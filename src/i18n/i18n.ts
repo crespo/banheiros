@@ -259,7 +259,7 @@ export function setLanguage(lang: Lang): void {
 }
 
 export function t(key: string, vars?: Record<string, string>): string {
-  let out = dicts[currentLang][key];
+  let out = dicts[currentLang][key] ?? key;
   if (vars) Object.keys(vars).forEach((k) => { out = out.replace(`{{${k}}}`, vars[k]); });
   return out;
 }

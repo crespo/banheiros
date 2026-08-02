@@ -31,6 +31,10 @@ test("module init reads lang from localStorage", async () => {
   expect(freshT("auth.welcomeTitle")).toBe("Welcome to Banheiros");
 });
 
+test("t returns the key itself when the key is missing", () => {
+  expect(t("nope.missing")).toBe("nope.missing");
+});
+
 test("pt and en dictionaries have identical key sets", () => {
   expect(Object.keys(dicts.en).sort()).toEqual(Object.keys(dicts.pt).sort());
 });
