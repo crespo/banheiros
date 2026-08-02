@@ -31,6 +31,13 @@ test("module init reads lang from localStorage", async () => {
   expect(freshT("auth.welcomeTitle")).toBe("Welcome to Banheiros");
 });
 
+test("module init falls back to pt when stored lang is invalid", async () => {
+  localStorage.setItem("banheiros_lang", "xx");
+  vi.resetModules();
+  const { t: freshT } = await import("./i18n");
+  expect(freshT("auth.welcomeTitle")).toBe("Bem-vindo ao Banheiros");
+});
+
 test("t returns the key itself when the key is missing", () => {
   expect(t("nope.missing")).toBe("nope.missing");
 });
