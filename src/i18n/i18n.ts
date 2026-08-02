@@ -1,4 +1,5 @@
-export type Lang = "pt" | "en";
+const LANGS = ["pt", "en"] as const;
+export type Lang = (typeof LANGS)[number];
 
 const pt: Record<string, string> = {
   "auth.welcomeTitle": "Bem-vindo ao Banheiros",
@@ -11,7 +12,11 @@ const en: Record<string, string> = {
 
 const dicts = { pt, en };
 
+const isLang = (value: string): value is Lang => (LANGS as readonly string[]).includes(value);
+
 let currentLang: Lang = "pt";
+const stored = localStorage.getItem("banheiros_lang");
+if (stored !== null && isLang(stored)) currentLang = stored;
 
 export function setLanguage(lang: Lang): void {
   currentLang = lang;
