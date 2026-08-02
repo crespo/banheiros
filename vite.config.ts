@@ -14,6 +14,7 @@ export default defineConfig({
         description: "Encontre e avalie banheiros públicos",
         lang: "pt-BR",
         display: "standalone",
+        // Both must mirror --color-bg in src/styles/tokens.css (manifest can't read CSS vars)
         theme_color: "#f5ead8",
         background_color: "#f5ead8",
         icons: [
