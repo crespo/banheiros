@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest";
-import { t, setLanguage } from "./i18n";
+import { t, setLanguage, dicts } from "./i18n";
 
 beforeEach(() => {
   localStorage.clear();
@@ -29,4 +29,8 @@ test("module init reads lang from localStorage", async () => {
   vi.resetModules();
   const { t: freshT } = await import("./i18n");
   expect(freshT("auth.welcomeTitle")).toBe("Welcome to Banheiros");
+});
+
+test("pt and en dictionaries have identical key sets", () => {
+  expect(Object.keys(dicts.en).sort()).toEqual(Object.keys(dicts.pt).sort());
 });
