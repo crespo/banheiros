@@ -15,3 +15,8 @@ test("t returns EN string after setLanguage('en')", () => {
   setLanguage("en");
   expect(t("auth.welcomeTitle")).toBe("Welcome to Banheiros");
 });
+
+test("setLanguage writes lang to localStorage", () => {
+  setLanguage("en");
+  expect(localStorage.getItem("banheiros_lang")).toBe("en");
+});

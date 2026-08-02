@@ -15,6 +15,7 @@ let currentLang: Lang = "pt";
 
 export function setLanguage(lang: Lang): void {
   currentLang = lang;
+  localStorage.setItem("banheiros_lang", lang);
 }
 
 export function t(key: string, vars?: Record<string, string>): string {
