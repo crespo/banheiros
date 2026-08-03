@@ -68,3 +68,13 @@ test("maps opening_hours tag to open_time and close_time", () => {
     })
   ).toMatchObject({ open_time: "06:00", close_time: "22:00" });
 });
+
+test("maps way center coordinates to lat and lon", () => {
+  expect(
+    mapElement({
+      id: 99,
+      center: { lat: -8.05, lon: -34.88 },
+      tags: { amenity: "toilets" },
+    })
+  ).toMatchObject({ lat: -8.05, lon: -34.88 });
+});

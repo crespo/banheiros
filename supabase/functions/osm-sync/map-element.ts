@@ -2,8 +2,9 @@ import { parseOpeningHours } from "./opening-hours";
 
 export function mapElement(element: {
   id: number;
-  lat: number;
-  lon: number;
+  lat?: number;
+  lon?: number;
+  center?: { lat: number; lon: number };
   tags: Record<string, string>;
 }) {
   return {
@@ -16,7 +17,7 @@ export function mapElement(element: {
     name: element.tags.name ?? null,
     address: null,
     osm_tags: element.tags,
-    lat: element.lat,
-    lon: element.lon,
+    lat: element.center?.lat ?? element.lat,
+    lon: element.center?.lon ?? element.lon,
   };
 }
