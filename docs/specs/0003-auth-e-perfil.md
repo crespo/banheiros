@@ -16,7 +16,7 @@ Contas reais via Supabase Auth: cadastro e login com email/senha (confirmação 
 ### Cadastro e login (email/senha)
 - Telas de auth do design v2: login e cadastro com os estados e a copy do handoff, chaves i18n já migradas na 0001.
 - Cadastro: email → username → senha → confirmar senha → aceite dos termos. "Criar conta" desabilitado enquanto senha < 6, confirmação difere ou termos não aceitos (PRD).
-- Username: pré-preenchido com sugestão derivada do email ("raul", senão "raul1", ...), sempre editável. Disponibilidade via a function `security definer` da 0002; a iteração da sugestão é client-side sobre ela. Regras de formato (3–30, `[a-z0-9._]`) validadas no campo com mensagem, além do constraint no banco.
+- Username: o campo abre pré-preenchido com a sugestão derivada do email, e a sugestão é resolvida inteira no backend. O front chama um único endpoint (function `security definer`, RPC `suggest_username`) passando o email; o backend deriva a base ("raul" de raul@gmail.com) e, se ocupada, itera um inteiro ao final ("raul1", "raul2", ...) até achar um username livre, retornando só o resultado final. O front não itera nem consulta disponibilidade em loop: espera a resposta e preenche o campo. Sempre editável; quando o usuário digita um username próprio, a checagem usa a function de disponibilidade da 0002. Regras de formato (3–30, `[a-z0-9._]`) validadas no campo com mensagem, além do constraint no banco.
 - Confirmação de email obrigatória: login antes de confirmar é bloqueado com instrução e botão de reenviar o link (fluxo nativo do Supabase Auth).
 - "Esqueci minha senha": envia o link de reset e a tela de redefinição funciona (o protótipo só tem o affordance).
 
@@ -33,7 +33,7 @@ Contas reais via Supabase Auth: cadastro e login com email/senha (confirmação 
 
 ## Critérios de aceitação
 
-- Cadastro com raul@gmail.com sugere username disponível derivado ("raul", ou "raul1" se ocupado), editável; username em uso mostra indisponibilidade e alternativa.
+- Cadastro com raul@gmail.com: o campo abre preenchido com o username que o backend retornou, já livre ("raul", ou "raul1" se "raul" está ocupado, e assim por diante); o front faz uma única chamada. Username digitado pelo usuário e já em uso mostra indisponibilidade e alternativa.
 - Cadastro sem confirmar email: login bloqueado com aviso e reenvio de link; após confirmar, login entra.
 - Login com Google completa sem pedir senha e passa pelo passo de username na primeira vez.
 - "Esqueci minha senha" redefine a senha e o login novo funciona.
@@ -49,6 +49,6 @@ Contas reais via Supabase Auth: cadastro e login com email/senha (confirmação 
 
 ## Dependências
 
-- Spec 0002 aplicada (tabela `profiles`, function de disponibilidade de username).
+- Spec 0002 aplicada (tabela `profiles`, function de disponibilidade de username). A RPC `suggest_username` nasce nesta spec, por cima dessa function.
 - Supabase CLI + Docker local; emails de confirmação testados no Mailpit do CLI.
 - Credenciais OAuth do Google (client id/secret) configuradas no Supabase; em dev, fluxo verificado manualmente.
