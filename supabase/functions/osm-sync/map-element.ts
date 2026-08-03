@@ -7,7 +7,7 @@ export function mapElement(element: {
   return {
     osm_id: element.id,
     kind: element.tags.amenity === "toilets" ? "public" : "instore",
-    paid: true,
+    paid: element.tags.fee === "yes",
     source: "osm",
     status: "approved",
     open_time: null,
