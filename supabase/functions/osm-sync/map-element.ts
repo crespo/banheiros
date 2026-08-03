@@ -12,7 +12,7 @@ export function mapElement(element: {
     status: "approved",
     open_time: null,
     close_time: null,
-    name: null,
+    name: element.tags.name ?? null,
     address: null,
     osm_tags: element.tags,
     lat: element.lat,

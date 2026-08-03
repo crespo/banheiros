@@ -46,3 +46,14 @@ test("maps missing fee tag to paid false", () => {
     }).paid
   ).toBe(false);
 });
+
+test("maps name tag to name field", () => {
+  expect(
+    mapElement({
+      id: 1,
+      lat: 0,
+      lon: 0,
+      tags: { amenity: "toilets", name: "Banheiro da Praça" },
+    }).name
+  ).toBe("Banheiro da Praça");
+});
