@@ -1,3 +1,5 @@
+import { parseOpeningHours } from "./opening-hours";
+
 export function mapElement(element: {
   id: number;
   lat: number;
@@ -10,8 +12,7 @@ export function mapElement(element: {
     paid: element.tags.fee === "yes",
     source: "osm",
     status: "approved",
-    open_time: null,
-    close_time: null,
+    ...(parseOpeningHours(element.tags.opening_hours ?? "") ?? { open_time: null, close_time: null }),
     name: element.tags.name ?? null,
     address: null,
     osm_tags: element.tags,

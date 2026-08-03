@@ -57,3 +57,14 @@ test("maps name tag to name field", () => {
     }).name
   ).toBe("Banheiro da Praça");
 });
+
+test("maps opening_hours tag to open_time and close_time", () => {
+  expect(
+    mapElement({
+      id: 1,
+      lat: 0,
+      lon: 0,
+      tags: { amenity: "toilets", opening_hours: "06:00-22:00" },
+    })
+  ).toMatchObject({ open_time: "06:00", close_time: "22:00" });
+});
