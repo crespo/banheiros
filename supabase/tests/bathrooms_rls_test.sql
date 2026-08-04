@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(5);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 
@@ -46,6 +46,19 @@ SELECT set_config('request.jwt.claims', '{"sub":"c9000000-0000-0000-0000-0000000
 SELECT ok(
   NOT EXISTS(SELECT 1 FROM bathrooms WHERE name = 'Owner Pending Bathroom'),
   'a stranger cannot see another user''s pending bathroom'
+);
+
+RESET ROLE;
+
+INSERT INTO auth.users (id, email) VALUES ('da000000-0000-0000-0000-000000000016', 'inserter@test.com');
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '{"sub":"da000000-0000-0000-0000-000000000016"}', true);
+
+SELECT lives_ok(
+  $$ INSERT INTO bathrooms (source, kind, status, created_by)
+       VALUES ('community', 'public', 'pending', 'da000000-0000-0000-0000-000000000016') $$,
+  'authenticated user can insert a community bathroom pending as themselves'
 );
 
 RESET ROLE;
