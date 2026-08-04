@@ -10,5 +10,6 @@ CREATE TABLE reviews (
   user_id uuid REFERENCES auth.users (id) ON DELETE SET NULL,
   show_username boolean DEFAULT false,
   status text DEFAULT 'pending' CHECK (status IN ('approved', 'pending', 'rejected')),
-  UNIQUE (bathroom_id, user_id)
+  UNIQUE (bathroom_id, user_id),
+  created_at timestamptz DEFAULT now()
 );

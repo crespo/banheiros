@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(6);
+SELECT plan(7);
 
 INSERT INTO reviews (comment) VALUES ('ok');
 
@@ -54,6 +54,14 @@ SELECT throws_ok(
   '23505',
   NULL,
   'a user cannot review the same bathroom twice'
+);
+
+INSERT INTO reviews (comment) VALUES ('timestamped');
+
+SELECT isnt(
+  (SELECT created_at FROM reviews WHERE comment = 'timestamped'),
+  NULL,
+  'created_at defaults to the current time'
 );
 
 SELECT * FROM finish();
