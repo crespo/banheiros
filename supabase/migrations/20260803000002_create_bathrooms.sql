@@ -1,4 +1,4 @@
 CREATE TABLE bathrooms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  source text
+  source text CHECK (source IN ('osm', 'community'))
 );
