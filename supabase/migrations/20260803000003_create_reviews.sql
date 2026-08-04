@@ -5,5 +5,8 @@ CREATE TABLE reviews (
   lighting smallint CHECK (lighting BETWEEN 1 AND 3),
   odor smallint CHECK (odor BETWEEN 1 AND 3),
   maintenance smallint CHECK (maintenance BETWEEN 1 AND 3),
-  cleanliness smallint CHECK (cleanliness BETWEEN 1 AND 3)
+  cleanliness smallint CHECK (cleanliness BETWEEN 1 AND 3),
+  bathroom_id uuid REFERENCES bathrooms (id),
+  show_username boolean DEFAULT false,
+  status text DEFAULT 'pending' CHECK (status IN ('approved', 'pending', 'rejected'))
 );
