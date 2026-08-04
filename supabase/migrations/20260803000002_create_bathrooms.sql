@@ -13,5 +13,5 @@ CREATE TABLE bathrooms (
   close_time time,
   osm_tags jsonb,
   osm_seen_at timestamptz,
-  osm_id bigint
+  osm_id bigint UNIQUE
 );
