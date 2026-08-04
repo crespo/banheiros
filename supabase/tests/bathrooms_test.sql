@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(5);
+SELECT plan(6);
 
 INSERT INTO bathrooms (source) VALUES ('osm');
 
@@ -37,6 +37,15 @@ SELECT is(
   ST_AsText((SELECT location::geometry FROM bathrooms WHERE kind = 'public' AND status = 'approved')),
   'POINT(-35.73 -9.66)',
   'location stores coordinates as a geography point'
+);
+
+INSERT INTO bathrooms (source, kind, status, paid, name, address, open_time, close_time, osm_tags, osm_seen_at, osm_id)
+  VALUES ('osm', 'public', 'approved', true, 'Banheiro Central', 'Praca X', '06:00', '22:00', '{"fee":"yes"}'::jsonb, '2026-01-01T00:00:00Z', 123);
+
+SELECT results_eq(
+  $$ SELECT paid, name, address, open_time, close_time, osm_tags, osm_seen_at, osm_id FROM bathrooms WHERE osm_id = 123 $$,
+  $$ VALUES (true, 'Banheiro Central'::text, 'Praca X'::text, '06:00'::time, '22:00'::time, '{"fee":"yes"}'::jsonb, '2026-01-01T00:00:00Z'::timestamptz, 123::bigint) $$,
+  'bathroom stores paid, name, address, hours, osm_tags, osm_seen_at, and osm_id'
 );
 
 SELECT * FROM finish();

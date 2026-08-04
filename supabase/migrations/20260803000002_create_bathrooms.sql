@@ -5,5 +5,13 @@ CREATE TABLE bathrooms (
   source text CHECK (source IN ('osm', 'community')),
   kind text CHECK (kind IN ('public', 'instore')),
   status text CHECK (status IN ('approved', 'pending', 'rejected')),
-  location geography(Point, 4326)
+  location geography(Point, 4326),
+  paid boolean,
+  name text,
+  address text,
+  open_time time,
+  close_time time,
+  osm_tags jsonb,
+  osm_seen_at timestamptz,
+  osm_id bigint
 );
