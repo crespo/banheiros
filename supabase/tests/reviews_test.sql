@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(5);
+SELECT plan(6);
 
 INSERT INTO reviews (comment) VALUES ('ok');
 
@@ -42,6 +42,18 @@ SELECT is(
   (SELECT user_id FROM reviews WHERE comment = 'anonymize me'),
   NULL::uuid,
   'review survives with user_id set to null when the reviewer account is deleted'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('d4000000-0000-0000-0000-000000000010', 'oneperbathroom@test.com');
+INSERT INTO reviews (bathroom_id, comment, user_id)
+  SELECT id, 'first', 'd4000000-0000-0000-0000-000000000010' FROM bathrooms LIMIT 1;
+
+SELECT throws_ok(
+  $$ INSERT INTO reviews (bathroom_id, comment, user_id)
+       SELECT id, 'second', 'd4000000-0000-0000-0000-000000000010' FROM bathrooms LIMIT 1 $$,
+  '23505',
+  NULL,
+  'a user cannot review the same bathroom twice'
 );
 
 SELECT * FROM finish();
