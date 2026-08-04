@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(3);
+SELECT plan(4);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 INSERT INTO reviews (bathroom_id, comment, status)
@@ -35,6 +35,14 @@ SELECT lives_ok(
   $$ INSERT INTO reviews (bathroom_id, comment, status, user_id)
        SELECT id, 'my own review', 'pending', 'eb000000-0000-0000-0000-000000000017' FROM bathrooms LIMIT 1 $$,
   'authenticated user can insert their own pending review'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO reviews (bathroom_id, comment, status, user_id)
+       SELECT id, 'forged', 'approved', 'eb000000-0000-0000-0000-000000000017' FROM bathrooms LIMIT 1 $$,
+  '42501',
+  NULL,
+  'authenticated user cannot insert a pre-approved review'
 );
 
 RESET ROLE;
