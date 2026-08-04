@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(5);
+SELECT plan(6);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 
@@ -59,6 +59,13 @@ SELECT lives_ok(
   $$ INSERT INTO bathrooms (source, kind, status, created_by)
        VALUES ('community', 'public', 'pending', 'da000000-0000-0000-0000-000000000016') $$,
   'authenticated user can insert a community bathroom pending as themselves'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO bathrooms (source, kind, status, created_by) VALUES ('osm', 'public', 'approved', 'da000000-0000-0000-0000-000000000016') $$,
+  '42501',
+  NULL,
+  'authenticated user cannot insert a bathroom claiming osm source or approved status'
 );
 
 RESET ROLE;
