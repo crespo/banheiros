@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(3);
+SELECT plan(4);
 
 INSERT INTO auth.users (id, email) VALUES ('1e000000-0000-0000-0000-000000000020', 'favowner@test.com');
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
@@ -30,6 +30,11 @@ SELECT lives_ok(
   $$ INSERT INTO favorites (user_id, bathroom_id)
        SELECT '2f000000-0000-0000-0000-000000000021', id FROM bathrooms LIMIT 1 $$,
   'owner can insert their own favorite'
+);
+
+SELECT lives_ok(
+  $$ DELETE FROM favorites WHERE user_id = '2f000000-0000-0000-0000-000000000021' $$,
+  'owner can delete their own favorite'
 );
 
 RESET ROLE;
