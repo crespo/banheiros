@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(5);
+SELECT plan(6);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -36,6 +36,16 @@ SELECT throws_ok(
   '23514',
   NULL,
   'username longer than 30 chars is rejected'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('f0000000-0000-0000-0000-000000000006', 'del@test.com');
+INSERT INTO profiles (user_id, username) VALUES ('f0000000-0000-0000-0000-000000000006', 'deleteme');
+DELETE FROM auth.users WHERE id = 'f0000000-0000-0000-0000-000000000006';
+
+SELECT is(
+  (SELECT count(*) FROM profiles WHERE user_id = 'f0000000-0000-0000-0000-000000000006'),
+  0::bigint,
+  'profile is deleted when the auth user is deleted'
 );
 
 SELECT * FROM finish();
