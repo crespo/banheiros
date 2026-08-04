@@ -5,5 +5,6 @@ CREATE TABLE profiles (
   username citext UNIQUE NOT NULL
     CHECK (char_length(username) BETWEEN 3 AND 30)
     CHECK (username::text ~ '^[a-z0-9._]+$'),
-  default_show_username boolean default false
+  default_show_username boolean default false,
+  language text default 'pt'
 );

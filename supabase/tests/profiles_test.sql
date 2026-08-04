@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -62,6 +62,12 @@ SELECT throws_ok(
   '23502',
   NULL,
   'username is required'
+);
+
+SELECT is(
+  (SELECT language FROM profiles WHERE user_id = 'a0000000-0000-0000-0000-000000000001'),
+  'pt',
+  'language defaults to pt'
 );
 
 SELECT * FROM finish();
