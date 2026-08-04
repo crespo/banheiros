@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(5);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 INSERT INTO reviews (bathroom_id, comment, status)
@@ -43,6 +43,11 @@ SELECT throws_ok(
   '42501',
   NULL,
   'authenticated user cannot insert a pre-approved review'
+);
+
+SELECT lives_ok(
+  $$ UPDATE reviews SET comment = 'edited by owner' WHERE user_id = 'eb000000-0000-0000-0000-000000000017' $$,
+  'authenticated user can update their own review'
 );
 
 RESET ROLE;
