@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(7);
+SELECT plan(8);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -53,6 +53,15 @@ SELECT throws_ok(
   '23505',
   NULL,
   'a user cannot have two profiles'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('a1000000-0000-0000-0000-000000000007', 'nouser@test.com');
+
+SELECT throws_ok(
+  $$ INSERT INTO profiles (user_id) VALUES ('a1000000-0000-0000-0000-000000000007') $$,
+  '23502',
+  NULL,
+  'username is required'
 );
 
 SELECT * FROM finish();
