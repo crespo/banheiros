@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(1);
+SELECT plan(2);
 
 INSERT INTO auth.users (id, email) VALUES ('30000000-0000-0000-0000-000000000022', 'reporter2@test.com');
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
@@ -11,6 +11,13 @@ SELECT lives_ok(
   $$ INSERT INTO reports (bathroom_id, user_id, comment)
        SELECT id, '30000000-0000-0000-0000-000000000022', 'broken sink' FROM bathrooms LIMIT 1 $$,
   'authenticated user can insert a report'
+);
+
+SELECT throws_ok(
+  $$ SELECT 1 FROM reports LIMIT 1 $$,
+  '42501',
+  NULL,
+  'authenticated users cannot select reports'
 );
 
 RESET ROLE;
