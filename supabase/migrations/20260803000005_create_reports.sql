@@ -3,5 +3,6 @@ CREATE TABLE reports (
   bathroom_id uuid REFERENCES bathrooms (id),
   user_id uuid REFERENCES auth.users (id) ON DELETE SET NULL,
   comment text,
-  resolved boolean DEFAULT false
+  resolved boolean DEFAULT false,
+  created_at timestamptz DEFAULT now()
 );

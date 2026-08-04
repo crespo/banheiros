@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(3);
+SELECT plan(4);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 INSERT INTO reports (bathroom_id)
@@ -27,6 +27,14 @@ SELECT is(
   (SELECT user_id FROM reports WHERE comment = 'stays after delete'),
   NULL::uuid,
   'report survives with user_id set to null when the reporter account is deleted'
+);
+
+INSERT INTO reports (comment) VALUES ('timestamped report');
+
+SELECT isnt(
+  (SELECT created_at FROM reports WHERE comment = 'timestamped report'),
+  NULL,
+  'created_at defaults to the current time'
 );
 
 SELECT * FROM finish();
