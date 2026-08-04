@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(5);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -29,6 +29,13 @@ SELECT throws_ok(
   '23514',
   NULL,
   'username with uppercase letters is rejected by charset check'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO profiles (user_id, username) VALUES ('e0000000-0000-0000-0000-000000000005', repeat('a', 31)) $$,
+  '23514',
+  NULL,
+  'username longer than 30 chars is rejected'
 );
 
 SELECT * FROM finish();
