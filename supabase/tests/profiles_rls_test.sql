@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(2);
+SELECT plan(3);
 
 INSERT INTO auth.users (id, email) VALUES ('fc000000-0000-0000-0000-000000000018', 'ownprofile@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('fc000000-0000-0000-0000-000000000018', 'ownprofile');
@@ -22,6 +22,11 @@ SELECT set_config('request.jwt.claims', '{"sub":"0d000000-0000-0000-0000-0000000
 SELECT ok(
   NOT EXISTS(SELECT 1 FROM profiles WHERE user_id = 'fc000000-0000-0000-0000-000000000018'),
   'a stranger cannot see another user''s profile'
+);
+
+SELECT lives_ok(
+  $$ INSERT INTO profiles (user_id, username) VALUES ('0d000000-0000-0000-0000-000000000019', 'strangerprofile') $$,
+  'owner can insert their own profile'
 );
 
 RESET ROLE;
