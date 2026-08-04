@@ -1,5 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+
 CREATE TABLE profiles (
   user_id uuid,
-  username text,
+  username citext UNIQUE,
   default_show_username boolean default false
 );
