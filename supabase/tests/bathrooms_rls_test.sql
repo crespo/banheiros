@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(6);
+SELECT plan(7);
 
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
 
@@ -66,6 +66,13 @@ SELECT throws_ok(
   '42501',
   NULL,
   'authenticated user cannot insert a bathroom claiming osm source or approved status'
+);
+
+SELECT throws_ok(
+  $$ UPDATE bathrooms SET name = 'hacked' WHERE created_by = 'da000000-0000-0000-0000-000000000016' $$,
+  '42501',
+  NULL,
+  'authenticated user cannot update their own bathroom'
 );
 
 RESET ROLE;
