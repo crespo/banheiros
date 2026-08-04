@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(2);
+SELECT plan(3);
 
 INSERT INTO auth.users (id, email) VALUES ('e5000000-0000-0000-0000-000000000011', 'fav@test.com');
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
@@ -20,6 +20,15 @@ SELECT is(
   (SELECT count(*) FROM favorites WHERE user_id = 'e5000000-0000-0000-0000-000000000011'),
   0::bigint,
   'favorite is deleted when the user is deleted'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('f6000000-0000-0000-0000-000000000012', 'badref@test.com');
+
+SELECT throws_ok(
+  $$ INSERT INTO favorites (user_id, bathroom_id) VALUES ('f6000000-0000-0000-0000-000000000012', gen_random_uuid()) $$,
+  '23503',
+  NULL,
+  'bathroom_id must reference an existing bathroom'
 );
 
 SELECT * FROM finish();
