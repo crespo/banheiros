@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(5);
 
 INSERT INTO bathrooms (source) VALUES ('osm');
 
@@ -28,6 +28,15 @@ SELECT throws_ok(
   '23514',
   NULL,
   'status must be approved, pending, or rejected'
+);
+
+INSERT INTO bathrooms (source, kind, status, location)
+  VALUES ('osm', 'public', 'approved', ST_SetSRID(ST_MakePoint(-35.73, -9.66), 4326)::geography);
+
+SELECT is(
+  ST_AsText((SELECT location::geometry FROM bathrooms WHERE kind = 'public' AND status = 'approved')),
+  'POINT(-35.73 -9.66)',
+  'location stores coordinates as a geography point'
 );
 
 SELECT * FROM finish();
