@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(3);
+SELECT plan(4);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -11,10 +11,10 @@ SELECT is(
 );
 
 SELECT throws_ok(
-  $$ INSERT INTO profiles (user_id, username) VALUES ('b0000000-0000-0000-0000-000000000002', 'TestUser') $$,
+  $$ INSERT INTO profiles (user_id, username) VALUES ('b0000000-0000-0000-0000-000000000002', 'testuser') $$,
   '23505',
   NULL,
-  'username uniqueness is case-insensitive'
+  'duplicate username is rejected'
 );
 
 SELECT throws_ok(
@@ -22,6 +22,13 @@ SELECT throws_ok(
   '23514',
   NULL,
   'username shorter than 3 chars is rejected'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO profiles (user_id, username) VALUES ('d0000000-0000-0000-0000-000000000004', 'TestUser2') $$,
+  '23514',
+  NULL,
+  'username with uppercase letters is rejected by charset check'
 );
 
 SELECT * FROM finish();
