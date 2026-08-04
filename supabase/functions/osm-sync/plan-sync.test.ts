@@ -12,3 +12,9 @@ test("an existing osm bathroom absent from the sync with no user content is plan
   const plan = planSync([], existing);
   expect(plan.toRemove).toEqual(["bathroom-1"]);
 });
+
+test("an existing osm bathroom absent from the sync with user content is kept", () => {
+  const existing = [{ id: "bathroom-2", osm_id: 100, hasContent: true }];
+  const plan = planSync([], existing);
+  expect(plan.toRemove).toEqual([]);
+});
