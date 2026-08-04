@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE profiles (
-  user_id uuid REFERENCES auth.users (id) ON DELETE CASCADE,
+  user_id uuid PRIMARY KEY REFERENCES auth.users (id) ON DELETE CASCADE,
   username citext UNIQUE
     CHECK (char_length(username) BETWEEN 3 AND 30)
     CHECK (username::text ~ '^[a-z0-9._]+$'),

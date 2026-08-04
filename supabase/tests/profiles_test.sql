@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(6);
+SELECT plan(7);
 
 INSERT INTO auth.users (id, email) VALUES ('a0000000-0000-0000-0000-000000000001', 'u@test.com');
 INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'testuser');
@@ -46,6 +46,13 @@ SELECT is(
   (SELECT count(*) FROM profiles WHERE user_id = 'f0000000-0000-0000-0000-000000000006'),
   0::bigint,
   'profile is deleted when the auth user is deleted'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO profiles (user_id, username) VALUES ('a0000000-0000-0000-0000-000000000001', 'anotherone') $$,
+  '23505',
+  NULL,
+  'a user cannot have two profiles'
 );
 
 SELECT * FROM finish();
