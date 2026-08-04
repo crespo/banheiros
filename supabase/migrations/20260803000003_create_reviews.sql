@@ -11,5 +11,19 @@ CREATE TABLE reviews (
   show_username boolean DEFAULT false,
   status text DEFAULT 'pending' CHECK (status IN ('approved', 'pending', 'rejected')),
   UNIQUE (bathroom_id, user_id),
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reviews_set_updated_at
+  BEFORE UPDATE ON reviews
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();

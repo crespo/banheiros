@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(7);
+SELECT plan(8);
 
 INSERT INTO reviews (comment) VALUES ('ok');
 
@@ -62,6 +62,14 @@ SELECT isnt(
   (SELECT created_at FROM reviews WHERE comment = 'timestamped'),
   NULL,
   'created_at defaults to the current time'
+);
+
+INSERT INTO reviews (comment, updated_at) VALUES ('editme', '2020-01-01T00:00:00Z');
+UPDATE reviews SET comment = 'edited' WHERE comment = 'editme';
+
+SELECT ok(
+  (SELECT updated_at FROM reviews WHERE comment = 'edited') > '2020-01-01T00:00:00Z'::timestamptz,
+  'updated_at bumps when a review is edited'
 );
 
 SELECT * FROM finish();
