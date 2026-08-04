@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 INSERT INTO bathrooms (source) VALUES ('osm');
 
@@ -60,6 +60,17 @@ SELECT throws_ok(
   '23514',
   NULL,
   'community bathrooms cannot have an osm_id'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('b2000000-0000-0000-0000-000000000008', 'creator@test.com');
+INSERT INTO bathrooms (source, kind, status, created_by, name)
+  VALUES ('community', 'public', 'pending', 'b2000000-0000-0000-0000-000000000008', 'Creator Bathroom');
+DELETE FROM auth.users WHERE id = 'b2000000-0000-0000-0000-000000000008';
+
+SELECT is(
+  (SELECT created_by FROM bathrooms WHERE name = 'Creator Bathroom'),
+  NULL::uuid,
+  'created_by is set to null when the creator account is deleted'
 );
 
 SELECT * FROM finish();

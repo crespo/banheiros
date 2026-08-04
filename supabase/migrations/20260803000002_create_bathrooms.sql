@@ -14,5 +14,6 @@ CREATE TABLE bathrooms (
   osm_tags jsonb,
   osm_seen_at timestamptz,
   osm_id bigint UNIQUE,
+  created_by uuid REFERENCES auth.users (id) ON DELETE SET NULL,
   CHECK (source != 'community' OR osm_id IS NULL)
 );
