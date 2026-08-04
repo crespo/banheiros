@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(7);
+SELECT plan(8);
 
 INSERT INTO bathrooms (source) VALUES ('osm');
 
@@ -53,6 +53,13 @@ SELECT throws_ok(
   '23505',
   NULL,
   'osm_id is unique'
+);
+
+SELECT throws_ok(
+  $$ INSERT INTO bathrooms (source, kind, status, osm_id) VALUES ('community', 'public', 'pending', 999) $$,
+  '23514',
+  NULL,
+  'community bathrooms cannot have an osm_id'
 );
 
 SELECT * FROM finish();

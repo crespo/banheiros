@@ -13,5 +13,6 @@ CREATE TABLE bathrooms (
   close_time time,
   osm_tags jsonb,
   osm_seen_at timestamptz,
-  osm_id bigint UNIQUE
+  osm_id bigint UNIQUE,
+  CHECK (source != 'community' OR osm_id IS NULL)
 );
