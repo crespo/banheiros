@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(5);
 
 INSERT INTO reviews (comment) VALUES ('ok');
 
@@ -31,6 +31,17 @@ SELECT results_eq(
   $$ SELECT show_username, status FROM reviews WHERE comment = 'first review' $$,
   $$ VALUES (false, 'pending'::text) $$,
   'review stores show_username and defaults status to pending'
+);
+
+INSERT INTO auth.users (id, email) VALUES ('c3000000-0000-0000-0000-000000000009', 'reviewer@test.com');
+INSERT INTO reviews (bathroom_id, comment, user_id)
+  SELECT id, 'anonymize me', 'c3000000-0000-0000-0000-000000000009' FROM bathrooms LIMIT 1;
+DELETE FROM auth.users WHERE id = 'c3000000-0000-0000-0000-000000000009';
+
+SELECT is(
+  (SELECT user_id FROM reviews WHERE comment = 'anonymize me'),
+  NULL::uuid,
+  'review survives with user_id set to null when the reviewer account is deleted'
 );
 
 SELECT * FROM finish();
