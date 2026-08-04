@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(2);
+SELECT plan(3);
 
 INSERT INTO auth.users (id, email) VALUES ('1e000000-0000-0000-0000-000000000020', 'favowner@test.com');
 INSERT INTO bathrooms (source, kind, status) VALUES ('osm', 'public', 'approved');
@@ -24,6 +24,12 @@ SELECT set_config('request.jwt.claims', '{"sub":"2f000000-0000-0000-0000-0000000
 SELECT ok(
   NOT EXISTS(SELECT 1 FROM favorites WHERE user_id = '1e000000-0000-0000-0000-000000000020'),
   'a stranger cannot see another user''s favorite'
+);
+
+SELECT lives_ok(
+  $$ INSERT INTO favorites (user_id, bathroom_id)
+       SELECT '2f000000-0000-0000-0000-000000000021', id FROM bathrooms LIMIT 1 $$,
+  'owner can insert their own favorite'
 );
 
 RESET ROLE;
