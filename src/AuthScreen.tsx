@@ -28,6 +28,10 @@ export default function AuthScreen() {
     supabase.auth.signUp({ email, password, options: { data: { username } } });
   }
 
+  function loginWithGoogle() {
+    supabase.auth.signInWithOAuth({ provider: "google" });
+  }
+
   function forgotPassword() {
     supabase.auth.resetPasswordForEmail(email);
   }
@@ -67,6 +71,7 @@ export default function AuthScreen() {
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>
       <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={loginWithGoogle}>{t("auth.googleButton")}</button>
       {mode === "signup" && (
         <>
           <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>

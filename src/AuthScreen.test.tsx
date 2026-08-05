@@ -12,6 +12,7 @@ vi.mock("./lib/supabase", () => ({
       signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
       resend: vi.fn().mockResolvedValue({ data: {}, error: null }),
       resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      signInWithOAuth: vi.fn().mockResolvedValue({ data: {}, error: null }),
     },
   },
 }));
@@ -231,4 +232,10 @@ test("clicking forgot password calls supabase.auth.resetPasswordForEmail with th
   fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
   fireEvent.click(screen.getByRole("button", { name: t("auth.forgotPassword") }));
   expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledExactlyOnceWith("raul@gmail.com");
+});
+
+test("clicking the Google button calls supabase.auth.signInWithOAuth with the google provider", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.googleButton") }));
+  expect(supabase.auth.signInWithOAuth).toHaveBeenCalledExactlyOnceWith({ provider: "google" });
 });
