@@ -12,3 +12,8 @@ test("AuthScreen renders an email input in login mode", () => {
   render(<AuthScreen />);
   expect(screen.getByLabelText(t("auth.emailLabel"))).toBeInTheDocument();
 });
+
+test("AuthScreen renders a password input in login mode", () => {
+  render(<AuthScreen />);
+  expect(screen.getByLabelText(t("auth.passwordLabel"))).toBeInTheDocument();
+});

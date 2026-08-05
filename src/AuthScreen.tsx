@@ -5,6 +5,8 @@ export default function AuthScreen() {
     <div>
       <label htmlFor="email">{t("auth.emailLabel")}</label>
       <input id="email" type="email" />
+      <label htmlFor="password">{t("auth.passwordLabel")}</label>
+      <input id="password" type="password" />
       <button>{t("auth.loginButton")}</button>
     </div>
   );
