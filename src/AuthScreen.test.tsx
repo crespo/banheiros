@@ -67,3 +67,12 @@ test("signup submit is disabled when the confirm password does not match", () =>
   fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
 });
+
+test("signup submit is enabled when password, confirm, and terms are all valid", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeEnabled();
+});
