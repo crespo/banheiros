@@ -28,6 +28,10 @@ export default function AuthScreen() {
     supabase.auth.signUp({ email, password, options: { data: { username } } });
   }
 
+  function resendConfirmation() {
+    supabase.auth.resend({ type: "signup", email });
+  }
+
   function submitLogin() {
     supabase.auth.signInWithPassword({ email, password }).then(({ error }) => {
       setEmailNotConfirmed(error?.code === "email_not_confirmed");
@@ -84,7 +88,12 @@ export default function AuthScreen() {
       {mode === "login" && (
         <>
           <button onClick={submitLogin}>{t("auth.loginButton")}</button>
-          {emailNotConfirmed && <p>{t("auth.emailNotConfirmed")}</p>}
+          {emailNotConfirmed && (
+            <p>
+              {t("auth.emailNotConfirmed")}
+              <button onClick={resendConfirmation}>{t("auth.resendConfirmation")}</button>
+            </p>
+          )}
           <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
         </>
       )}

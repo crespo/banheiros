@@ -10,6 +10,7 @@ vi.mock("./lib/supabase", () => ({
     auth: {
       signUp: vi.fn().mockResolvedValue({ data: {}, error: null }),
       signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      resend: vi.fn().mockResolvedValue({ data: {}, error: null }),
     },
   },
 }));
@@ -203,4 +204,18 @@ test("shows a resend-confirmation prompt when login fails because the email is u
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "secret123" } });
   fireEvent.click(screen.getByRole("button", { name: t("auth.loginButton") }));
   expect(await screen.findByText(t("auth.emailNotConfirmed"))).toBeInTheDocument();
+});
+
+test("clicking resend confirmation calls supabase.auth.resend with the email", async () => {
+  vi.mocked(supabase.auth.signInWithPassword).mockResolvedValueOnce({
+    data: {},
+    error: { code: "email_not_confirmed", message: "Email not confirmed" },
+  } as never);
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "secret123" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.loginButton") }));
+  await screen.findByText(t("auth.emailNotConfirmed"));
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resendConfirmation") }));
+  expect(supabase.auth.resend).toHaveBeenCalledExactlyOnceWith({ type: "signup", email: "raul@gmail.com" });
 });
