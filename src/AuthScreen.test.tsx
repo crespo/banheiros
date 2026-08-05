@@ -51,6 +51,14 @@ test("signup submit is disabled when the password is shorter than 6 characters",
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
 });
 
+test("signup submit is disabled when the terms are not accepted", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
+});
+
 test("signup submit is disabled when the confirm password does not match", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
