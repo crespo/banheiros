@@ -17,9 +17,11 @@ vi.mock("./lib/supabase", () => ({
           single: vi
             .fn()
             .mockResolvedValue({ data: { username: "raul", language: "pt", default_show_username: false }, error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { username: "raul" }, error: null }),
         }),
       }),
     }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   },
 }));
 
@@ -34,6 +36,17 @@ test("App renders ProfileScreen when there is a session", async () => {
   } as never);
   render(<App />);
   expect(await screen.findByText("@raul")).toBeInTheDocument();
+});
+
+test("App renders ChooseUsernameScreen when a session exists but no profile row does", async () => {
+  vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
+    data: { session: { user: { id: "u1" } } },
+  } as never);
+  vi.mocked(supabase.from).mockReturnValueOnce({
+    select: () => ({ eq: () => ({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }),
+  } as never);
+  render(<App />);
+  expect(await screen.findByLabelText(t("auth.usernameLabel"))).toBeInTheDocument();
 });
 
 test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", async () => {
