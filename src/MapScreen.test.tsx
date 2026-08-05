@@ -34,3 +34,9 @@ test("MapScreen renders a pin button for a bathroom with a name", () => {
   render(<MapScreen bathrooms={bathrooms} />);
   expect(screen.getByRole("button", { name: "Banheiro Central" })).toBeInTheDocument();
 });
+
+test("MapScreen renders a pin button using a generic label when bathroom name is null", () => {
+  const bathrooms = [{ id: "b2", name: null, address: "Rua B", kind: "public", paid: false }];
+  render(<MapScreen bathrooms={bathrooms} />);
+  expect(screen.getByRole("button", { name: t("bathroom.unnamed") })).toBeInTheDocument();
+});
