@@ -92,6 +92,7 @@ export default function AuthScreen() {
           >
             {t("auth.signupButton")}
           </button>
+          <button onClick={() => setMode("login")}>{t("auth.loginLink")}</button>
         </>
       )}
       {mode === "login" && (
