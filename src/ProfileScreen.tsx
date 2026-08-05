@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { t } from "./i18n/i18n";
+import { dicts, t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
 type Profile = { username: string; language: string; default_show_username: boolean };
@@ -42,6 +42,12 @@ export default function ProfileScreen() {
         />
         {t("profile.defaultVisibilityLabel")}
       </label>
+      {Object.keys(dicts).map((lang) => (
+        <label key={lang}>
+          <input type="radio" name="lang" checked={profile.language === lang} readOnly />
+          {lang.toUpperCase()}
+        </label>
+      ))}
     </div>
   );
 }

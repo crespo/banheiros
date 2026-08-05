@@ -60,3 +60,9 @@ test("toggling the default-visibility switch updates its checked state", async (
   fireEvent.click(toggle);
   expect(toggle).toBeChecked();
 });
+
+test("ProfileScreen renders a checked radio for the loaded language", async () => {
+  mockProfileLoad({ username: "raul", language: "en", default_show_username: false });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("radio", { name: "EN" })).toBeChecked();
+});
