@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { t } from "./i18n/i18n";
+import { bathroomDisplayName } from "./lib/bathroomName";
 
-export default function MapScreen() {
+type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
+
+export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }) {
   const [filter, setFilter] = useState("all");
   return (
     <>
@@ -9,6 +12,7 @@ export default function MapScreen() {
       <button aria-pressed={filter === "public" ? "true" : "false"} onClick={() => setFilter("public")}>{t("map.filterPublic")}</button>
       <button aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
       <button aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
+      {bathrooms.map(b => <button key={b.id}>{bathroomDisplayName(b.name, b.address)}</button>)}
     </>
   );
 }

@@ -28,3 +28,9 @@ test('clicking the "Público" chip selects it and deselects "Todos"', () => {
   expect(screen.getByRole("button", { name: t("map.filterPublic") })).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "false");
 });
+
+test("MapScreen renders a pin button for a bathroom with a name", () => {
+  const bathrooms = [{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }];
+  render(<MapScreen bathrooms={bathrooms} />);
+  expect(screen.getByRole("button", { name: "Banheiro Central" })).toBeInTheDocument();
+});
