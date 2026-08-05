@@ -7,7 +7,12 @@ beforeEach(() => {
   setLanguage("pt");
 });
 
-test("MapScreen renders a button for the all-filter chip", () => {
+test.each([
+  ["map.filterAll"],
+  ["map.filterPublic"],
+  ["map.filterInstore"],
+  ["map.filterPaid"],
+])('MapScreen renders a button for filter chip "%s"', (key) => {
   render(<MapScreen />);
-  expect(screen.getByRole("button", { name: t("map.filterAll") })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: t(key as Parameters<typeof t>[0]) })).toBeInTheDocument();
 });
