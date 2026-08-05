@@ -1,8 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { expect, test, vi } from "vitest";
+import { beforeEach, expect, test, vi } from "vitest";
 import ProfileScreen from "./ProfileScreen";
 import { supabase } from "./lib/supabase";
-import { t } from "./i18n/i18n";
+import { setLanguage, t } from "./i18n/i18n";
+
+beforeEach(() => {
+  setLanguage("pt");
+});
 
 type ProfileRow = { username: string; language: string; default_show_username: boolean };
 
@@ -80,4 +84,11 @@ test("selecting a language persists it to the profile", async () => {
   render(<ProfileScreen />);
   fireEvent.click(await screen.findByRole("radio", { name: "EN" }));
   expect(updateMock).toHaveBeenCalledExactlyOnceWith({ language: "en" });
+});
+
+test("clicking logout calls supabase.auth.signOut", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("button", { name: t("profile.logout") }));
+  expect(supabase.auth.signOut).toHaveBeenCalledOnce();
 });

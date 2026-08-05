@@ -32,6 +32,10 @@ export default function ProfileScreen() {
     supabase.from("profiles").update({ default_show_username: value }).eq("user_id", userId);
   }
 
+  function logout() {
+    supabase.auth.signOut();
+  }
+
   function changeLanguage(lang: Lang) {
     setLanguage(lang);
     supabase.from("profiles").update({ language: lang }).eq("user_id", userId);
@@ -62,6 +66,7 @@ export default function ProfileScreen() {
           {lang.toUpperCase()}
         </label>
       ))}
+      <button onClick={logout}>{t("profile.logout")}</button>
     </div>
   );
 }
