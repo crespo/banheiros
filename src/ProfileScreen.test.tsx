@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import ProfileScreen from "./ProfileScreen";
 import { supabase } from "./lib/supabase";
+import { t } from "./i18n/i18n";
 
 type ProfileRow = { username: string; language: string; default_show_username: boolean };
 
@@ -33,4 +34,10 @@ test("ProfileScreen renders the user's email", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
   expect(await screen.findByText("raul@gmail.com")).toBeInTheDocument();
+});
+
+test("ProfileScreen renders the default-visibility toggle reflecting the loaded state", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: true });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") })).toBeChecked();
 });

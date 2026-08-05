@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
 type Profile = { username: string; language: string; default_show_username: boolean };
@@ -26,6 +27,10 @@ export default function ProfileScreen() {
     <div>
       <p>@{profile.username}</p>
       <p>{email}</p>
+      <label>
+        <input type="checkbox" checked={profile.default_show_username} readOnly />
+        {t("profile.defaultVisibilityLabel")}
+      </label>
     </div>
   );
 }
