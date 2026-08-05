@@ -109,7 +109,16 @@ test("manually editing the username stops later email changes from overwriting i
   vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "newsuggestion", error: null } as never);
   fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "other@gmail.com" } });
 
-  await vi.mocked(supabase.rpc).mock.results[1].value;
   await new Promise((resolve) => setTimeout(resolve, 0));
   expect(screen.getByLabelText(t("auth.usernameLabel"))).toHaveValue("custom");
+  expect(supabase.rpc).toHaveBeenCalledTimes(1);
+});
+
+test("editing the username manually checks its availability via is_username_available", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "custom" } });
+  expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("is_username_available", {
+    check_username: "custom",
+  });
 });
