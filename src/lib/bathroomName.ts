@@ -1,3 +1,3 @@
-export function bathroomDisplayName(name: string | null, _fallback: string): string {
-  return name!;
+export function bathroomDisplayName(name: string | null, fallback: string): string {
+  return name ?? fallback;
 }
