@@ -9,3 +9,12 @@ test('filterBathrooms("all") returns all bathrooms', () => {
   const result = filterBathrooms(bathrooms, "all");
   expect(result).toEqual(bathrooms);
 });
+
+test('filterBathrooms("paid") returns only paid bathrooms', () => {
+  const bathrooms = [
+    { id: "1", kind: "public", paid: false },
+    { id: "2", kind: "public", paid: true },
+  ];
+  const result = filterBathrooms(bathrooms, "paid");
+  expect(result).toEqual([bathrooms[1]]);
+});
