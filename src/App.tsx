@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AuthScreen from "./AuthScreen";
+import ProfileScreen from "./ProfileScreen";
 import { supabase } from "./lib/supabase";
 
 export default function App() {
@@ -15,5 +16,5 @@ export default function App() {
 
   if (hasSession === null) return null;
   if (!hasSession) return <AuthScreen />;
-  return null;
+  return <ProfileScreen />;
 }
