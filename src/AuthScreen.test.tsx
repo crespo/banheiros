@@ -35,3 +35,9 @@ test("signup mode renders a terms-agreement checkbox", () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   expect(screen.getByRole("checkbox", { name: t("auth.termsAgree") })).toBeInTheDocument();
 });
+
+test("signup mode renders a create-account submit button", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeInTheDocument();
+});

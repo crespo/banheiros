@@ -24,10 +24,15 @@ export default function AuthScreen() {
             <input type="checkbox" />
             {t("auth.termsAgree")}
           </label>
+          <button>{t("auth.signupButton")}</button>
         </>
       )}
-      <button>{t("auth.loginButton")}</button>
-      <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
+      {mode === "login" && (
+        <>
+          <button>{t("auth.loginButton")}</button>
+          <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
+        </>
+      )}
     </div>
   );
 }
