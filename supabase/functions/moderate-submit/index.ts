@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { evaluateModeration, type Attribute, type Scores } from "./evaluate.ts";
 import { extractText } from "./extract-text.ts";
 import { parseThresholds } from "./thresholds.ts";
+import { shouldPublish } from "./should-publish.ts";
 
 type ReviewSubmission = {
   type: "review";
@@ -93,26 +94,35 @@ Deno.serve(async (req) => {
   const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   if (submission.type === "review") {
-    const { error } = await adminClient
+    const { data: existing } = await adminClient
       .from("reviews")
-      .upsert(
-        {
-          bathroom_id: submission.bathroom_id,
-          user_id: user.id,
-          comment: submission.comment,
-          accessibility: submission.accessibility,
-          lighting: submission.lighting,
-          odor: submission.odor,
-          maintenance: submission.maintenance,
-          cleanliness: submission.cleanliness,
-          show_username: submission.show_username,
-          status: verdict,
-        },
-        { onConflict: "bathroom_id,user_id" },
-      );
-    if (error) {
-      console.error("moderate-submit: failed to save review", error);
-      return new Response("failed to save review", { status: 500 });
+      .select("status")
+      .eq("bathroom_id", submission.bathroom_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (shouldPublish(verdict, existing?.status ?? null)) {
+      const { error } = await adminClient
+        .from("reviews")
+        .upsert(
+          {
+            bathroom_id: submission.bathroom_id,
+            user_id: user.id,
+            comment: submission.comment,
+            accessibility: submission.accessibility,
+            lighting: submission.lighting,
+            odor: submission.odor,
+            maintenance: submission.maintenance,
+            cleanliness: submission.cleanliness,
+            show_username: submission.show_username,
+            status: verdict,
+          },
+          { onConflict: "bathroom_id,user_id" },
+        );
+      if (error) {
+        console.error("moderate-submit: failed to save review", error);
+        return new Response("failed to save review", { status: 500 });
+      }
     }
   } else {
     const { error } = await adminClient.from("bathrooms").insert({
