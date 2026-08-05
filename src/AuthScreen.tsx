@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { t } from "./i18n/i18n";
+import { supabase } from "./lib/supabase";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -7,10 +8,16 @@ export default function AuthScreen() {
   const [confirm, setConfirm] = useState("");
   const [agree, setAgree] = useState(false);
 
+  function handleEmailChange(email: string) {
+    if (mode === "signup") {
+      supabase.rpc("suggest_username", { email });
+    }
+  }
+
   return (
     <div>
       <label htmlFor="email">{t("auth.emailLabel")}</label>
-      <input id="email" type="email" />
+      <input id="email" type="email" onChange={(e) => handleEmailChange(e.target.value)} />
       {mode === "signup" && (
         <>
           <label htmlFor="username">{t("auth.usernameLabel")}</label>

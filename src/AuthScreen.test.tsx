@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { t } from "./i18n/i18n";
 import AuthScreen from "./AuthScreen";
+import { supabase } from "./lib/supabase";
+
+vi.mock("./lib/supabase", () => ({
+  supabase: { rpc: vi.fn().mockResolvedValue({ data: null, error: null }) },
+}));
 
 test("AuthScreen renders a login submit button by default", () => {
   render(<AuthScreen />);
@@ -75,4 +80,11 @@ test("signup submit is enabled when password, confirm, and terms are all valid",
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
   fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeEnabled();
+});
+
+test("entering an email in signup mode calls suggest_username once with that email", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("suggest_username", { email: "raul@gmail.com" });
 });
