@@ -12,6 +12,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [usernameTaken, setUsernameTaken] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
   function handleEmailChange(email: string) {
@@ -28,7 +29,9 @@ export default function AuthScreen() {
   }
 
   function submitLogin() {
-    supabase.auth.signInWithPassword({ email, password });
+    supabase.auth.signInWithPassword({ email, password }).then(({ error }) => {
+      setEmailNotConfirmed(error?.code === "email_not_confirmed");
+    });
   }
 
   return (
@@ -81,6 +84,7 @@ export default function AuthScreen() {
       {mode === "login" && (
         <>
           <button onClick={submitLogin}>{t("auth.loginButton")}</button>
+          {emailNotConfirmed && <p>{t("auth.emailNotConfirmed")}</p>}
           <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
         </>
       )}

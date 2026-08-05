@@ -192,3 +192,15 @@ test("clicking login submit calls supabase.auth.signInWithPassword with email an
     password: "secret123",
   });
 });
+
+test("shows a resend-confirmation prompt when login fails because the email is unconfirmed", async () => {
+  vi.mocked(supabase.auth.signInWithPassword).mockResolvedValueOnce({
+    data: {},
+    error: { code: "email_not_confirmed", message: "Email not confirmed" },
+  } as never);
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "secret123" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.loginButton") }));
+  expect(await screen.findByText(t("auth.emailNotConfirmed"))).toBeInTheDocument();
+});
