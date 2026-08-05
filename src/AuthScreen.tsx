@@ -7,10 +7,13 @@ export default function AuthScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [agree, setAgree] = useState(false);
+  const [username, setUsername] = useState("");
 
   function handleEmailChange(email: string) {
     if (mode === "signup") {
-      supabase.rpc("suggest_username", { email });
+      supabase.rpc("suggest_username", { email }).then(({ data }) => {
+        setUsername(data ?? "");
+      });
     }
   }
 
@@ -21,7 +24,7 @@ export default function AuthScreen() {
       {mode === "signup" && (
         <>
           <label htmlFor="username">{t("auth.usernameLabel")}</label>
-          <input id="username" type="text" />
+          <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
         </>
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>

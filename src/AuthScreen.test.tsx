@@ -88,3 +88,11 @@ test("entering an email in signup mode calls suggest_username once with that ema
   fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
   expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("suggest_username", { email: "raul@gmail.com" });
 });
+
+test("the username field fills with the suggestion returned by suggest_username", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "raul", error: null } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  expect(await screen.findByDisplayValue("raul")).toBeInTheDocument();
+});
