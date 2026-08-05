@@ -8,3 +8,7 @@ test('categorizeBathroom("public", false) returns the public free category', () 
 test('categorizeBathroom("instore", false) returns the instore category', () => {
   expect(categorizeBathroom("instore", false)).toEqual({ id: "instore", icon: "store", tone: "accent2" });
 });
+
+test('categorizeBathroom("public", true) returns the public paid category', () => {
+  expect(categorizeBathroom("public", true)).toEqual({ id: "public_paid", icon: "building2", tone: "accent" });
+});
