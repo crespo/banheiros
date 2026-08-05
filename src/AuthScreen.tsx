@@ -28,6 +28,10 @@ export default function AuthScreen() {
     supabase.auth.signUp({ email, password, options: { data: { username } } });
   }
 
+  function forgotPassword() {
+    supabase.auth.resetPasswordForEmail(email);
+  }
+
   function resendConfirmation() {
     supabase.auth.resend({ type: "signup", email });
   }
@@ -88,6 +92,7 @@ export default function AuthScreen() {
       {mode === "login" && (
         <>
           <button onClick={submitLogin}>{t("auth.loginButton")}</button>
+          <button onClick={forgotPassword}>{t("auth.forgotPassword")}</button>
           {emailNotConfirmed && (
             <p>
               {t("auth.emailNotConfirmed")}

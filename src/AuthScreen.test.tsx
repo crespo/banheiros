@@ -11,6 +11,7 @@ vi.mock("./lib/supabase", () => ({
       signUp: vi.fn().mockResolvedValue({ data: {}, error: null }),
       signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
       resend: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
     },
   },
 }));
@@ -218,4 +219,16 @@ test("clicking resend confirmation calls supabase.auth.resend with the email", a
   await screen.findByText(t("auth.emailNotConfirmed"));
   fireEvent.click(screen.getByRole("button", { name: t("auth.resendConfirmation") }));
   expect(supabase.auth.resend).toHaveBeenCalledExactlyOnceWith({ type: "signup", email: "raul@gmail.com" });
+});
+
+test("AuthScreen renders a forgot-password link in login mode", () => {
+  render(<AuthScreen />);
+  expect(screen.getByRole("button", { name: t("auth.forgotPassword") })).toBeInTheDocument();
+});
+
+test("clicking forgot password calls supabase.auth.resetPasswordForEmail with the email", () => {
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.forgotPassword") }));
+  expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledExactlyOnceWith("raul@gmail.com");
 });
