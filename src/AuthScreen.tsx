@@ -76,7 +76,12 @@ export default function AuthScreen() {
             <p>
               {t("auth.usernameTaken")}
               {usernameAlternative && (
-                <button onClick={() => setUsername(usernameAlternative)}>
+                <button
+                  onClick={() => {
+                    setUsername(usernameAlternative);
+                    setUsernameTaken(false);
+                  }}
+                >
                   {t("auth.usernameUseSuggestion", { name: usernameAlternative })}
                 </button>
               )}

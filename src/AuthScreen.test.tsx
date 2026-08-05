@@ -162,6 +162,17 @@ test("clicking the alternative suggestion fills the username field with it", asy
   expect(screen.getByLabelText(t("auth.usernameLabel"))).toHaveValue("taken1");
 });
 
+test("clicking the alternative suggestion clears the taken message", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: false, error: null } as never);
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "taken1", error: null } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
+  const chip = await screen.findByRole("button", { name: t("auth.usernameUseSuggestion", { name: "taken1" }) });
+  fireEvent.click(chip);
+  expect(screen.queryByText(t("auth.usernameTaken"))).not.toBeInTheDocument();
+});
+
 test("shows the invalid-format message when the typed username fails format rules", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
