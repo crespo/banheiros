@@ -49,3 +49,14 @@ test("paid bathroom pin shows dollar-sign badge; free bathroom pin does not", ()
   expect(paidContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).toBeInTheDocument();
   expect(freeContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).not.toBeInTheDocument();
 });
+
+test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
+  const pub  = { id: "b5", name: "P", address: "Rua E", kind: "public",  paid: false };
+  const inst = { id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false };
+  const { container: publicContainer }  = render(<MapScreen bathrooms={[pub]} />);
+  const { container: instoreContainer } = render(<MapScreen bathrooms={[inst]} />);
+  expect(publicContainer.querySelector('path[d^="M6 22V4"]')).toBeInTheDocument();
+  expect(publicContainer.querySelector('path[d="M3 9 4 4h16l1 5"]')).not.toBeInTheDocument();
+  expect(instoreContainer.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeInTheDocument();
+  expect(instoreContainer.querySelector('path[d^="M6 22V4"]')).not.toBeInTheDocument();
+});
