@@ -3,10 +3,14 @@ import { expect, test, vi } from "vitest";
 import ProfileScreen from "./ProfileScreen";
 import { supabase } from "./lib/supabase";
 
-function mockProfileRow(row: { username: string; language: string; default_show_username: boolean }) {
-  return {
-    single: vi.fn().mockResolvedValue({ data: row, error: null }),
-  };
+type ProfileRow = { username: string; language: string; default_show_username: boolean };
+
+function mockProfileLoad(row: ProfileRow) {
+  vi.mocked(supabase.from).mockReturnValue({
+    select: () => ({
+      eq: () => ({ single: vi.fn().mockResolvedValue({ data: row, error: null }) }),
+    }),
+  } as never);
 }
 
 vi.mock("./lib/supabase", () => ({
@@ -20,21 +24,13 @@ vi.mock("./lib/supabase", () => ({
 }));
 
 test("ProfileScreen renders the username once the profile loads", async () => {
-  vi.mocked(supabase.from).mockReturnValue({
-    select: () => ({
-      eq: () => mockProfileRow({ username: "raul", language: "pt", default_show_username: false }),
-    }),
-  } as never);
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
   expect(await screen.findByText("@raul")).toBeInTheDocument();
 });
 
 test("ProfileScreen renders the user's email", async () => {
-  vi.mocked(supabase.from).mockReturnValue({
-    select: () => ({
-      eq: () => mockProfileRow({ username: "raul", language: "pt", default_show_username: false }),
-    }),
-  } as never);
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
   expect(await screen.findByText("raul@gmail.com")).toBeInTheDocument();
 });
