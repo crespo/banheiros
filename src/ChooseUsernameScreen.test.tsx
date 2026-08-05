@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { t } from "./i18n/i18n";
 import ChooseUsernameScreen from "./ChooseUsernameScreen";
@@ -24,4 +24,21 @@ test("prefills the username field with a suggestion based on the account email",
   render(<ChooseUsernameScreen onCreated={() => {}} />);
   expect(await screen.findByDisplayValue("raul")).toBeInTheDocument();
   expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("suggest_username", { email: "raul@gmail.com" });
+});
+
+test("renders a continue button", () => {
+  render(<ChooseUsernameScreen onCreated={() => {}} />);
+  expect(screen.getByRole("button", { name: t("auth.continueButton") })).toBeInTheDocument();
+});
+
+test("clicking continue inserts the profile row and calls onCreated", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "raul", error: null } as never);
+  const insertMock = vi.fn().mockResolvedValue({ error: null });
+  vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as never);
+  const onCreated = vi.fn();
+  render(<ChooseUsernameScreen onCreated={onCreated} />);
+  await screen.findByDisplayValue("raul");
+  fireEvent.click(screen.getByRole("button", { name: t("auth.continueButton") }));
+  expect(insertMock).toHaveBeenCalledExactlyOnceWith({ user_id: "u1", username: "raul" });
+  await vi.waitFor(() => expect(onCreated).toHaveBeenCalledOnce());
 });
