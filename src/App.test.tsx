@@ -1,11 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import App from "./App";
 import { t } from "./i18n/i18n";
+import { supabase } from "./lib/supabase";
 
-test("app shell renders the app name heading", () => {
+vi.mock("./lib/supabase", () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+    },
+  },
+}));
+
+test("App renders AuthScreen when there is no session", async () => {
   render(<App />);
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    t("common.appName"),
-  );
+  expect(await screen.findByLabelText(t("auth.emailLabel"))).toBeInTheDocument();
 });
