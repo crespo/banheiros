@@ -92,3 +92,10 @@ test("clicking logout calls supabase.auth.signOut", async () => {
   fireEvent.click(await screen.findByRole("button", { name: t("profile.logout") }));
   expect(supabase.auth.signOut).toHaveBeenCalledOnce();
 });
+
+test("clicking delete account shows a confirmation prompt", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("button", { name: t("profile.deleteAccount") }));
+  expect(screen.getByText(t("profile.deleteAccountConfirm"))).toBeInTheDocument();
+});

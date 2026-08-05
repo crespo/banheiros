@@ -8,6 +8,7 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -67,6 +68,8 @@ export default function ProfileScreen() {
         </label>
       ))}
       <button onClick={logout}>{t("profile.logout")}</button>
+      <button onClick={() => setConfirmingDelete(true)}>{t("profile.deleteAccount")}</button>
+      {confirmingDelete && <p>{t("profile.deleteAccountConfirm")}</p>}
     </div>
   );
 }
