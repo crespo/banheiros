@@ -12,3 +12,7 @@ test("rejects a username longer than 30 characters", () => {
 test("rejects a username with characters outside a-z0-9._", () => {
   expect(validateUsernameFormat("Raul!")).toBe("auth.usernameInvalidFormat");
 });
+
+test("accepts a valid username", () => {
+  expect(validateUsernameFormat("raul.crespo_1")).toBe(null);
+});
