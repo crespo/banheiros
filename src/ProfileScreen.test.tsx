@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import ProfileScreen from "./ProfileScreen";
 import { supabase } from "./lib/supabase";
@@ -6,11 +6,14 @@ import { t } from "./i18n/i18n";
 
 type ProfileRow = { username: string; language: string; default_show_username: boolean };
 
+const updateMock = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+
 function mockProfileLoad(row: ProfileRow) {
   vi.mocked(supabase.from).mockReturnValue({
     select: () => ({
       eq: () => ({ single: vi.fn().mockResolvedValue({ data: row, error: null }) }),
     }),
+    update: updateMock,
   } as never);
 }
 
@@ -40,4 +43,12 @@ test("ProfileScreen renders the default-visibility toggle reflecting the loaded 
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: true });
   render(<ProfileScreen />);
   expect(await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") })).toBeChecked();
+});
+
+test("toggling the default-visibility switch persists the new value", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  const toggle = await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") });
+  fireEvent.click(toggle);
+  expect(updateMock).toHaveBeenCalledExactlyOnceWith({ default_show_username: true });
 });
