@@ -20,6 +20,10 @@ export default function AuthScreen() {
         <>
           <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>
           <input id="confirm" type="password" />
+          <label>
+            <input type="checkbox" />
+            {t("auth.termsAgree")}
+          </label>
         </>
       )}
       <button>{t("auth.loginButton")}</button>

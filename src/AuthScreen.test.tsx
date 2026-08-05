@@ -29,3 +29,9 @@ test("signup mode renders a confirm-password input", () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   expect(screen.getByLabelText(t("auth.confirmPasswordLabel"))).toBeInTheDocument();
 });
+
+test("signup mode renders a terms-agreement checkbox", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("checkbox", { name: t("auth.termsAgree") })).toBeInTheDocument();
+});
