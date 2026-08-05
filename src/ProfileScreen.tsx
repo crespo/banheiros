@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dicts, t } from "./i18n/i18n";
+import { dicts, Lang, setLanguage, t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
 type Profile = { username: string; language: string; default_show_username: boolean };
@@ -28,6 +28,11 @@ export default function ProfileScreen() {
     supabase.from("profiles").update({ default_show_username: value }).eq("user_id", userId);
   }
 
+  function changeLanguage(lang: Lang) {
+    setLanguage(lang);
+    supabase.from("profiles").update({ language: lang }).eq("user_id", userId);
+  }
+
   if (!profile) return null;
 
   return (
@@ -44,7 +49,12 @@ export default function ProfileScreen() {
       </label>
       {Object.keys(dicts).map((lang) => (
         <label key={lang}>
-          <input type="radio" name="lang" checked={profile.language === lang} readOnly />
+          <input
+            type="radio"
+            name="lang"
+            checked={profile.language === lang}
+            onChange={() => changeLanguage(lang as Lang)}
+          />
           {lang.toUpperCase()}
         </label>
       ))}

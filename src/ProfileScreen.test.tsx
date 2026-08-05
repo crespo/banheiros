@@ -66,3 +66,10 @@ test("ProfileScreen renders a checked radio for the loaded language", async () =
   render(<ProfileScreen />);
   expect(await screen.findByRole("radio", { name: "EN" })).toBeChecked();
 });
+
+test("selecting a language persists it to the profile", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("radio", { name: "EN" }));
+  expect(updateMock).toHaveBeenCalledExactlyOnceWith({ language: "en" });
+});
