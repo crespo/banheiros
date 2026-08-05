@@ -52,3 +52,11 @@ test("toggling the default-visibility switch persists the new value", async () =
   fireEvent.click(toggle);
   expect(updateMock).toHaveBeenCalledExactlyOnceWith({ default_show_username: true });
 });
+
+test("toggling the default-visibility switch updates its checked state", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  const toggle = await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") });
+  fireEvent.click(toggle);
+  expect(toggle).toBeChecked();
+});

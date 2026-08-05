@@ -24,6 +24,7 @@ export default function ProfileScreen() {
   }, []);
 
   function toggleDefaultVisibility(value: boolean) {
+    setProfile((prev) => (prev ? { ...prev, default_show_username: value } : prev));
     supabase.from("profiles").update({ default_show_username: value }).eq("user_id", userId);
   }
 
