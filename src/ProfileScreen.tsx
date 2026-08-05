@@ -19,7 +19,10 @@ export default function ProfileScreen() {
         .select("username, language, default_show_username")
         .eq("user_id", data.user.id)
         .single()
-        .then(({ data: row }) => setProfile(row));
+        .then(({ data: row }) => {
+          setProfile(row);
+          setLanguage(row.language as Lang);
+        });
     });
   }, []);
 

@@ -67,6 +67,14 @@ test("ProfileScreen renders a checked radio for the loaded language", async () =
   expect(await screen.findByRole("radio", { name: "EN" })).toBeChecked();
 });
 
+test("ProfileScreen activates the loaded profile's language on mount", async () => {
+  localStorage.setItem("banheiros_lang", "pt");
+  mockProfileLoad({ username: "raul", language: "en", default_show_username: false });
+  render(<ProfileScreen />);
+  await screen.findByText("@raul");
+  expect(localStorage.getItem("banheiros_lang")).toBe("en");
+});
+
 test("selecting a language persists it to the profile", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
