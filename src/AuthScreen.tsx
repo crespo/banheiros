@@ -5,6 +5,7 @@ import { validateUsernameFormat } from "./lib/username";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [agree, setAgree] = useState(false);
@@ -14,6 +15,7 @@ export default function AuthScreen() {
   const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
   function handleEmailChange(email: string) {
+    setEmail(email);
     if (mode === "signup" && !usernameTouched) {
       supabase.rpc("suggest_username", { email }).then(({ data }) => {
         setUsername(data ?? "");
@@ -21,10 +23,14 @@ export default function AuthScreen() {
     }
   }
 
+  function submitSignup() {
+    supabase.auth.signUp({ email, password, options: { data: { username } } });
+  }
+
   return (
     <div>
       <label htmlFor="email">{t("auth.emailLabel")}</label>
-      <input id="email" type="email" onChange={(e) => handleEmailChange(e.target.value)} />
+      <input id="email" type="email" value={email} onChange={(e) => handleEmailChange(e.target.value)} />
       {mode === "signup" && (
         <>
           <label htmlFor="username">{t("auth.usernameLabel")}</label>
@@ -62,6 +68,7 @@ export default function AuthScreen() {
               usernameTaken ||
               Boolean(usernameFormatError)
             }
+            onClick={submitSignup}
           >
             {t("auth.signupButton")}
           </button>

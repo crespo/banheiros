@@ -5,7 +5,12 @@ import AuthScreen from "./AuthScreen";
 import { supabase } from "./lib/supabase";
 
 vi.mock("./lib/supabase", () => ({
-  supabase: { rpc: vi.fn().mockResolvedValue({ data: null, error: null }) },
+  supabase: {
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    auth: {
+      signUp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+    },
+  },
 }));
 
 test("AuthScreen renders a login submit button by default", () => {
@@ -158,4 +163,20 @@ test("signup submit is disabled when the typed username is taken", async () => {
   fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
   await screen.findByText(t("auth.usernameTaken"));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
+});
+
+test("clicking signup submit calls supabase.auth.signUp with email, password, and username metadata", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "raul" } });
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("button", { name: t("auth.signupButton") }));
+  expect(supabase.auth.signUp).toHaveBeenCalledExactlyOnceWith({
+    email: "raul@gmail.com",
+    password: "123456",
+    options: { data: { username: "raul" } },
+  });
 });
