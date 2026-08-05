@@ -51,7 +51,7 @@ export default function AuthScreen() {
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
             {t("auth.termsAgree")}
           </label>
-          <button disabled={password.length < 6 || password !== confirm || !agree}>
+          <button disabled={password.length < 6 || password !== confirm || !agree || usernameTaken}>
             {t("auth.signupButton")}
           </button>
         </>
