@@ -9,6 +9,7 @@ export default function AuthScreen() {
   const [agree, setAgree] = useState(false);
   const [username, setUsername] = useState("");
   const [usernameTouched, setUsernameTouched] = useState(false);
+  const [usernameTaken, setUsernameTaken] = useState(false);
 
   function handleEmailChange(email: string) {
     if (mode === "signup" && !usernameTouched) {
@@ -32,9 +33,12 @@ export default function AuthScreen() {
             onChange={(e) => {
               setUsernameTouched(true);
               setUsername(e.target.value);
-              supabase.rpc("is_username_available", { check_username: e.target.value });
+              supabase.rpc("is_username_available", { check_username: e.target.value }).then(({ data }) => {
+                setUsernameTaken(data === false);
+              });
             }}
           />
+          {usernameTaken && <p>{t("auth.usernameTaken")}</p>}
         </>
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>

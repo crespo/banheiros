@@ -122,3 +122,11 @@ test("editing the username manually checks its availability via is_username_avai
     check_username: "custom",
   });
 });
+
+test("shows the taken message when the typed username is unavailable", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: false, error: null } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
+  expect(await screen.findByText(t("auth.usernameTaken"))).toBeInTheDocument();
+});
