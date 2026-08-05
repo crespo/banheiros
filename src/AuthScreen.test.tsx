@@ -140,6 +140,28 @@ test("shows the taken message when the typed username is unavailable", async () 
   expect(await screen.findByText(t("auth.usernameTaken"))).toBeInTheDocument();
 });
 
+test("offers a free alternative when the typed username is taken", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: false, error: null } as never);
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "taken1", error: null } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
+  expect(
+    await screen.findByRole("button", { name: t("auth.usernameUseSuggestion", { name: "taken1" }) }),
+  ).toBeInTheDocument();
+});
+
+test("clicking the alternative suggestion fills the username field with it", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: false, error: null } as never);
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "taken1", error: null } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
+  const chip = await screen.findByRole("button", { name: t("auth.usernameUseSuggestion", { name: "taken1" }) });
+  fireEvent.click(chip);
+  expect(screen.getByLabelText(t("auth.usernameLabel"))).toHaveValue("taken1");
+});
+
 test("shows the invalid-format message when the typed username fails format rules", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));

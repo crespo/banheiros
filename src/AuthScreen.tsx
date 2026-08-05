@@ -12,6 +12,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [usernameTaken, setUsernameTaken] = useState(false);
+  const [usernameAlternative, setUsernameAlternative] = useState<string | null>(null);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
@@ -62,11 +63,25 @@ export default function AuthScreen() {
               setUsername(e.target.value);
               supabase.rpc("is_username_available", { check_username: e.target.value }).then(({ data }) => {
                 setUsernameTaken(data === false);
+                if (data === false) {
+                  supabase.rpc("suggest_username", { email: e.target.value }).then(({ data: alt }) => {
+                    setUsernameAlternative(alt ?? null);
+                  });
+                }
               });
             }}
           />
           {usernameFormatError && <p>{t(usernameFormatError)}</p>}
-          {usernameTaken && <p>{t("auth.usernameTaken")}</p>}
+          {usernameTaken && (
+            <p>
+              {t("auth.usernameTaken")}
+              {usernameAlternative && (
+                <button onClick={() => setUsername(usernameAlternative)}>
+                  {t("auth.usernameUseSuggestion", { name: usernameAlternative })}
+                </button>
+              )}
+            </p>
+          )}
         </>
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>
