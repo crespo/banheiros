@@ -41,3 +41,12 @@ test("signup mode renders a create-account submit button", () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeInTheDocument();
 });
+
+test("signup submit is disabled when the password is shorter than 6 characters", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "12345" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "12345" } });
+  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
+});

@@ -3,6 +3,7 @@ import { t } from "./i18n/i18n";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [password, setPassword] = useState("");
 
   return (
     <div>
@@ -15,7 +16,7 @@ export default function AuthScreen() {
         </>
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>
-      <input id="password" type="password" />
+      <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       {mode === "signup" && (
         <>
           <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>
@@ -24,7 +25,7 @@ export default function AuthScreen() {
             <input type="checkbox" />
             {t("auth.termsAgree")}
           </label>
-          <button>{t("auth.signupButton")}</button>
+          <button disabled={password.length < 6}>{t("auth.signupButton")}</button>
         </>
       )}
       {mode === "login" && (
