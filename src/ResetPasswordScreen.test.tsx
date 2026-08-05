@@ -7,3 +7,8 @@ test("ResetPasswordScreen renders a new-password input", () => {
   render(<ResetPasswordScreen />);
   expect(screen.getByLabelText(t("auth.newPasswordLabel"))).toBeInTheDocument();
 });
+
+test("ResetPasswordScreen renders a confirm-password input", () => {
+  render(<ResetPasswordScreen />);
+  expect(screen.getByLabelText(t("auth.confirmPasswordLabel"))).toBeInTheDocument();
+});

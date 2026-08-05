@@ -5,6 +5,8 @@ export default function ResetPasswordScreen() {
     <div>
       <label htmlFor="new-password">{t("auth.newPasswordLabel")}</label>
       <input id="new-password" type="password" />
+      <label htmlFor="confirm-password">{t("auth.confirmPasswordLabel")}</label>
+      <input id="confirm-password" type="password" />
     </div>
   );
 }
