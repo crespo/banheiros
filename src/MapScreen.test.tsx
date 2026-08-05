@@ -40,3 +40,12 @@ test("MapScreen renders a pin button using a generic label when bathroom name is
   render(<MapScreen bathrooms={bathrooms} />);
   expect(screen.getByRole("button", { name: t("bathroom.unnamed") })).toBeInTheDocument();
 });
+
+test("paid bathroom pin shows dollar-sign badge; free bathroom pin does not", () => {
+  const paid = { id: "b3", name: "P", address: "Rua C", kind: "public", paid: true };
+  const free = { id: "b4", name: "F", address: "Rua D", kind: "public", paid: false };
+  const { container: paidContainer } = render(<MapScreen bathrooms={[paid]} />);
+  const { container: freeContainer } = render(<MapScreen bathrooms={[free]} />);
+  expect(paidContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).toBeInTheDocument();
+  expect(freeContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).not.toBeInTheDocument();
+});
