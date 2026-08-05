@@ -36,3 +36,12 @@ test('filterBathrooms("public") includes paid public bathrooms', () => {
   const result = filterBathrooms(bathrooms, "public");
   expect(result).toEqual(bathrooms);
 });
+
+test('filterBathrooms("instore") returns only instore bathrooms', () => {
+  const bathrooms = [
+    { id: "1", kind: "public", paid: false },
+    { id: "2", kind: "instore", paid: false },
+  ];
+  const result = filterBathrooms(bathrooms, "instore");
+  expect(result).toEqual([bathrooms[1]]);
+});
