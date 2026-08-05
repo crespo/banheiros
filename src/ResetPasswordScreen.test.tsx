@@ -12,3 +12,8 @@ test("ResetPasswordScreen renders a confirm-password input", () => {
   render(<ResetPasswordScreen />);
   expect(screen.getByLabelText(t("auth.confirmPasswordLabel"))).toBeInTheDocument();
 });
+
+test("ResetPasswordScreen renders a submit button", () => {
+  render(<ResetPasswordScreen />);
+  expect(screen.getByRole("button", { name: t("auth.resetPasswordButton") })).toBeInTheDocument();
+});
