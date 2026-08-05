@@ -20,6 +20,7 @@ export default function ProfileScreen() {
         .eq("user_id", data.user.id)
         .single()
         .then(({ data: row }) => {
+          if (!row) return;
           setProfile(row);
           setLanguage(row.language as Lang);
         });
