@@ -131,6 +131,23 @@ test("shows the taken message when the typed username is unavailable", async () 
   expect(await screen.findByText(t("auth.usernameTaken"))).toBeInTheDocument();
 });
 
+test("shows the invalid-format message when the typed username fails format rules", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "ab" } });
+  expect(screen.getByText(t("auth.usernameInvalidFormat"))).toBeInTheDocument();
+});
+
+test("signup submit is disabled when the typed username fails format rules", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "ab" } });
+  expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
+});
+
 test("signup submit is disabled when the typed username is taken", async () => {
   vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: false, error: null } as never);
   render(<AuthScreen />);

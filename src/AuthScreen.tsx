@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
+import { validateUsernameFormat } from "./lib/username";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -10,6 +11,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [usernameTaken, setUsernameTaken] = useState(false);
+  const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
   function handleEmailChange(email: string) {
     if (mode === "signup" && !usernameTouched) {
@@ -38,6 +40,7 @@ export default function AuthScreen() {
               });
             }}
           />
+          {usernameFormatError && <p>{t(usernameFormatError)}</p>}
           {usernameTaken && <p>{t("auth.usernameTaken")}</p>}
         </>
       )}
@@ -51,7 +54,15 @@ export default function AuthScreen() {
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
             {t("auth.termsAgree")}
           </label>
-          <button disabled={password.length < 6 || password !== confirm || !agree || usernameTaken}>
+          <button
+            disabled={
+              password.length < 6 ||
+              password !== confirm ||
+              !agree ||
+              usernameTaken ||
+              Boolean(usernameFormatError)
+            }
+          >
             {t("auth.signupButton")}
           </button>
         </>
