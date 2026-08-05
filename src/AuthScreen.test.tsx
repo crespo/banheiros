@@ -111,7 +111,7 @@ test("manually editing the username stops later email changes from overwriting i
 
   await new Promise((resolve) => setTimeout(resolve, 0));
   expect(screen.getByLabelText(t("auth.usernameLabel"))).toHaveValue("custom");
-  expect(supabase.rpc).toHaveBeenCalledTimes(1);
+  expect(supabase.rpc).toHaveBeenCalledTimes(2);
 });
 
 test("editing the username manually checks its availability via is_username_available", () => {

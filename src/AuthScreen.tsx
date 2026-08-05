@@ -32,6 +32,7 @@ export default function AuthScreen() {
             onChange={(e) => {
               setUsernameTouched(true);
               setUsername(e.target.value);
+              supabase.rpc("is_username_available", { check_username: e.target.value });
             }}
           />
         </>
