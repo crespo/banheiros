@@ -16,3 +16,8 @@ test.each([
   render(<MapScreen />);
   expect(screen.getByRole("button", { name: t(key as Parameters<typeof t>[0]) })).toBeInTheDocument();
 });
+
+test('the "all" filter chip is pressed by default', () => {
+  render(<MapScreen />);
+  expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "true");
+});
