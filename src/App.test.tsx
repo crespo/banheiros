@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import App from "./App";
 import { t } from "./i18n/i18n";
-import { supabase } from "./lib/supabase";
 
 vi.mock("./lib/supabase", () => ({
   supabase: {
