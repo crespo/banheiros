@@ -28,3 +28,13 @@ test("ProfileScreen renders the username once the profile loads", async () => {
   render(<ProfileScreen />);
   expect(await screen.findByText("@raul")).toBeInTheDocument();
 });
+
+test("ProfileScreen renders the user's email", async () => {
+  vi.mocked(supabase.from).mockReturnValue({
+    select: () => ({
+      eq: () => mockProfileRow({ username: "raul", language: "pt", default_show_username: false }),
+    }),
+  } as never);
+  render(<ProfileScreen />);
+  expect(await screen.findByText("raul@gmail.com")).toBeInTheDocument();
+});

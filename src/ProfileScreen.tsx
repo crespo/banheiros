@@ -5,10 +5,12 @@ type Profile = { username: string; language: string; default_show_username: bool
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return;
+      setEmail(data.user.email ?? null);
       supabase
         .from("profiles")
         .select("username, language, default_show_username")
@@ -23,6 +25,7 @@ export default function ProfileScreen() {
   return (
     <div>
       <p>@{profile.username}</p>
+      <p>{email}</p>
     </div>
   );
 }
