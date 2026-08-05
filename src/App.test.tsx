@@ -35,3 +35,11 @@ test("App renders ProfileScreen when there is a session", async () => {
   render(<App />);
   expect(await screen.findByText("@raul")).toBeInTheDocument();
 });
+
+test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", async () => {
+  render(<App />);
+  await screen.findByLabelText(t("auth.emailLabel"));
+  const onAuthStateChange = vi.mocked(supabase.auth.onAuthStateChange).mock.calls[0][0];
+  onAuthStateChange("PASSWORD_RECOVERY", { user: { id: "u1" } } as never);
+  expect(await screen.findByLabelText(t("auth.newPasswordLabel"))).toBeInTheDocument();
+});
