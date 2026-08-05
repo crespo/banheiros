@@ -16,6 +16,12 @@ export default function AuthScreen() {
       )}
       <label htmlFor="password">{t("auth.passwordLabel")}</label>
       <input id="password" type="password" />
+      {mode === "signup" && (
+        <>
+          <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>
+          <input id="confirm" type="password" />
+        </>
+      )}
       <button>{t("auth.loginButton")}</button>
       <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
     </div>

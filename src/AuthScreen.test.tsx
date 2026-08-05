@@ -23,3 +23,9 @@ test("clicking the create-account link switches to signup mode", () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   expect(screen.getByLabelText(t("auth.usernameLabel"))).toBeInTheDocument();
 });
+
+test("signup mode renders a confirm-password input", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByLabelText(t("auth.confirmPasswordLabel"))).toBeInTheDocument();
+});
