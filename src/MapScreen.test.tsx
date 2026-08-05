@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, test } from "vitest";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
@@ -20,4 +20,11 @@ test.each([
 test('the "all" filter chip is pressed by default', () => {
   render(<MapScreen />);
   expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "true");
+});
+
+test('clicking the "Público" chip selects it and deselects "Todos"', () => {
+  render(<MapScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("map.filterPublic") }));
+  expect(screen.getByRole("button", { name: t("map.filterPublic") })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "false");
 });
