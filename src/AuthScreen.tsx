@@ -27,6 +27,10 @@ export default function AuthScreen() {
     supabase.auth.signUp({ email, password, options: { data: { username } } });
   }
 
+  function submitLogin() {
+    supabase.auth.signInWithPassword({ email, password });
+  }
+
   return (
     <div>
       <label htmlFor="email">{t("auth.emailLabel")}</label>
@@ -76,7 +80,7 @@ export default function AuthScreen() {
       )}
       {mode === "login" && (
         <>
-          <button>{t("auth.loginButton")}</button>
+          <button onClick={submitLogin}>{t("auth.loginButton")}</button>
           <button onClick={() => setMode("signup")}>{t("auth.createAccountLink")}</button>
         </>
       )}

@@ -9,6 +9,7 @@ vi.mock("./lib/supabase", () => ({
     rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     auth: {
       signUp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
     },
   },
 }));
@@ -178,5 +179,16 @@ test("clicking signup submit calls supabase.auth.signUp with email, password, an
     email: "raul@gmail.com",
     password: "123456",
     options: { data: { username: "raul" } },
+  });
+});
+
+test("clicking login submit calls supabase.auth.signInWithPassword with email and password", () => {
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "secret123" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.loginButton") }));
+  expect(supabase.auth.signInWithPassword).toHaveBeenCalledExactlyOnceWith({
+    email: "raul@gmail.com",
+    password: "secret123",
   });
 });
