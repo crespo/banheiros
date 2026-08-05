@@ -28,6 +28,9 @@ vi.mock("./lib/supabase", () => ({
       signOut: vi.fn().mockResolvedValue({ error: null }),
     },
     from: vi.fn(),
+    functions: {
+      invoke: vi.fn().mockResolvedValue({ data: {}, error: null }),
+    },
   },
 }));
 
@@ -98,4 +101,12 @@ test("clicking delete account shows a confirmation prompt", async () => {
   render(<ProfileScreen />);
   fireEvent.click(await screen.findByRole("button", { name: t("profile.deleteAccount") }));
   expect(screen.getByText(t("profile.deleteAccountConfirm"))).toBeInTheDocument();
+});
+
+test("confirming delete account invokes the delete-account edge function", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("button", { name: t("profile.deleteAccount") }));
+  fireEvent.click(screen.getByRole("button", { name: t("profile.deleteAccountConfirmButton") }));
+  expect(supabase.functions.invoke).toHaveBeenCalledExactlyOnceWith("delete-account");
 });

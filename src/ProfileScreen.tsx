@@ -37,6 +37,10 @@ export default function ProfileScreen() {
     supabase.auth.signOut();
   }
 
+  function deleteAccount() {
+    supabase.functions.invoke("delete-account");
+  }
+
   function changeLanguage(lang: Lang) {
     setLanguage(lang);
     supabase.from("profiles").update({ language: lang }).eq("user_id", userId);
@@ -69,7 +73,12 @@ export default function ProfileScreen() {
       ))}
       <button onClick={logout}>{t("profile.logout")}</button>
       <button onClick={() => setConfirmingDelete(true)}>{t("profile.deleteAccount")}</button>
-      {confirmingDelete && <p>{t("profile.deleteAccountConfirm")}</p>}
+      {confirmingDelete && (
+        <p>
+          {t("profile.deleteAccountConfirm")}
+          <button onClick={deleteAccount}>{t("profile.deleteAccountConfirmButton")}</button>
+        </p>
+      )}
     </div>
   );
 }
