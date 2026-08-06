@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
 
@@ -57,6 +57,21 @@ test("paid bathroom pin shows dollar-sign badge; free bathroom pin does not", ()
   const { container: freeContainer } = render(<MapScreen bathrooms={[free]} />);
   expect(paidContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).toBeInTheDocument();
   expect(freeContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).not.toBeInTheDocument();
+});
+
+describe("user location marker", () => {
+  afterEach(() => {
+    Object.defineProperty(navigator, "geolocation", { value: undefined, configurable: true });
+  });
+
+  test("renders user location marker when geolocation succeeds", () => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
+      configurable: true,
+    });
+    render(<MapScreen bathrooms={[]} />);
+    expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
+  });
 });
 
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
