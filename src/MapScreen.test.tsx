@@ -22,6 +22,13 @@ function mockBathrooms(rows: unknown[]) {
   return eq;
 }
 
+function mockPreciseGeolocation() {
+  Object.defineProperty(navigator, "geolocation", {
+    value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
+    configurable: true,
+  });
+}
+
 test.each([
   ["map.filterAll"],
   ["map.filterPublic"],
@@ -80,10 +87,7 @@ describe("user location marker", () => {
   });
 
   test("renders user location marker when geolocation succeeds", () => {
-    Object.defineProperty(navigator, "geolocation", {
-      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
-      configurable: true,
-    });
+    mockPreciseGeolocation();
     render(<MapScreen />);
     expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
   });
@@ -107,14 +111,18 @@ describe("user location marker", () => {
     expect(marker.querySelector("circle")).toBeNull();
   });
 
-  test("precise mode marker contains a circle dot child", () => {
-    Object.defineProperty(navigator, "geolocation", {
-      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
-      configurable: true,
-    });
+  test("precise mode marker contains a circle with class location-dot", () => {
+    mockPreciseGeolocation();
     render(<MapScreen />);
     const marker = screen.getByRole("img", { name: t("map.legendYou") });
-    expect(marker.querySelector("circle")).not.toBeNull();
+    expect(marker.querySelector("circle.location-dot")).not.toBeNull();
+  });
+
+  test("precise mode marker contains a circle with class location-halo", () => {
+    mockPreciseGeolocation();
+    render(<MapScreen />);
+    const marker = screen.getByRole("img", { name: t("map.legendYou") });
+    expect(marker.querySelector("circle.location-halo")).not.toBeNull();
   });
 });
 
