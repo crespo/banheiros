@@ -253,3 +253,43 @@ test("clicking the add-bathroom FAB calls onAddBathroom", () => {
   fireEvent.click(screen.getByRole("button", { name: t("map.addBathroom") }));
   expect(onAddBathroom).toHaveBeenCalledOnce();
 });
+
+test("MapScreen renders an address search input", () => {
+  render(<MapScreen />);
+  expect(screen.getByPlaceholderText(t("map.searchPlaceholder"))).toBeInTheDocument();
+});
+
+describe("address search geocoding", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([]) }));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  test("debounces the Nominatim request while the user types", async () => {
+    render(<MapScreen />);
+    fireEvent.change(screen.getByPlaceholderText(t("map.searchPlaceholder")), { target: { value: "Praça" } });
+    expect(fetch).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(400);
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("nominatim.openstreetmap.org"));
+  });
+
+  test("selecting the first geocoding result recenters the map", async () => {
+    const setCenter = vi.fn();
+    vi.mocked(maplibregl.Map).mockImplementation(function () { return { setCenter } as never; });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+    render(<MapScreen />);
+    fireEvent.change(screen.getByPlaceholderText(t("map.searchPlaceholder")), { target: { value: "Praça" } });
+    await vi.advanceTimersByTimeAsync(400);
+    expect(setCenter).toHaveBeenCalledWith([-35.7, -9.6]);
+  });
+});
+
+test("MapScreen shows Nominatim attribution near the search input", () => {
+  render(<MapScreen />);
+  expect(screen.getByText(/Nominatim/)).toBeInTheDocument();
+});

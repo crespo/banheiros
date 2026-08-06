@@ -6,7 +6,7 @@ import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
 import { bathroomDisplayName } from "./lib/bathroomName";
 import { resolveLocationMode } from "./lib/locationMode";
-import { isWithinCoverage, MACEIO_CENTER } from "./lib/mapCoverage";
+import { COVERAGE_BOUNDS, isWithinCoverage, MACEIO_CENTER } from "./lib/mapCoverage";
 import { supabase } from "./lib/supabase";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
@@ -18,6 +18,7 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   useEffect(() => {
@@ -36,6 +37,19 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
     });
   }, []);
   useEffect(() => {
+    if (!query) return;
+    const timeout = setTimeout(() => {
+      const viewbox = `${COVERAGE_BOUNDS.minLng},${COVERAGE_BOUNDS.maxLat},${COVERAGE_BOUNDS.maxLng},${COVERAGE_BOUNDS.minLat}`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=${viewbox}&bounded=0`)
+        .then((res) => res.json())
+        .then((results: { lat: string; lon: string }[]) => {
+          const first = results[0];
+          if (first) mapInstanceRef.current?.setCenter([parseFloat(first.lon), parseFloat(first.lat)]);
+        });
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [query]);
+  useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -53,6 +67,8 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
       <button aria-pressed={filter === "public" ? "true" : "false"} onClick={() => setFilter("public")}>{t("map.filterPublic")}</button>
       <button aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
       <button aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
+      <input placeholder={t("map.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
+      <small>Search by Nominatim, © OpenStreetMap contributors</small>
       <button aria-label={t("map.legendTitle")} onClick={() => setLegendOpen(!legendOpen)}><Icon name="filter" /></button>
       {legendOpen && (
         <div>
