@@ -103,6 +103,21 @@ describe("user location marker", () => {
   });
 });
 
+describe("coverage warning", () => {
+  afterEach(() => {
+    Object.defineProperty(navigator, "geolocation", { value: undefined, configurable: true });
+  });
+
+  test("shows alert when geolocation succeeds outside coverage area", () => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: -23.5, longitude: -46.6, accuracy: 10 } })) },
+      configurable: true,
+    });
+    render(<MapScreen bathrooms={[]} />);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+});
+
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
   const pub  = { id: "b5", name: "P", address: "Rua E", kind: "public",  paid: false };
   const inst = { id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false };

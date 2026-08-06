@@ -4,15 +4,23 @@ import { t } from "./i18n/i18n";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
 import { bathroomDisplayName } from "./lib/bathroomName";
+import { isWithinCoverage } from "./lib/mapCoverage";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
 
 export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }) {
   const [filter, setFilter] = useState("all");
   const [locationMode, setLocationMode] = useState<"precise" | "approximate" | null>(null);
+  const [outOfCoverage, setOutOfCoverage] = useState(false);
   useEffect(() => {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(() => setLocationMode("precise"), () => setLocationMode("approximate"));
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocationMode("precise");
+        setOutOfCoverage(!isWithinCoverage(pos.coords.latitude, pos.coords.longitude));
+      },
+      () => setLocationMode("approximate"),
+    );
   }, []);
   return (
     <>
@@ -21,6 +29,7 @@ export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }
       <button aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
       <button aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
       {locationMode !== null && <span role="img" aria-label={t("map.legendYou")}>{locationMode === "precise" && <svg aria-hidden="true"><circle /></svg>}</span>}
+      {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
       {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}</button>; })}
     </>
   );
