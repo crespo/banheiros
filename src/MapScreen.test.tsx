@@ -72,6 +72,16 @@ describe("user location marker", () => {
     render(<MapScreen bathrooms={[]} />);
     expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
   });
+
+  test("precise mode marker contains a circle dot child", () => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
+      configurable: true,
+    });
+    render(<MapScreen bathrooms={[]} />);
+    const marker = screen.getByRole("img", { name: t("map.legendYou") });
+    expect(marker.querySelector("circle")).not.toBeNull();
+  });
 });
 
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
