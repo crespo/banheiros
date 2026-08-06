@@ -15,6 +15,7 @@ export default function MapScreen() {
   const [locationMode, setLocationMode] = useState<"precise" | "approximate" | null>(null);
   const [outOfCoverage, setOutOfCoverage] = useState(false);
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     supabase.from("bathrooms").select().then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
@@ -48,7 +49,7 @@ export default function MapScreen() {
       <div ref={mapRef} />
       {locationMode !== null && <span role="img" aria-label={t("map.legendYou")}>{locationMode === "precise" && <svg aria-hidden="true"><circle /></svg>}</span>}
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
-      {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}</button>; })}
+      {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id} aria-pressed={b.id === selectedId ? "true" : "false"} onClick={() => setSelectedId(b.id)}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}</button>; })}
     </>
   );
 }

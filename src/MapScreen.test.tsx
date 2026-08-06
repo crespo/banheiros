@@ -176,3 +176,26 @@ test("pin renders building2 icon for public bathroom and store icon for instore 
   expect(instoreContainer.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeInTheDocument();
   expect(instoreContainer.querySelector('path[d^="M6 22V4"]')).not.toBeInTheDocument();
 });
+
+test("clicking a pin marks it selected", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+  render(<MapScreen />);
+  const pin = await screen.findByRole("button", { name: "Banheiro Central" });
+  expect(pin).toHaveAttribute("aria-pressed", "false");
+  fireEvent.click(pin);
+  expect(pin).toHaveAttribute("aria-pressed", "true");
+});
+
+test("selecting a pin deselects the previously selected pin", async () => {
+  mockBathrooms([
+    { id: "b1", name: "A", address: "Rua A", kind: "public", paid: false },
+    { id: "b2", name: "B", address: "Rua B", kind: "public", paid: false },
+  ]);
+  render(<MapScreen />);
+  const pinA = await screen.findByRole("button", { name: "A" });
+  const pinB = screen.getByRole("button", { name: "B" });
+  fireEvent.click(pinA);
+  fireEvent.click(pinB);
+  expect(pinA).toHaveAttribute("aria-pressed", "false");
+  expect(pinB).toHaveAttribute("aria-pressed", "true");
+});
