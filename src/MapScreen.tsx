@@ -12,7 +12,7 @@ export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }
   const [locationVisible, setLocationVisible] = useState(false);
   useEffect(() => {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(() => setLocationVisible(true));
+    navigator.geolocation.getCurrentPosition(() => setLocationVisible(true), () => setLocationVisible(true));
   }, []);
   return (
     <>

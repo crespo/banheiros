@@ -73,6 +73,15 @@ describe("user location marker", () => {
     expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
   });
 
+  test("renders user location marker when geolocation errors", () => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn((_ok, err) => err?.({ code: 1, message: "User denied Geolocation" })) },
+      configurable: true,
+    });
+    render(<MapScreen bathrooms={[]} />);
+    expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
+  });
+
   test("precise mode marker contains a circle dot child", () => {
     Object.defineProperty(navigator, "geolocation", {
       value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
