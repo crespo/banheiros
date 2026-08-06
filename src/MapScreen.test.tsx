@@ -211,6 +211,19 @@ test("pin renders building2 icon for public bathroom and store icon for instore 
   expect(instoreContainer.querySelector('path[d^="M6 22V4"]')).not.toBeInTheDocument();
 });
 
+test("pin button carries a tone class matching the bathroom category", async () => {
+  const pub  = { id: "b7", name: "P2", address: "Rua G", kind: "public",  paid: false };
+  const inst = { id: "b8", name: "I2", address: "Rua H", kind: "instore", paid: false };
+  mockBathrooms([pub]);
+  const { container: publicContainer } = render(<MapScreen />);
+  const publicPin = await within(publicContainer).findByRole("button", { name: "P2" });
+  mockBathrooms([inst]);
+  const { container: instoreContainer } = render(<MapScreen />);
+  const instorePin = await within(instoreContainer).findByRole("button", { name: "I2" });
+  expect(publicPin).toHaveClass("pin--accent");
+  expect(instorePin).toHaveClass("pin--accent2");
+});
+
 test("clicking a pin marks it selected", async () => {
   mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
   render(<MapScreen />);
