@@ -3,11 +3,14 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
+import { supabase } from "./lib/supabase";
 
 vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
+vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
 
 beforeEach(() => {
   setLanguage("pt");
+  vi.mocked(supabase.from).mockReturnValue({ select: () => Promise.resolve({ data: [], error: null }) } as never);
 });
 
 test.each([
@@ -142,6 +145,11 @@ test("Map style includes a raster layer referencing the osm source", () => {
   render(<MapScreen bathrooms={[]} />);
   const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
   expect(opts?.style?.layers).toEqual(expect.arrayContaining([expect.objectContaining({ type: "raster", source: "osm" })]));
+});
+
+test("MapScreen queries the bathrooms table on mount", () => {
+  render(<MapScreen />);
+  expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("bathrooms");
 });
 
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {

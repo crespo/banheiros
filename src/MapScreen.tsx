@@ -6,6 +6,7 @@ import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
 import { bathroomDisplayName } from "./lib/bathroomName";
 import { isWithinCoverage } from "./lib/mapCoverage";
+import { supabase } from "./lib/supabase";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
 
@@ -14,6 +15,9 @@ export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }
   const [locationMode, setLocationMode] = useState<"precise" | "approximate" | null>(null);
   const [outOfCoverage, setOutOfCoverage] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    supabase.from("bathrooms").select();
+  }, []);
   useEffect(() => {
     new maplibregl.Map({
       container: mapRef.current!,
