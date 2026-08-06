@@ -29,6 +29,15 @@ test('clicking the "Público" chip selects it and deselects "Todos"', () => {
   expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "false");
 });
 
+test('clicking "Público" chip hides instore bathroom pins', () => {
+  render(<MapScreen bathrooms={[
+    { id: "pub1", name: "Public One", address: "Rua A", kind: "public",  paid: false },
+    { id: "inst1", name: "Instore One", address: "Rua B", kind: "instore", paid: false },
+  ]} />);
+  fireEvent.click(screen.getByRole("button", { name: t("map.filterPublic") }));
+  expect(screen.queryByRole("button", { name: "Instore One" })).not.toBeInTheDocument();
+});
+
 test("MapScreen renders a pin button for a bathroom with a name", () => {
   const bathrooms = [{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }];
   render(<MapScreen bathrooms={bathrooms} />);
