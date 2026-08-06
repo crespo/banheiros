@@ -82,6 +82,16 @@ describe("user location marker", () => {
     expect(screen.getByRole("img", { name: t("map.legendYou") })).toBeInTheDocument();
   });
 
+  test("approximate mode marker contains no circle dot child", () => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn((_ok, err) => err?.({ code: 1, message: "User denied Geolocation" })) },
+      configurable: true,
+    });
+    render(<MapScreen bathrooms={[]} />);
+    const marker = screen.getByRole("img", { name: t("map.legendYou") });
+    expect(marker.querySelector("circle")).toBeNull();
+  });
+
   test("precise mode marker contains a circle dot child", () => {
     Object.defineProperty(navigator, "geolocation", {
       value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: 0, longitude: 0, accuracy: 10 } })) },
