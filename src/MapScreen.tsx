@@ -10,13 +10,14 @@ import { supabase } from "./lib/supabase";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
 
-export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }) {
+export default function MapScreen() {
   const [filter, setFilter] = useState("all");
   const [locationMode, setLocationMode] = useState<"precise" | "approximate" | null>(null);
   const [outOfCoverage, setOutOfCoverage] = useState(false);
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    supabase.from("bathrooms").select();
+    supabase.from("bathrooms").select().then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
   }, []);
   useEffect(() => {
     new maplibregl.Map({
