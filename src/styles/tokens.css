@@ -111,3 +111,10 @@ h6 {
 .pin--accent2 {
   color: var(--color-accent-2);
 }
+
+.location-dot {
+  fill: var(--color-accent-2);
+}
+.location-halo {
+  fill: color-mix(in srgb, var(--color-accent-2) 30%, transparent);
+}
