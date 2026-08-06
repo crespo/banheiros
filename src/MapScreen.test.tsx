@@ -246,3 +246,10 @@ test("clicking the legend toggle again hides the legend rows", () => {
   fireEvent.click(toggle);
   expect(screen.queryByText(t("map.legendPublic"))).not.toBeInTheDocument();
 });
+
+test("clicking the add-bathroom FAB calls onAddBathroom", () => {
+  const onAddBathroom = vi.fn();
+  render(<MapScreen onAddBathroom={onAddBathroom} />);
+  fireEvent.click(screen.getByRole("button", { name: t("map.addBathroom") }));
+  expect(onAddBathroom).toHaveBeenCalledOnce();
+});

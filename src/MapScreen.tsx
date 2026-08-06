@@ -11,7 +11,7 @@ import { supabase } from "./lib/supabase";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
 
-export default function MapScreen() {
+export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => void } = {}) {
   const [filter, setFilter] = useState("all");
   const [locationMode, setLocationMode] = useState<"precise" | "approximate" | null>(null);
   const [outOfCoverage, setOutOfCoverage] = useState(false);
@@ -66,6 +66,7 @@ export default function MapScreen() {
       {locationMode !== null && <span role="img" aria-label={t("map.legendYou")}>{locationMode === "precise" && <svg aria-hidden="true"><circle /></svg>}</span>}
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
       {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id} aria-pressed={b.id === selectedId ? "true" : "false"} onClick={() => setSelectedId(b.id)}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}</button>; })}
+      <button aria-label={t("map.addBathroom")} onClick={onAddBathroom}><Icon name="plus" /></button>
     </>
   );
 }
