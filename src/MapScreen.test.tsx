@@ -126,6 +126,12 @@ test("MapScreen constructs a maplibregl.Map on mount", () => {
   expect(maplibregl.Map).toHaveBeenCalledOnce();
 });
 
+test("Map is constructed with OSM raster tile source", () => {
+  render(<MapScreen bathrooms={[]} />);
+  const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
+  expect(opts?.style?.sources?.osm?.tiles).toEqual(["https://tile.openstreetmap.org/{z}/{x}/{y}.png"]);
+});
+
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
   const pub  = { id: "b5", name: "P", address: "Rua E", kind: "public",  paid: false };
   const inst = { id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false };

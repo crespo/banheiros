@@ -15,7 +15,14 @@ export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }
   const [outOfCoverage, setOutOfCoverage] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    new maplibregl.Map({ container: mapRef.current! });
+    new maplibregl.Map({
+      container: mapRef.current!,
+      style: {
+        version: 8,
+        sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"] } },
+        layers: [],
+      },
+    });
   }, []);
   useEffect(() => {
     if (!navigator.geolocation) return;
