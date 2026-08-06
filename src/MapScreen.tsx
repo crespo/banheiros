@@ -20,7 +20,7 @@ export default function MapScreen({ bathrooms = [] }: { bathrooms?: Bathroom[] }
       style: {
         version: 8,
         sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors" } },
-        layers: [],
+        layers: [{ id: "osm-tiles", type: "raster", source: "osm" }],
       },
     });
   }, []);

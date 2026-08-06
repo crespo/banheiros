@@ -138,6 +138,12 @@ test("Map style includes OSM attribution", () => {
   expect(opts?.style?.sources?.osm?.attribution).toEqual(expect.stringContaining("OpenStreetMap"));
 });
 
+test("Map style includes a raster layer referencing the osm source", () => {
+  render(<MapScreen bathrooms={[]} />);
+  const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
+  expect(opts?.style?.layers).toEqual(expect.arrayContaining([expect.objectContaining({ type: "raster", source: "osm" })]));
+});
+
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
   const pub  = { id: "b5", name: "P", address: "Rua E", kind: "public",  paid: false };
   const inst = { id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false };
