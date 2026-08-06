@@ -15,7 +15,11 @@ beforeEach(() => {
 });
 
 function mockBathrooms(rows: unknown[]) {
-  vi.mocked(supabase.from).mockReturnValue({ select: () => Promise.resolve({ data: rows, error: null }) } as never);
+  const eq = vi.fn().mockResolvedValue({ data: rows, error: null });
+  vi.mocked(supabase.from).mockReturnValue({
+    select: () => ({ eq }),
+  } as never);
+  return eq;
 }
 
 test.each([
@@ -178,6 +182,12 @@ test("Map is constructed centered on the default Maceió region", () => {
 test("MapScreen queries the bathrooms table on mount", () => {
   render(<MapScreen />);
   expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("bathrooms");
+});
+
+test("MapScreen filters bathrooms query by status=approved", () => {
+  const eq = mockBathrooms([]);
+  render(<MapScreen />);
+  expect(eq).toHaveBeenCalledWith("status", "approved");
 });
 
 test("MapScreen renders a pin button for a bathroom returned by the fetch", async () => {

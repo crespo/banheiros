@@ -22,7 +22,7 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   useEffect(() => {
-    supabase.from("bathrooms").select().then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
+    supabase.from("bathrooms").select().eq("status", "approved").then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
   }, []);
   useEffect(() => {
     mapInstanceRef.current = new maplibregl.Map({
