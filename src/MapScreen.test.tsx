@@ -223,3 +223,26 @@ test("selecting a pin deselects the previously selected pin", async () => {
   expect(pinA).toHaveAttribute("aria-pressed", "false");
   expect(pinB).toHaveAttribute("aria-pressed", "true");
 });
+
+test("MapScreen renders a legend toggle button", () => {
+  render(<MapScreen />);
+  expect(screen.getByRole("button", { name: t("map.legendTitle") })).toBeInTheDocument();
+});
+
+test("clicking the legend toggle shows the legend rows", () => {
+  render(<MapScreen />);
+  expect(screen.queryByText(t("map.legendPublic"))).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: t("map.legendTitle") }));
+  expect(screen.getByText(t("map.legendPublic"))).toBeInTheDocument();
+  expect(screen.getByText(t("map.legendInstore"))).toBeInTheDocument();
+  expect(screen.getByText(t("map.legendPaid"))).toBeInTheDocument();
+  expect(screen.getByText(t("map.legendYou"))).toBeInTheDocument();
+});
+
+test("clicking the legend toggle again hides the legend rows", () => {
+  render(<MapScreen />);
+  const toggle = screen.getByRole("button", { name: t("map.legendTitle") });
+  fireEvent.click(toggle);
+  fireEvent.click(toggle);
+  expect(screen.queryByText(t("map.legendPublic"))).not.toBeInTheDocument();
+});

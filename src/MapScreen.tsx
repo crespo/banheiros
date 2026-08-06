@@ -17,6 +17,7 @@ export default function MapScreen() {
   const [outOfCoverage, setOutOfCoverage] = useState(false);
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [legendOpen, setLegendOpen] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   useEffect(() => {
@@ -52,6 +53,15 @@ export default function MapScreen() {
       <button aria-pressed={filter === "public" ? "true" : "false"} onClick={() => setFilter("public")}>{t("map.filterPublic")}</button>
       <button aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
       <button aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
+      <button aria-label={t("map.legendTitle")} onClick={() => setLegendOpen(!legendOpen)}><Icon name="filter" /></button>
+      {legendOpen && (
+        <div>
+          <span>{t("map.legendPublic")}</span>
+          <span>{t("map.legendInstore")}</span>
+          <span>{t("map.legendPaid")}</span>
+          <span>{t("map.legendYou")}</span>
+        </div>
+      )}
       <div ref={mapRef} />
       {locationMode !== null && <span role="img" aria-label={t("map.legendYou")}>{locationMode === "precise" && <svg aria-hidden="true"><circle /></svg>}</span>}
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
