@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
+
+vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
 
 beforeEach(() => {
   setLanguage("pt");
@@ -116,6 +119,11 @@ describe("coverage warning", () => {
     render(<MapScreen bathrooms={[]} />);
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
+});
+
+test("MapScreen constructs a maplibregl.Map on mount", () => {
+  render(<MapScreen bathrooms={[]} />);
+  expect(maplibregl.Map).toHaveBeenCalledOnce();
 });
 
 test("pin renders building2 icon for public bathroom and store icon for instore bathroom", () => {
