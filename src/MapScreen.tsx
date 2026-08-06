@@ -5,7 +5,8 @@ import { t } from "./i18n/i18n";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
 import { bathroomDisplayName } from "./lib/bathroomName";
-import { isWithinCoverage } from "./lib/mapCoverage";
+import { resolveLocationMode } from "./lib/locationMode";
+import { isWithinCoverage, MACEIO_CENTER } from "./lib/mapCoverage";
 import { supabase } from "./lib/supabase";
 
 type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
@@ -17,12 +18,15 @@ export default function MapScreen() {
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   useEffect(() => {
     supabase.from("bathrooms").select().then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
   }, []);
   useEffect(() => {
-    new maplibregl.Map({
+    mapInstanceRef.current = new maplibregl.Map({
       container: mapRef.current!,
+      center: MACEIO_CENTER,
+      zoom: 13,
       style: {
         version: 8,
         sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors" } },
@@ -34,10 +38,12 @@ export default function MapScreen() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLocationMode("precise");
-        setOutOfCoverage(!isWithinCoverage(pos.coords.latitude, pos.coords.longitude));
+        setLocationMode(resolveLocationMode("success"));
+        const withinCoverage = isWithinCoverage(pos.coords.latitude, pos.coords.longitude);
+        setOutOfCoverage(!withinCoverage);
+        if (withinCoverage) mapInstanceRef.current?.setCenter([pos.coords.longitude, pos.coords.latitude]);
       },
-      () => setLocationMode("approximate"),
+      () => setLocationMode(resolveLocationMode("error")),
     );
   }, []);
   return (

@@ -4,6 +4,7 @@ import maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
 import { supabase } from "./lib/supabase";
+import { MACEIO_CENTER } from "./lib/mapCoverage";
 
 vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
 vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
@@ -113,6 +114,23 @@ describe("user location marker", () => {
   });
 });
 
+describe("map recentering", () => {
+  afterEach(() => {
+    Object.defineProperty(navigator, "geolocation", { value: undefined, configurable: true });
+  });
+
+  test("recenters the map to the user's exact coordinates when geolocation succeeds inside coverage", () => {
+    const setCenter = vi.fn();
+    vi.mocked(maplibregl.Map).mockImplementation(function () { return { setCenter } as never; });
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition: vi.fn(ok => ok({ coords: { latitude: -9.58, longitude: -35.73, accuracy: 10 } })) },
+      configurable: true,
+    });
+    render(<MapScreen />);
+    expect(setCenter).toHaveBeenCalledWith([-35.73, -9.58]);
+  });
+});
+
 describe("coverage warning", () => {
   afterEach(() => {
     Object.defineProperty(navigator, "geolocation", { value: undefined, configurable: true });
@@ -149,6 +167,12 @@ test("Map style includes a raster layer referencing the osm source", () => {
   render(<MapScreen />);
   const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
   expect(opts?.style?.layers).toEqual(expect.arrayContaining([expect.objectContaining({ type: "raster", source: "osm" })]));
+});
+
+test("Map is constructed centered on the default Maceió region", () => {
+  render(<MapScreen />);
+  const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
+  expect(opts?.center).toEqual(MACEIO_CENTER);
 });
 
 test("MapScreen queries the bathrooms table on mount", () => {
