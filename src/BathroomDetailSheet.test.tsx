@@ -145,6 +145,14 @@ test("rounds the score to determine filled dot count", async () => {
   expect(container.querySelectorAll('.dot.filled')).toHaveLength(3);
 });
 
+test("shows the no-reviews empty state when bathroom_scores returns no row", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("bathroom.noReviews"))).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
