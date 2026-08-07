@@ -148,7 +148,7 @@ test("rounds the score to determine filled dot count", async () => {
 });
 
 test("shows the no-reviews empty state when bathroom_scores returns no row", async () => {
-  mockSupabase({});
+  mockSupabase({}, null, [{ comment: "Bom banheiro" }]);
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -215,4 +215,12 @@ test("renders one approved review's comment", async () => {
   render(<BathroomDetailSheet bathroomId="b1" />);
 
   expect(await screen.findByText("Bom banheiro")).toBeInTheDocument();
+});
+
+test("shows the no-reviews message in the list area when there are no reviews", async () => {
+  mockSupabase({}, { overall: 4.5 }, []);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("bathroom.noReviews"))).toBeInTheDocument();
 });
