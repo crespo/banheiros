@@ -14,11 +14,15 @@ const CAT_ICON = { accessibility: "accessibility", lighting: "lightbulb", odor: 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
   const [score, setScore] = useState<({ overall: number } & Partial<Record<typeof CATS[number], number>>) | null>(null);
+  const [reviews, setReviews] = useState<{ comment: string }[]>([]);
   useEffect(() => {
     supabase.from("bathrooms").select().eq("id", bathroomId).single().then(({ data }: { data: Bathroom | null }) => setBathroom(data));
   }, [bathroomId]);
   useEffect(() => {
     supabase.from("bathroom_scores").select().eq("bathroom_id", bathroomId).maybeSingle().then(({ data }) => setScore(data));
+  }, [bathroomId]);
+  useEffect(() => {
+    supabase.from("reviews").select().eq("bathroom_id", bathroomId).eq("status", "approved").order().then(({ data }) => setReviews(data ?? []));
   }, [bathroomId]);
   if (!bathroom) return null;
   return (
@@ -31,6 +35,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
       {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
+      {reviews.map((r, i) => <p key={i}>{r.comment}</p>)}
     </>
   );
 }

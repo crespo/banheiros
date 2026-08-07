@@ -6,10 +6,12 @@ import { t } from "./i18n/i18n";
 
 vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
 
-function mockSupabase(bathroomData: object | null, scoreData: object | null = null) {
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
-  const eq = vi.fn().mockReturnValue({ single, maybeSingle });
+  const order = vi.fn().mockResolvedValue({ data: reviewsData, error: null });
+  const eq = vi.fn();
+  eq.mockReturnValue({ single, maybeSingle, eq, order });
   vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
 }
 
@@ -205,4 +207,12 @@ describe("closed-now pill", () => {
 
     expect(await screen.findByText(t("bathroom.closedNow"))).toBeInTheDocument();
   });
+});
+
+test("renders one approved review's comment", async () => {
+  mockSupabase({}, null, [{ comment: "Bom banheiro" }]);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText("Bom banheiro")).toBeInTheDocument();
 });
