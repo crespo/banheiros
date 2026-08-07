@@ -58,3 +58,13 @@ test("renders the free tag when the bathroom is not paid", async () => {
 
   expect(await screen.findByText(t("common.free"))).toBeInTheDocument();
 });
+
+test("shows unknown hours label when open_time is null", async () => {
+  const single = vi.fn().mockResolvedValue({ data: { open_time: null }, error: null });
+  const eq = vi.fn().mockReturnValue({ single });
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("bathroom.hoursUnknown"))).toBeInTheDocument();
+});
