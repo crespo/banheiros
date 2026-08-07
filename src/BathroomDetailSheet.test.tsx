@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import BathroomDetailSheet from "./BathroomDetailSheet";
 import { supabase } from "./lib/supabase";
 import { t } from "./i18n/i18n";
@@ -87,4 +87,28 @@ test("renders open-now pill when isOpenNow resolves true", async () => {
   render(<BathroomDetailSheet bathroomId="b1" />);
 
   expect(await screen.findByText(t("bathroom.openNow"))).toBeInTheDocument();
+});
+
+describe("closed-now pill", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2025-01-15T23:00:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("renders closed-now pill when current time is outside the open window", async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: { open_time: "06:00", close_time: "22:00" },
+      error: null,
+    });
+    const eq = vi.fn().mockReturnValue({ single });
+    vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+    render(<BathroomDetailSheet bathroomId="b1" />);
+
+    expect(await screen.findByText(t("bathroom.closedNow"))).toBeInTheDocument();
+  });
 });

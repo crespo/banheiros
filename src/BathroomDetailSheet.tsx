@@ -20,7 +20,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
       <span>{bathroom.paid ? t("common.paid") : t("common.free")}</span>
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
-      {bathroom.open_time && <>{<span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>}{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) && <span>{t("bathroom.openNow")}</span>}</>}
+      {bathroom.open_time && <>{<span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>}{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
     </>
   );
 }
