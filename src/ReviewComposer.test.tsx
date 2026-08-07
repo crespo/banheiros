@@ -1,5 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
+
+const CATS = ["lighting", "odor", "maintenance", "cleanliness"] as const;
 import ReviewComposer from "./ReviewComposer";
 import { t } from "./i18n/i18n";
 
@@ -27,6 +29,21 @@ test("renders 3 labeled rating options for the accessibility category", () => {
   within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 1` });
   within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` });
   within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 3` });
+});
+
+test.each(CATS)("renders a rating group for the %s category", (cat) => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByRole("group", { name: t(`ratingCat.${cat}`) })).toBeInTheDocument();
 });
 
 test("renders a comment textarea", () => {
