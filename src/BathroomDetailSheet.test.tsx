@@ -305,6 +305,14 @@ test("renders a disabled write-review placeholder button", async () => {
   expect(await screen.findByRole("button", { name: t("bathroom.writeReview") })).toBeDisabled();
 });
 
+test("renders a disabled favorite placeholder button", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toBeDisabled();
+});
+
 test("renders a report-issue button", async () => {
   mockSupabase({});
 
