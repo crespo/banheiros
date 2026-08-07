@@ -78,14 +78,7 @@ test("renders open-now pill when isOpenNow resolves true", async () => {
 });
 
 test("renders the overall score from bathroom_scores", async () => {
-  const bathroomsSingle = vi.fn().mockResolvedValue({ data: {}, error: null });
-  const bathroomsChain = { select: () => ({ eq: vi.fn().mockReturnValue({ single: bathroomsSingle }) }) };
-  const scoresMaybeSingle = vi.fn().mockResolvedValue({ data: { overall: 4.2 }, error: null });
-  const scoresChain = { select: () => ({ eq: vi.fn().mockReturnValue({ maybeSingle: scoresMaybeSingle }) }) };
-  vi.mocked(supabase.from).mockImplementation((table) => {
-    if (table === "bathroom_scores") return scoresChain as never;
-    return bathroomsChain as never;
-  });
+  mockSupabase({}, { overall: 4.2 });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
