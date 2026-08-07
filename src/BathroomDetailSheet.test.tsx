@@ -322,6 +322,21 @@ test("does not call onClose when drag crosses threshold transiently but releases
   expect(onClose).not.toHaveBeenCalled();
 });
 
+test("does not close on a tap that follows an earlier sub-threshold drag", async () => {
+  mockSupabase({ address: "x" });
+  const onClose = vi.fn();
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+  await screen.findByText("x");
+  const handle = container.querySelector('.sheet-handle')!;
+  fireEvent.pointerDown(handle, { clientY: 100 });
+  fireEvent.pointerMove(handle, { clientY: 150 });
+  fireEvent.pointerUp(handle);
+  onClose.mockClear();
+  fireEvent.pointerDown(handle, { clientY: 30 });
+  fireEvent.pointerUp(handle);
+  expect(onClose).not.toHaveBeenCalled();
+});
+
 test("renders a disabled write-review placeholder button", async () => {
   mockSupabase({});
 
