@@ -281,3 +281,12 @@ test("calls onClose when the X button is clicked", async () => {
 
   expect(onClose).toHaveBeenCalledOnce();
 });
+
+test("does not call onClose when a child element is clicked", async () => {
+  mockSupabase({ address: "Rua das Flores, 42" });
+  const onClose = vi.fn();
+  render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+  await screen.findByText("Rua das Flores, 42");
+  fireEvent.click(screen.getByText("Rua das Flores, 42"));
+  expect(onClose).not.toHaveBeenCalled();
+});

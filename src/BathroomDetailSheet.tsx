@@ -31,8 +31,8 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   }, [reviews]);
   if (!bathroom) return null;
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
-      <button aria-label={t("common.close")} onClick={(e) => { e.stopPropagation(); onClose?.(); }} />
+    <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
+      <button aria-label={t("common.close")} onClick={() => onClose?.()} />
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>
       <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
