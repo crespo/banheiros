@@ -117,6 +117,14 @@ test("renders the maintenance criterion label", async () => {
   expect(await screen.findByText(t("ratingCat.maintenance"))).toBeInTheDocument();
 });
 
+test("renders the cleanliness criterion label", async () => {
+  mockSupabase({}, {});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("ratingCat.cleanliness"))).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
