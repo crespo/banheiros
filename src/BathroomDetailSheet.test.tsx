@@ -85,6 +85,14 @@ test("renders the overall score from bathroom_scores", async () => {
   expect(await screen.findByText("4.2")).toBeInTheDocument();
 });
 
+test("renders the accessibility criterion label", async () => {
+  mockSupabase({}, {});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("ratingCat.accessibility"))).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
