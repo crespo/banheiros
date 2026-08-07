@@ -4,7 +4,7 @@ import { bathroomDisplayName } from "./lib/bathroomName";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { t } from "./i18n/i18n";
 
-type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null };
+type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string | null };
 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
@@ -19,6 +19,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
       <span>{bathroom.paid ? t("common.paid") : t("common.free")}</span>
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
+      {bathroom.open_time && <span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>}
     </>
   );
 }

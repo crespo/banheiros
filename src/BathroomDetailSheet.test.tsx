@@ -68,3 +68,13 @@ test("shows unknown hours label when open_time is null", async () => {
 
   expect(await screen.findByText(t("bathroom.hoursUnknown"))).toBeInTheDocument();
 });
+
+test("renders the formatted time range when open_time and close_time are both present", async () => {
+  const single = vi.fn().mockResolvedValue({ data: { open_time: "06:00", close_time: "22:00" }, error: null });
+  const eq = vi.fn().mockReturnValue({ single });
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText("06:00 – 22:00")).toBeInTheDocument();
+});
