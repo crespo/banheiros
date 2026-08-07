@@ -290,3 +290,11 @@ test("does not call onClose when a child element is clicked", async () => {
   fireEvent.click(screen.getByText("Rua das Flores, 42"));
   expect(onClose).not.toHaveBeenCalled();
 });
+
+test("renders a report-issue button", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByRole("button", { name: t("bathroom.reportIssue") })).toBeInTheDocument();
+});
