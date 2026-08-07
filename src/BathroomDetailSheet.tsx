@@ -23,7 +23,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
     supabase.from("bathroom_scores").select().eq("bathroom_id", bathroomId).maybeSingle().then(({ data }) => setScore(data));
   }, [bathroomId]);
   useEffect(() => {
-    supabase.from("reviews").select().eq("bathroom_id", bathroomId).eq("status", "approved").order().then(({ data }) => setReviews(data ?? []));
+    supabase.from("reviews").select().eq("bathroom_id", bathroomId).eq("status", "approved").order("created_at", { ascending: false }).then(({ data }) => setReviews(data ?? []));
   }, [bathroomId]);
   useEffect(() => {
     const ids = reviews.map(r => r.user_id);

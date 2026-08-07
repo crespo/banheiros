@@ -14,6 +14,7 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
   const eq = vi.fn();
   eq.mockReturnValue({ single, maybeSingle, eq, order });
   vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq, in: inFn }) } as never);
+  return { single, maybeSingle, eq, order, in: inFn };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
@@ -248,4 +249,14 @@ test("renders anonymous author when user_id is null despite show_username true",
   render(<BathroomDetailSheet bathroomId="b1" />);
 
   expect(await screen.findByText(t("common.anonymous"))).toBeInTheDocument();
+});
+
+test("orders reviews by created_at descending", async () => {
+  const { order } = mockSupabase({}, null, []);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  await screen.findByText(t("bathroom.unnamed"));
+
+  expect(order).toHaveBeenCalledWith("created_at", { ascending: false });
 });
