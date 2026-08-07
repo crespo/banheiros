@@ -11,7 +11,7 @@ type Bathroom = { name: string | null; address: string; kind: string; paid: bool
 const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"] as const;
 const CAT_ICON = { accessibility: "accessibility", lighting: "lightbulb", odor: "wind", maintenance: "wrench", cleanliness: "sparkles" } as const;
 
-export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
+export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomId: string; onClose?: () => void }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
   const [score, setScore] = useState<({ overall: number } & Partial<Record<typeof CATS[number], number>>) | null>(null);
   const [reviews, setReviews] = useState<{ comment: string; show_username: boolean; user_id: string | null }[]>([]);
@@ -32,6 +32,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
   if (!bathroom) return null;
   return (
     <>
+      <button aria-label={t("common.close")} onClick={onClose} />
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>
       <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>

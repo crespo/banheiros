@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import BathroomDetailSheet from "./BathroomDetailSheet";
 import { supabase } from "./lib/supabase";
@@ -259,4 +259,16 @@ test("orders reviews by created_at descending", async () => {
   await screen.findByText(t("bathroom.unnamed"));
 
   expect(order).toHaveBeenCalledWith("created_at", { ascending: false });
+});
+
+test("calls onClose when the X button is clicked", async () => {
+  const onClose = vi.fn();
+  mockSupabase({ id: "b1" });
+
+  render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+
+  await screen.findByText(t("bathroom.unnamed"));
+  fireEvent.click(screen.getByRole("button", { name: t("common.close") }));
+
+  expect(onClose).toHaveBeenCalledOnce();
 });
