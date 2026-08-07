@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 const CATS = ["lighting", "odor", "maintenance", "cleanliness"] as const;
@@ -74,4 +74,26 @@ test("submit button is disabled when the form opens empty", () => {
   );
 
   expect(screen.getByRole("button", { name: t("review.submit") })).toBeDisabled();
+});
+
+test("submit becomes enabled when all 5 ratings and a non-empty comment are filled", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+
+  expect(screen.getByRole("button", { name: t("review.submit") })).toBeEnabled();
 });
