@@ -181,6 +181,13 @@ test("renders the maintenance icon", async () => {
   expect(container.querySelector('path[d^="M14.7 6.3"]')).toBeInTheDocument();
 });
 
+test("renders the cleanliness icon", async () => {
+  mockSupabase({}, {});
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+  await screen.findByText(t("ratingCat.cleanliness"));
+  expect(container.querySelector('path[d^="M9.937 15.5"]')).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
