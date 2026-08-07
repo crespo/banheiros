@@ -160,6 +160,13 @@ test("renders the accessibility icon", async () => {
   expect(container.querySelector('circle[cx="16"][cy="4"][r="1"]')).toBeInTheDocument();
 });
 
+test("renders the lighting icon", async () => {
+  mockSupabase({}, {});
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+  await screen.findByText(t("ratingCat.lighting"));
+  expect(container.querySelector('path[d^="M9 18h6"]')).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
