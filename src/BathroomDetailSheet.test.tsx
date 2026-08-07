@@ -38,3 +38,23 @@ test("renders the category tag for a public, unpaid bathroom", async () => {
 
   expect(await screen.findByText(t("category.public"))).toBeInTheDocument();
 });
+
+test("renders the paid tag when the bathroom is paid", async () => {
+  const single = vi.fn().mockResolvedValue({ data: { paid: true }, error: null });
+  const eq = vi.fn().mockReturnValue({ single });
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("common.paid"))).toBeInTheDocument();
+});
+
+test("renders the free tag when the bathroom is not paid", async () => {
+  const single = vi.fn().mockResolvedValue({ data: { paid: false }, error: null });
+  const eq = vi.fn().mockReturnValue({ single });
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("common.free"))).toBeInTheDocument();
+});

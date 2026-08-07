@@ -17,6 +17,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>
       <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
+      <span>{bathroom.paid ? t("common.paid") : t("common.free")}</span>
     </>
   );
 }
