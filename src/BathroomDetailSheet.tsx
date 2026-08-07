@@ -7,6 +7,8 @@ import { isOpenNow } from "./lib/bathroomHours";
 
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
+const CATS = ["accessibility", "lighting", "odor"] as const;
+
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
   const [score, setScore] = useState<{ overall: number } | null>(null);
@@ -26,9 +28,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score && <span>{score.overall}</span>}
-      <span>{t("ratingCat.accessibility")}</span>
-      <span>{t("ratingCat.lighting")}</span>
-      <span>{t("ratingCat.odor")}</span>
+      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}</span>)}
     </>
   );
 }
