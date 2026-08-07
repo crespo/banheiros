@@ -307,3 +307,12 @@ test("clicking the report-issue button reveals a comment field", async () => {
 
   expect(screen.getByRole("textbox")).toBeInTheDocument();
 });
+
+test("clicking the report-issue button reveals a submit button", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.reportIssue") }));
+
+  expect(screen.getByRole("button", { name: t("bathroom.reportSubmit") })).toBeInTheDocument();
+});
