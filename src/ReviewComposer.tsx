@@ -32,6 +32,11 @@ export default function ReviewComposer(_props: Props) {
           ))}
         </fieldset>
       ))}
+      <fieldset>
+        <legend>{t("review.usernameVisibility")}</legend>
+        <input type="radio" aria-label={t("review.hideUsername")} />
+        <input type="radio" aria-label={t("review.showUsername")} />
+      </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
       <textarea id="comment" onChange={(e) => setComment(e.target.value)} />
       <button disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}>{t("review.submit")}</button>

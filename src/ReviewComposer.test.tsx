@@ -13,6 +13,23 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
+test("renders a visibility group containing both visibility options", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  const group = screen.getByRole("group", { name: t("review.usernameVisibility") });
+  within(group).getByRole("radio", { name: t("review.hideUsername") });
+  within(group).getByRole("radio", { name: t("review.showUsername") });
+});
+
 test("renders 3 labeled rating options for the accessibility category", () => {
   render(
     <ReviewComposer
