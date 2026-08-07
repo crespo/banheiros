@@ -125,6 +125,16 @@ test("renders the cleanliness criterion label", async () => {
   expect(await screen.findByText(t("ratingCat.cleanliness"))).toBeInTheDocument();
 });
 
+test("renders 2 filled dots when accessibility score is 2", async () => {
+  mockSupabase({}, { accessibility: 2 });
+
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+
+  await screen.findByText(t("ratingCat.accessibility"));
+
+  expect(container.querySelectorAll('.dot.filled')).toHaveLength(2);
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });

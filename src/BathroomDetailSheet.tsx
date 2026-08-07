@@ -11,7 +11,7 @@ const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"]
 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
-  const [score, setScore] = useState<{ overall: number } | null>(null);
+  const [score, setScore] = useState<({ overall: number } & Partial<Record<typeof CATS[number], number>>) | null>(null);
   useEffect(() => {
     supabase.from("bathrooms").select().eq("id", bathroomId).single().then(({ data }: { data: Bathroom | null }) => setBathroom(data));
   }, [bathroomId]);
@@ -28,7 +28,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score && <span>{score.overall}</span>}
-      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}</span>)}
+      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{[1,2,3].map((n) => <span key={n} className={`dot${n <= score?.[cat] ? " filled" : ""}`} />)}</span>)}
     </>
   );
 }
