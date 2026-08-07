@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { bathroomDisplayName } from "./lib/bathroomName";
+import { categorizeBathroom } from "./lib/bathroomCategory";
 import { t } from "./i18n/i18n";
 
-type Bathroom = { name: string | null; address: string };
+type Bathroom = { name: string | null; address: string; kind: string; paid: boolean };
 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
@@ -15,6 +16,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
     <>
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>
+      <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
     </>
   );
 }

@@ -28,3 +28,13 @@ test("falls back to translated label when bathroom name is null", async () => {
 
   expect(await screen.findByText(t("bathroom.unnamed"))).toBeInTheDocument();
 });
+
+test("renders the category tag for a public, unpaid bathroom", async () => {
+  const single = vi.fn().mockResolvedValue({ data: { kind: "public", paid: false }, error: null });
+  const eq = vi.fn().mockReturnValue({ single });
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("category.public"))).toBeInTheDocument();
+});
