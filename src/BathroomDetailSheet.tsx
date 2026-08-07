@@ -4,6 +4,7 @@ import { bathroomDisplayName } from "./lib/bathroomName";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { t } from "./i18n/i18n";
 import { isOpenNow } from "./lib/bathroomHours";
+import Icon from "./Icon";
 
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
@@ -28,7 +29,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
-      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
+      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{cat === "accessibility" && <Icon name="accessibility" />}{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
     </>
   );
 }

@@ -153,6 +153,13 @@ test("shows the no-reviews empty state when bathroom_scores returns no row", asy
   expect(await screen.findByText(t("bathroom.noReviews"))).toBeInTheDocument();
 });
 
+test("renders the accessibility icon", async () => {
+  mockSupabase({}, {});
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+  await screen.findByText(t("ratingCat.accessibility"));
+  expect(container.querySelector('circle[cx="16"][cy="4"][r="1"]')).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
