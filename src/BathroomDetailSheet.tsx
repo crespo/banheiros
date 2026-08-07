@@ -49,6 +49,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
       {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
+      <button disabled>{t("bathroom.writeReview")}</button>
       {reviews.length === 0 ? <p>{t("bathroom.noReviews")}</p> : reviews.map((r, i) => <Fragment key={i}><p>{r.show_username && r.user_id ? `@${profiles.find(p => p.user_id === r.user_id)?.username}` : t("common.anonymous")}</p><p>{r.comment}</p></Fragment>)}
       {reportSent ? <p className="success-banner">{t("bathroom.reportSuccess")}</p> : reportOpen ? <><textarea value={reportComment} onChange={(e) => setReportComment(e.target.value)} /><button onClick={submitReport}>{t("bathroom.reportSubmit")}</button></> : <button onClick={() => setReportOpen(true)}>{t("bathroom.reportIssue")}</button>}
     </div>

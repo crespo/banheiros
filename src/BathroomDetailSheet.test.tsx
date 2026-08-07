@@ -297,6 +297,14 @@ test("does not call onClose when a child element is clicked", async () => {
   expect(onClose).not.toHaveBeenCalled();
 });
 
+test("renders a disabled write-review placeholder button", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByRole("button", { name: t("bathroom.writeReview") })).toBeDisabled();
+});
+
 test("renders a report-issue button", async () => {
   mockSupabase({});
 
