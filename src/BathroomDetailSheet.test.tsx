@@ -101,6 +101,14 @@ test("renders the lighting criterion label", async () => {
   expect(await screen.findByText(t("ratingCat.lighting"))).toBeInTheDocument();
 });
 
+test("renders the odor criterion label", async () => {
+  mockSupabase({}, {});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("ratingCat.odor"))).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });

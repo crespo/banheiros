@@ -28,6 +28,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {score && <span>{score.overall}</span>}
       <span>{t("ratingCat.accessibility")}</span>
       <span>{t("ratingCat.lighting")}</span>
+      <span>{t("ratingCat.odor")}</span>
     </>
   );
 }
