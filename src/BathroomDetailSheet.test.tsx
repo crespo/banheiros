@@ -297,6 +297,18 @@ test("does not call onClose when a child element is clicked", async () => {
   expect(onClose).not.toHaveBeenCalled();
 });
 
+test("calls onClose when handle is dragged past 110px threshold", async () => {
+  mockSupabase({ address: "x" });
+  const onClose = vi.fn();
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+  await screen.findByText("x");
+  const handle = container.querySelector('.sheet-handle')!;
+  fireEvent.pointerDown(handle, { clientY: 0 });
+  fireEvent.pointerMove(handle, { clientY: 111 });
+  fireEvent.pointerUp(handle);
+  expect(onClose).toHaveBeenCalledOnce();
+});
+
 test("renders a disabled write-review placeholder button", async () => {
   mockSupabase({});
 

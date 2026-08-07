@@ -1,5 +1,6 @@
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState, Fragment, useRef } from "react";
 import { supabase } from "./lib/supabase";
+import { shouldCloseOnDrag } from "./lib/shouldCloseOnDrag";
 import { bathroomDisplayName } from "./lib/bathroomName";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { t } from "./i18n/i18n";
@@ -19,6 +20,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [reportOpen, setReportOpen] = useState(false);
   const [reportComment, setReportComment] = useState("");
   const [reportSent, setReportSent] = useState(false);
+  const dragStartY = useRef(0);
   useEffect(() => {
     supabase.from("bathrooms").select().eq("id", bathroomId).single().then(({ data }: { data: Bathroom | null }) => setBathroom(data));
   }, [bathroomId]);
@@ -40,6 +42,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   if (!bathroom) return null;
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
+      <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; }} onPointerMove={(e) => { if (shouldCloseOnDrag(e.clientY - dragStartY.current)) onClose?.(); }} />
       <button aria-label={t("common.close")} onClick={() => onClose?.()} />
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>
