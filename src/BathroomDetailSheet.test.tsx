@@ -261,6 +261,15 @@ test("orders reviews by created_at descending", async () => {
   expect(order).toHaveBeenCalledWith("created_at", { ascending: false });
 });
 
+test("calls onClose when the backdrop is clicked", async () => {
+  mockSupabase({ address: "x" });
+  const onClose = vi.fn();
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+  await screen.findByText("x");
+  fireEvent.click(container.querySelector('.sheet-backdrop')!);
+  expect(onClose).toHaveBeenCalledOnce();
+});
+
 test("calls onClose when the X button is clicked", async () => {
   const onClose = vi.fn();
   mockSupabase({ id: "b1" });
