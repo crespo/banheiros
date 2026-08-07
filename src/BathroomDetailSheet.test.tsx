@@ -333,3 +333,13 @@ test("submitting the report inserts into reports with bathroom_id, user_id and c
 
   await vi.waitFor(() => expect(insert).toHaveBeenCalledExactlyOnceWith({ bathroom_id: "b1", user_id: "u1", comment: "Sem papel" }));
 });
+
+test("shows a success confirmation after submitting the report", async () => {
+  mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.reportIssue") }));
+  fireEvent.click(screen.getByRole("button", { name: t("bathroom.reportSubmit") }));
+
+  expect(await screen.findByText(t("bathroom.reportSuccess"))).toBeInTheDocument();
+});
