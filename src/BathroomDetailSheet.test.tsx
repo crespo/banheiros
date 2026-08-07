@@ -224,3 +224,11 @@ test("shows the no-reviews message in the list area when there are no reviews", 
 
   expect(await screen.findByText(t("bathroom.noReviews"))).toBeInTheDocument();
 });
+
+test("renders anonymous author when show_username is false", async () => {
+  mockSupabase({}, null, [{ comment: "Clean place", show_username: false, user_id: "u1" }]);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("common.anonymous"))).toBeInTheDocument();
+});
