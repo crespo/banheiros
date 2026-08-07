@@ -10,5 +10,11 @@ type Props = {
 };
 
 export default function ReviewComposer(_props: Props) {
-  return <button disabled>{t("review.submit")}</button>;
+  return (
+    <>
+      <label htmlFor="comment">{t("review.commentLabel")}</label>
+      <textarea id="comment" />
+      <button disabled>{t("review.submit")}</button>
+    </>
+  );
 }

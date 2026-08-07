@@ -11,6 +11,21 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
+test("renders a comment textarea", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByRole("textbox", { name: t("review.commentLabel") })).toBeInTheDocument();
+});
+
 test("submit button is disabled when the form opens empty", () => {
   render(
     <ReviewComposer
