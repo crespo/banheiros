@@ -241,3 +241,11 @@ test("renders @username when show_username is true", async () => {
 
   expect(await screen.findByText("@alice")).toBeInTheDocument();
 });
+
+test("renders anonymous author when user_id is null despite show_username true", async () => {
+  mockSupabase({}, null, [{ comment: "x", show_username: true, user_id: null }], []);
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("common.anonymous"))).toBeInTheDocument();
+});
