@@ -104,3 +104,17 @@ h6 {
 ::selection {
   background: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
+
+.pin--accent {
+  color: var(--color-accent);
+}
+.pin--accent2 {
+  color: var(--color-accent-2);
+}
+
+.location-dot {
+  fill: var(--color-accent-2);
+}
+.location-halo {
+  fill: color-mix(in srgb, var(--color-accent-2) 30%, transparent);
+}
