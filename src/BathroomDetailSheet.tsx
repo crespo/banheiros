@@ -27,6 +27,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score && <span>{score.overall}</span>}
       <span>{t("ratingCat.accessibility")}</span>
+      <span>{t("ratingCat.lighting")}</span>
     </>
   );
 }

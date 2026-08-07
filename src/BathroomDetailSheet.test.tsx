@@ -93,6 +93,14 @@ test("renders the accessibility criterion label", async () => {
   expect(await screen.findByText(t("ratingCat.accessibility"))).toBeInTheDocument();
 });
 
+test("renders the lighting criterion label", async () => {
+  mockSupabase({}, {});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText(t("ratingCat.lighting"))).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
