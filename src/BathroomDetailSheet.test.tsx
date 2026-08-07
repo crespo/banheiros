@@ -4,17 +4,23 @@ import BathroomDetailSheet from "./BathroomDetailSheet";
 import { supabase } from "./lib/supabase";
 import { t } from "./i18n/i18n";
 
-vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
+vi.mock("./lib/supabase", () => ({
+  supabase: {
+    from: vi.fn(),
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1" } } }) },
+  },
+}));
 
 function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
   const order = vi.fn().mockResolvedValue({ data: reviewsData, error: null });
   const inFn = vi.fn().mockResolvedValue({ data: profilesData, error: null });
+  const insert = vi.fn().mockResolvedValue({ error: null });
   const eq = vi.fn();
   eq.mockReturnValue({ single, maybeSingle, eq, order });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq, in: inFn }) } as never);
-  return { single, maybeSingle, eq, order, in: inFn };
+  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq, in: inFn }), insert } as never);
+  return { single, maybeSingle, eq, order, in: inFn, insert };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
@@ -315,4 +321,15 @@ test("clicking the report-issue button reveals a submit button", async () => {
   fireEvent.click(await screen.findByRole("button", { name: t("bathroom.reportIssue") }));
 
   expect(screen.getByRole("button", { name: t("bathroom.reportSubmit") })).toBeInTheDocument();
+});
+
+test("submitting the report inserts into reports with bathroom_id, user_id and comment", async () => {
+  const { insert } = mockSupabase({});
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.reportIssue") }));
+  fireEvent.change(screen.getByRole("textbox"), { target: { value: "Sem papel" } });
+  fireEvent.click(screen.getByRole("button", { name: t("bathroom.reportSubmit") }));
+
+  await vi.waitFor(() => expect(insert).toHaveBeenCalledExactlyOnceWith({ bathroom_id: "b1", user_id: "u1", comment: "Sem papel" }));
 });
