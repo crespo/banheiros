@@ -26,6 +26,7 @@ export default function ReviewComposer(_props: Props) {
               key={n}
               type="radio"
               aria-label={`${t(`ratingCat.${cat}`)} ${n}`}
+              checked={ratings[cat] === n}
               onChange={() => setRatings((prev) => ({ ...prev, [cat]: n }))}
             />
           ))}

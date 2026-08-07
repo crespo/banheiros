@@ -76,6 +76,24 @@ test("submit button is disabled when the form opens empty", () => {
   expect(screen.getByRole("button", { name: t("review.submit") })).toBeDisabled();
 });
 
+test("selecting rating 2 for accessibility deselects rating 1", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 1` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+
+  expect(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 1` })).not.toBeChecked();
+});
+
 test("submit stays disabled when only 4 of 5 ratings are filled", () => {
   render(
     <ReviewComposer
