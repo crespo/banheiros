@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import ReviewComposer from "./ReviewComposer";
 import { t } from "./i18n/i18n";
@@ -10,6 +10,24 @@ vi.mock("./lib/supabase", () => ({
     functions: { invoke: vi.fn().mockResolvedValue({ data: {}, error: null }) },
   },
 }));
+
+test("renders 3 labeled rating options for the accessibility category", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  const group = screen.getByRole("group", { name: t("ratingCat.accessibility") });
+  within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 1` });
+  within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` });
+  within(group).getByRole("radio", { name: `${t("ratingCat.accessibility")} 3` });
+});
 
 test("renders a comment textarea", () => {
   render(
