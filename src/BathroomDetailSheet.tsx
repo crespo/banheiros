@@ -7,7 +7,7 @@ import { isOpenNow } from "./lib/bathroomHours";
 
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
-const CATS = ["accessibility", "lighting", "odor"] as const;
+const CATS = ["accessibility", "lighting", "odor", "maintenance"] as const;
 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
