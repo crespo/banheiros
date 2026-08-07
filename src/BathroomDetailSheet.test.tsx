@@ -135,6 +135,16 @@ test("renders 2 filled dots when accessibility score is 2", async () => {
   expect(container.querySelectorAll('.dot.filled')).toHaveLength(2);
 });
 
+test("rounds the score to determine filled dot count", async () => {
+  mockSupabase({}, { accessibility: 2.6 });
+
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+
+  await screen.findByText(t("ratingCat.accessibility"));
+
+  expect(container.querySelectorAll('.dot.filled')).toHaveLength(3);
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
