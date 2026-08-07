@@ -9,6 +9,7 @@ import Icon from "./Icon";
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
 const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"] as const;
+const CAT_ICON = { accessibility: "accessibility", lighting: "lightbulb", odor: "wind", maintenance: "wrench", cleanliness: "sparkles" } as const;
 
 export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string }) {
   const [bathroom, setBathroom] = useState<Bathroom | null>(null);
@@ -29,7 +30,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
-      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{cat === "accessibility" && <Icon name="accessibility" />}{cat === "lighting" && <Icon name="lightbulb" />}{cat === "odor" && <Icon name="wind" />}{cat === "maintenance" && <Icon name="wrench" />}{cat === "cleanliness" && <Icon name="sparkles" />}{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
+      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
     </>
   );
 }
