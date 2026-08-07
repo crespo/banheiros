@@ -1,5 +1,6 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
+import BathroomDetailSheet from "./BathroomDetailSheet";
 import Icon from "./Icon";
 import { t } from "./i18n/i18n";
 import { categorizeBathroom } from "./lib/bathroomCategory";
@@ -83,6 +84,7 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
       {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id} className={`pin--${category.tone}`} aria-pressed={b.id === selectedId ? "true" : "false"} onClick={() => setSelectedId(b.id)}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}</button>; })}
       <button aria-label={t("map.addBathroom")} onClick={onAddBathroom}><Icon name="plus" /></button>
+      {selectedId && <BathroomDetailSheet bathroomId={selectedId} onClose={() => setSelectedId(null)} />}
     </>
   );
 }

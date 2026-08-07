@@ -14,10 +14,22 @@ beforeEach(() => {
   mockBathrooms([]);
 });
 
-function mockBathrooms(rows: unknown[]) {
-  const eq = vi.fn().mockResolvedValue({ data: rows, error: null });
+function mockBathrooms(rows: unknown[], detail: unknown = rows[0] ?? null) {
+  const single = vi.fn().mockResolvedValue({ data: detail, error: null });
+  const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+  const order = vi.fn().mockResolvedValue({ data: [], error: null });
+  const inFn = vi.fn().mockResolvedValue({ data: [], error: null });
+  const eq: ReturnType<typeof vi.fn> = vi.fn();
+  eq.mockReturnValue({
+    then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: rows, error: null }),
+    single,
+    maybeSingle,
+    order,
+    eq,
+    in: inFn,
+  });
   vi.mocked(supabase.from).mockReturnValue({
-    select: () => ({ eq }),
+    select: () => ({ eq, in: inFn }),
   } as never);
   return eq;
 }
@@ -239,6 +251,14 @@ test("clicking a pin marks it selected", async () => {
   expect(pin).toHaveAttribute("aria-pressed", "false");
   fireEvent.click(pin);
   expect(pin).toHaveAttribute("aria-pressed", "true");
+});
+
+test("clicking a pin opens the detail sheet for the selected bathroom", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+  render(<MapScreen />);
+  const pin = await screen.findByRole("button", { name: "Banheiro Central" });
+  fireEvent.click(pin);
+  expect(await screen.findByText("Rua A")).toBeInTheDocument();
 });
 
 test("selecting a pin deselects the previously selected pin", async () => {
