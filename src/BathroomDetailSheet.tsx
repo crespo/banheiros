@@ -29,7 +29,7 @@ export default function BathroomDetailSheet({ bathroomId }: { bathroomId: string
       {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
-      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{cat === "accessibility" && <Icon name="accessibility" />}{cat === "lighting" && <Icon name="lightbulb" />}{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
+      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}{cat === "accessibility" && <Icon name="accessibility" />}{cat === "lighting" && <Icon name="lightbulb" />}{cat === "odor" && <Icon name="wind" />}{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
     </>
   );
 }

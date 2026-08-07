@@ -167,6 +167,13 @@ test("renders the lighting icon", async () => {
   expect(container.querySelector('path[d^="M9 18h6"]')).toBeInTheDocument();
 });
 
+test("renders the odor icon", async () => {
+  mockSupabase({}, {});
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" />);
+  await screen.findByText(t("ratingCat.odor"));
+  expect(container.querySelector('path[d^="M9.8 4.4"]')).toBeInTheDocument();
+});
+
 describe("closed-now pill", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
