@@ -21,6 +21,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [reportComment, setReportComment] = useState("");
   const [reportSent, setReportSent] = useState(false);
   const dragStartY = useRef(0);
+  const dragCurrentY = useRef(0);
   useEffect(() => {
     supabase.from("bathrooms").select().eq("id", bathroomId).single().then(({ data }: { data: Bathroom | null }) => setBathroom(data));
   }, [bathroomId]);
@@ -42,7 +43,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   if (!bathroom) return null;
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
-      <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; }} onPointerMove={(e) => { if (shouldCloseOnDrag(e.clientY - dragStartY.current)) onClose?.(); }} />
+      <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; }} onPointerMove={(e) => { dragCurrentY.current = e.clientY; }} onPointerUp={() => { if (shouldCloseOnDrag(dragCurrentY.current - dragStartY.current)) onClose?.(); }} />
       <button aria-label={t("common.close")} onClick={() => onClose?.()} />
       <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
       <span>{bathroom.address}</span>

@@ -309,6 +309,19 @@ test("calls onClose when handle is dragged past 110px threshold", async () => {
   expect(onClose).toHaveBeenCalledOnce();
 });
 
+test("does not call onClose when drag crosses threshold transiently but releases below it", async () => {
+  mockSupabase({ address: "x" });
+  const onClose = vi.fn();
+  const { container } = render(<BathroomDetailSheet bathroomId="b1" onClose={onClose} />);
+  await screen.findByText("x");
+  const handle = container.querySelector('.sheet-handle')!;
+  fireEvent.pointerDown(handle, { clientY: 0 });
+  fireEvent.pointerMove(handle, { clientY: 120 });
+  fireEvent.pointerMove(handle, { clientY: 50 });
+  fireEvent.pointerUp(handle, { clientY: 50 });
+  expect(onClose).not.toHaveBeenCalled();
+});
+
 test("renders a disabled write-review placeholder button", async () => {
   mockSupabase({});
 
