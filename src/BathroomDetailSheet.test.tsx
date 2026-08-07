@@ -6,13 +6,15 @@ import { t } from "./i18n/i18n";
 
 vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
 
-test("renders the bathroom's address once the query resolves", async () => {
-  const single = vi.fn().mockResolvedValue({
-    data: { id: "b1", address: "Rua das Flores, 42" },
-    error: null,
-  });
-  const eq = vi.fn().mockReturnValue({ single });
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null) {
+  const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
+  const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
+  const eq = vi.fn().mockReturnValue({ single, maybeSingle });
   vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+}
+
+test("renders the bathroom's address once the query resolves", async () => {
+  mockSupabase({ id: "b1", address: "Rua das Flores, 42" });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -20,9 +22,7 @@ test("renders the bathroom's address once the query resolves", async () => {
 });
 
 test("falls back to translated label when bathroom name is null", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { name: null }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ name: null });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -30,9 +30,7 @@ test("falls back to translated label when bathroom name is null", async () => {
 });
 
 test("renders the category tag for a public, unpaid bathroom", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { kind: "public", paid: false }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ kind: "public", paid: false });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -40,9 +38,7 @@ test("renders the category tag for a public, unpaid bathroom", async () => {
 });
 
 test("renders the paid tag when the bathroom is paid", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { paid: true }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ paid: true });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -50,9 +46,7 @@ test("renders the paid tag when the bathroom is paid", async () => {
 });
 
 test("renders the free tag when the bathroom is not paid", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { paid: false }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ paid: false });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -60,9 +54,7 @@ test("renders the free tag when the bathroom is not paid", async () => {
 });
 
 test("shows unknown hours label when open_time is null", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { open_time: null }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ open_time: null });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -70,9 +62,7 @@ test("shows unknown hours label when open_time is null", async () => {
 });
 
 test("renders the formatted time range when open_time and close_time are both present", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { open_time: "06:00", close_time: "22:00" }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ open_time: "06:00", close_time: "22:00" });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
@@ -80,13 +70,26 @@ test("renders the formatted time range when open_time and close_time are both pr
 });
 
 test("renders open-now pill when isOpenNow resolves true", async () => {
-  const single = vi.fn().mockResolvedValue({ data: { open_time: "22:00", close_time: "06:00" }, error: null });
-  const eq = vi.fn().mockReturnValue({ single });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+  mockSupabase({ open_time: "22:00", close_time: "06:00" });
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
   expect(await screen.findByText(t("bathroom.openNow"))).toBeInTheDocument();
+});
+
+test("renders the overall score from bathroom_scores", async () => {
+  const bathroomsSingle = vi.fn().mockResolvedValue({ data: {}, error: null });
+  const bathroomsChain = { select: () => ({ eq: vi.fn().mockReturnValue({ single: bathroomsSingle }) }) };
+  const scoresMaybeSingle = vi.fn().mockResolvedValue({ data: { overall: 4.2 }, error: null });
+  const scoresChain = { select: () => ({ eq: vi.fn().mockReturnValue({ maybeSingle: scoresMaybeSingle }) }) };
+  vi.mocked(supabase.from).mockImplementation((table) => {
+    if (table === "bathroom_scores") return scoresChain as never;
+    return bathroomsChain as never;
+  });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+
+  expect(await screen.findByText("4.2")).toBeInTheDocument();
 });
 
 describe("closed-now pill", () => {
@@ -100,12 +103,7 @@ describe("closed-now pill", () => {
   });
 
   test("renders closed-now pill when current time is outside the open window", async () => {
-    const single = vi.fn().mockResolvedValue({
-      data: { open_time: "06:00", close_time: "22:00" },
-      error: null,
-    });
-    const eq = vi.fn().mockReturnValue({ single });
-    vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq }) } as never);
+    mockSupabase({ open_time: "06:00", close_time: "22:00" });
 
     render(<BathroomDetailSheet bathroomId="b1" />);
 
