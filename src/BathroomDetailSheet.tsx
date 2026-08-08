@@ -7,6 +7,7 @@ import { t } from "./i18n/i18n";
 import { isOpenNow } from "./lib/bathroomHours";
 import Icon from "./Icon";
 import ReviewComposer from "./ReviewComposer";
+import { fetchFavoriteIds } from "./lib/favorites";
 
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
@@ -27,6 +28,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [reportOpen, setReportOpen] = useState(false);
   const [reportComment, setReportComment] = useState("");
   const [reportSent, setReportSent] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const dragStartY = useRef(0);
   const dragCurrentY = useRef(0);
   useEffect(() => {
@@ -49,6 +51,12 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
     const ids = reviews.map(r => r.user_id);
     supabase.from("profiles").select("user_id, username").in("user_id", ids).then(({ data }) => setProfiles(data ?? []));
   }, [reviews]);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      fetchFavoriteIds(data.user.id).then((ids) => setIsFavorite(ids.includes(bathroomId)));
+    });
+  }, [bathroomId]);
   function submitReport() {
     supabase.auth.getUser().then(({ data }) => {
       supabase.from("reports").insert({ bathroom_id: bathroomId, user_id: data.user?.id ?? null, comment: reportComment }).then(() => setReportSent(true));
@@ -68,7 +76,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
       {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
-      <button disabled aria-label={t("bathroom.favorite")} />
+      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} />
       {approvedBanner && <p className="success-banner">{t("review.successMessage")}</p>}
       {pendingBanner && <p>{t("review.pendingMessage")}</p>}
       <button onClick={() => setView("review")}>{t("bathroom.writeReview")}</button>

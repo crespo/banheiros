@@ -12,7 +12,7 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
-function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null) {
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null, favoritesData: object[] = []) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
   const ownReviewMaybeSingle = vi.fn().mockResolvedValue({ data: ownReviewData, error: null });
@@ -28,6 +28,7 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
     if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
     if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
     if (table === "reports") return { insert } as never;
+    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }) } as never;
     return {} as never;
   });
   return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert };
@@ -366,12 +367,18 @@ test("clicking the composer's back button returns the sheet to the detail view",
   expect(await screen.findByText("Rua das Flores, 42")).toBeInTheDocument();
 });
 
-test("renders a disabled favorite placeholder button", async () => {
+test("favorite button is not pressed when the bathroom is not in the user's favorites", async () => {
   mockSupabase({});
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
-  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toBeDisabled();
+  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toHaveAttribute("aria-pressed", "false");
+});
+
+test("favorite button is pressed when the bathroom is in the user's favorites", async () => {
+  mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("renders a report-issue button", async () => {
