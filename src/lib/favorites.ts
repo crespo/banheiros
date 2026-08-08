@@ -11,3 +11,7 @@ export async function fetchFavoriteIds(userId: string): Promise<string[]> {
 export async function addFavorite(userId: string, bathroomId: string) {
   await supabase.from("favorites").insert({ user_id: userId, bathroom_id: bathroomId });
 }
+
+export async function removeFavorite(userId: string, bathroomId: string) {
+  await supabase.from("favorites").delete().eq("user_id", userId).eq("bathroom_id", bathroomId);
+}
