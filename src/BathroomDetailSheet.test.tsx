@@ -8,6 +8,7 @@ vi.mock("./lib/supabase", () => ({
   supabase: {
     from: vi.fn(),
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1" } } }) },
+    functions: { invoke: vi.fn().mockResolvedValue({ data: {}, error: null }) },
   },
 }));
 
@@ -436,4 +437,21 @@ test("composer defaultShowUsername reflects profiles.default_show_username when 
   fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
 
   expect(await screen.findByRole("radio", { name: t("review.showUsername") })).toBeChecked();
+});
+
+test("after approved submission shows the success banner", async () => {
+  mockSupabase({}, {}, []);
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  expect(await screen.findByText(t("review.successMessage"))).toBeInTheDocument();
 });
