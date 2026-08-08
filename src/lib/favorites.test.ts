@@ -30,3 +30,9 @@ test("addFavorite passes the correct payload to insert", async () => {
   await addFavorite("u1", "b1");
   expect(insertMock).toHaveBeenCalledWith({ user_id: "u1", bathroom_id: "b1" });
 });
+
+test("addFavorite calls supabase.from with 'favorites'", async () => {
+  vi.mocked(supabase.from).mockReturnValue({ insert: vi.fn().mockResolvedValue({}) } as never);
+  await addFavorite("u1", "b1");
+  expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("favorites");
+});
