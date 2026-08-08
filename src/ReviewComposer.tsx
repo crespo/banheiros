@@ -12,9 +12,10 @@ type Props = {
   onPending: () => void;
 };
 
-export default function ReviewComposer(_props: Props) {
+export default function ReviewComposer({ defaultShowUsername }: Props) {
   const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>({});
   const [comment, setComment] = useState("");
+  const [showUsername, setShowUsername] = useState(defaultShowUsername);
 
   return (
     <>
@@ -34,8 +35,8 @@ export default function ReviewComposer(_props: Props) {
       ))}
       <fieldset>
         <legend>{t("review.usernameVisibility")}</legend>
-        <input type="radio" aria-label={t("review.hideUsername")} />
-        <input type="radio" aria-label={t("review.showUsername")} />
+        <input type="radio" aria-label={t("review.hideUsername")} checked={!showUsername} onChange={() => setShowUsername(false)} />
+        <input type="radio" aria-label={t("review.showUsername")} checked={showUsername} onChange={() => setShowUsername(true)} />
       </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
       <textarea id="comment" onChange={(e) => setComment(e.target.value)} />

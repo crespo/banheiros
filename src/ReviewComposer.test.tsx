@@ -13,6 +13,22 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
+test("hide-username option is pre-selected when defaultShowUsername is false", () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  const group = screen.getByRole("group", { name: t("review.usernameVisibility") });
+  expect(within(group).getByRole("radio", { name: t("review.hideUsername") })).toBeChecked();
+});
+
 test("renders a visibility group containing both visibility options", () => {
   render(
     <ReviewComposer
