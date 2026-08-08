@@ -337,12 +337,13 @@ test("does not close on a tap that follows an earlier sub-threshold drag", async
   expect(onClose).not.toHaveBeenCalled();
 });
 
-test("renders a disabled write-review placeholder button", async () => {
+test("clicking write-review switches the sheet to ReviewComposer view", async () => {
   mockSupabase({});
 
   render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
 
-  expect(await screen.findByRole("button", { name: t("bathroom.writeReview") })).toBeDisabled();
+  expect(screen.getByRole("button", { name: t("review.submit") })).toBeInTheDocument();
 });
 
 test("renders a disabled favorite placeholder button", async () => {
