@@ -455,3 +455,21 @@ test("after approved submission shows the success banner", async () => {
 
   expect(await screen.findByText(t("review.successMessage"))).toBeInTheDocument();
 });
+
+test("after approved submission refetches bathroom_scores and reviews", async () => {
+  const { maybeSingle, order } = mockSupabase({}, {}, []);
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  await vi.waitFor(() => expect(maybeSingle).toHaveBeenCalledTimes(2));
+  await vi.waitFor(() => expect(order).toHaveBeenCalledTimes(2));
+});

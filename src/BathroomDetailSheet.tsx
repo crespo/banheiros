@@ -22,6 +22,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [ownReview, setOwnReview] = useState<{ accessibility: number; lighting: number; odor: number; maintenance: number; cleanliness: number; comment: string; show_username: boolean } | null>(null);
   const [defaultShowUsername, setDefaultShowUsername] = useState(false);
   const [approvedBanner, setApprovedBanner] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportComment, setReportComment] = useState("");
   const [reportSent, setReportSent] = useState(false);
@@ -32,10 +33,10 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   }, [bathroomId]);
   useEffect(() => {
     supabase.from("bathroom_scores").select().eq("bathroom_id", bathroomId).maybeSingle().then(({ data }) => setScore(data));
-  }, [bathroomId]);
+  }, [bathroomId, refreshKey]);
   useEffect(() => {
     supabase.from("reviews").select().eq("bathroom_id", bathroomId).eq("status", "approved").order("created_at", { ascending: false }).then(({ data }) => setReviews(data ?? []));
-  }, [bathroomId]);
+  }, [bathroomId, refreshKey]);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return;
@@ -53,7 +54,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
     });
   }
   if (!bathroom) return null;
-  if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={defaultShowUsername} onCancel={() => setView("detail")} onApproved={() => { setView("detail"); setApprovedBanner(true); }} onPending={() => setView("detail")} />;
+  if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={defaultShowUsername} onCancel={() => setView("detail")} onApproved={() => { setView("detail"); setApprovedBanner(true); setRefreshKey((k) => k + 1); }} onPending={() => setView("detail")} />;
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
       <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; dragCurrentY.current = e.clientY; }} onPointerMove={(e) => { dragCurrentY.current = e.clientY; }} onPointerUp={() => { if (shouldCloseOnDrag(dragCurrentY.current - dragStartY.current)) onClose?.(); }} />
