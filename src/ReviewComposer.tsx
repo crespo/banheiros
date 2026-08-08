@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "./lib/supabase";
 import { t } from "./i18n/i18n";
 
 const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"] as const;
@@ -12,7 +13,7 @@ type Props = {
   onPending: () => void;
 };
 
-export default function ReviewComposer({ defaultShowUsername, existingReview, onCancel }: Props) {
+export default function ReviewComposer({ bathroomId, defaultShowUsername, existingReview, onCancel }: Props) {
   const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>(
     existingReview ? { accessibility: existingReview.accessibility, lighting: existingReview.lighting, odor: existingReview.odor, maintenance: existingReview.maintenance, cleanliness: existingReview.cleanliness } : {}
   );
@@ -43,7 +44,10 @@ export default function ReviewComposer({ defaultShowUsername, existingReview, on
       <label htmlFor="comment">{t("review.commentLabel")}</label>
       <textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} />
       <button onClick={onCancel}>{t("common.back")}</button>
-      <button disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}>{t("review.submit")}</button>
+      <button
+        disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}
+        onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } })}
+      >{t("review.submit")}</button>
     </>
   );
 }

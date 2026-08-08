@@ -3,6 +3,7 @@ import { expect, test, vi } from "vitest";
 
 const CATS = ["lighting", "odor", "maintenance", "cleanliness"] as const;
 import ReviewComposer from "./ReviewComposer";
+import { supabase } from "./lib/supabase";
 import { t } from "./i18n/i18n";
 
 vi.mock("./lib/supabase", () => ({
@@ -233,4 +234,31 @@ test("clicking the back button calls onCancel", () => {
   fireEvent.click(screen.getByRole("button", { name: t("common.back") }));
 
   expect(onCancel).toHaveBeenCalledOnce();
+});
+
+test("clicking submit calls supabase.functions.invoke with moderate-submit and the review payload", async () => {
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  await vi.waitFor(() =>
+    expect(vi.mocked(supabase.functions.invoke)).toHaveBeenCalledExactlyOnceWith("moderate-submit", {
+      body: { type: "review", bathroom_id: "b1", accessibility: 2, lighting: 2, odor: 2, maintenance: 2, cleanliness: 2, comment: "bom", show_username: false },
+    }),
+  );
 });
