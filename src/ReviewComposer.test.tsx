@@ -262,3 +262,28 @@ test("clicking submit calls supabase.functions.invoke with moderate-submit and t
     }),
   );
 });
+
+test("calls onApproved when moderate-submit responds with approved verdict", async () => {
+  const onApproved = vi.fn();
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={onApproved}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  await vi.waitFor(() => expect(onApproved).toHaveBeenCalledOnce());
+});
