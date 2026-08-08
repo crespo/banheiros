@@ -7,3 +7,7 @@ export async function fetchFavoriteIds(userId: string): Promise<string[]> {
     .eq("user_id", userId);
   return (data ?? []).map((r) => r.bathroom_id);
 }
+
+export async function addFavorite(userId: string, bathroomId: string) {
+  await supabase.from("favorites").insert({ user_id: userId, bathroom_id: bathroomId });
+}

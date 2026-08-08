@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { fetchFavoriteIds } from "./favorites";
+import { addFavorite, fetchFavoriteIds } from "./favorites";
 import { supabase } from "./supabase";
 
 vi.mock("./supabase", () => ({ supabase: { from: vi.fn() } }));
@@ -22,4 +22,11 @@ test('fetchFavoriteIds filters by eq("user_id", userId)', async () => {
   const eq = mockFavorites([]);
   await fetchFavoriteIds("user-1");
   expect(eq).toHaveBeenCalledWith("user_id", "user-1");
+});
+
+test("addFavorite passes the correct payload to insert", async () => {
+  const insertMock = vi.fn().mockResolvedValue({});
+  vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as never);
+  await addFavorite("u1", "b1");
+  expect(insertMock).toHaveBeenCalledWith({ user_id: "u1", bathroom_id: "b1" });
 });
