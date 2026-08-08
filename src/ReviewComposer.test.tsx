@@ -336,3 +336,27 @@ test("calls onPending when moderate-submit responds with pending verdict", async
 
   await vi.waitFor(() => expect(onPending).toHaveBeenCalledOnce());
 });
+
+test("shows submitError when moderate-submit resolves with an error", async () => {
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: null, error: new Error("network down") });
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  expect(await screen.findByText(t("review.submitError"))).toBeInTheDocument();
+});
