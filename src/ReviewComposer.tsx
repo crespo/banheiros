@@ -13,7 +13,7 @@ type Props = {
   onPending: () => void;
 };
 
-export default function ReviewComposer({ bathroomId, defaultShowUsername, existingReview, onCancel, onApproved }: Props) {
+export default function ReviewComposer({ bathroomId, defaultShowUsername, existingReview, onCancel, onApproved, onPending }: Props) {
   const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>(
     existingReview ? { accessibility: existingReview.accessibility, lighting: existingReview.lighting, odor: existingReview.odor, maintenance: existingReview.maintenance, cleanliness: existingReview.cleanliness } : {}
   );
@@ -48,7 +48,7 @@ export default function ReviewComposer({ bathroomId, defaultShowUsername, existi
       <button onClick={onCancel}>{t("common.back")}</button>
       <button
         disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}
-        onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } }).then(({ data }) => { if (data?.verdict === "approved") onApproved(); else if (data?.verdict === "rejected") setRejected(true); })}
+        onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } }).then(({ data }) => { if (data?.verdict === "approved") onApproved(); else if (data?.verdict === "rejected") setRejected(true); else if (data?.verdict === "pending") onPending(); })}
       >{t("review.submit")}</button>
     </>
   );

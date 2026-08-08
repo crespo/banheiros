@@ -311,3 +311,28 @@ test("shows moderationWarning when moderate-submit responds with rejected verdic
 
   expect(await screen.findByText(t("review.moderationWarning"))).toBeInTheDocument();
 });
+
+test("calls onPending when moderate-submit responds with pending verdict", async () => {
+  const onPending = vi.fn();
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "pending", reason: null }, error: null });
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={onPending}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  await vi.waitFor(() => expect(onPending).toHaveBeenCalledOnce());
+});
