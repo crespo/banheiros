@@ -28,7 +28,7 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
     if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
     if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
     if (table === "reports") return { insert } as never;
-    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }) } as never;
+    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }), insert: vi.fn().mockReturnValue(new Promise(() => {})) } as never;
     return {} as never;
   });
   return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert };
@@ -496,4 +496,12 @@ test("after pending submission shows the pending message", async () => {
   fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
 
   expect(await screen.findByText(t("review.pendingMessage"))).toBeInTheDocument();
+});
+
+test("clicking the favorite button when not favorited flips it to pressed immediately", async () => {
+  mockSupabase({});
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  fireEvent.click(star);
+  expect(star).toHaveAttribute("aria-pressed", "true");
 });

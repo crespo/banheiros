@@ -76,7 +76,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
       {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
-      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} />
+      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} onClick={() => setIsFavorite(!isFavorite)} />
       {approvedBanner && <p className="success-banner">{t("review.successMessage")}</p>}
       {pendingBanner && <p>{t("review.pendingMessage")}</p>}
       <button onClick={() => setView("review")}>{t("bathroom.writeReview")}</button>
