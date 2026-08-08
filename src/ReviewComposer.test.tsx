@@ -190,3 +190,21 @@ test("submit becomes enabled when all 5 ratings and a non-empty comment are fill
 
   expect(screen.getByRole("button", { name: t("review.submit") })).toBeEnabled();
 });
+
+test("clicking the back button calls onCancel", () => {
+  const onCancel = vi.fn();
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={onCancel}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: t("common.back") }));
+
+  expect(onCancel).toHaveBeenCalledOnce();
+});

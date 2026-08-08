@@ -12,7 +12,7 @@ type Props = {
   onPending: () => void;
 };
 
-export default function ReviewComposer({ defaultShowUsername }: Props) {
+export default function ReviewComposer({ defaultShowUsername, onCancel }: Props) {
   const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>({});
   const [comment, setComment] = useState("");
   const [showUsername, setShowUsername] = useState(defaultShowUsername);
@@ -40,6 +40,7 @@ export default function ReviewComposer({ defaultShowUsername }: Props) {
       </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
       <textarea id="comment" onChange={(e) => setComment(e.target.value)} />
+      <button onClick={onCancel}>{t("common.back")}</button>
       <button disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}>{t("review.submit")}</button>
     </>
   );
