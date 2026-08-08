@@ -346,6 +346,16 @@ test("clicking write-review switches the sheet to ReviewComposer view", async ()
   expect(screen.getByRole("button", { name: t("review.submit") })).toBeInTheDocument();
 });
 
+test("clicking the composer's back button returns the sheet to the detail view", async () => {
+  mockSupabase({ address: "Rua das Flores, 42" });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("button", { name: t("common.back") }));
+
+  expect(await screen.findByText("Rua das Flores, 42")).toBeInTheDocument();
+});
+
 test("renders a disabled favorite placeholder button", async () => {
   mockSupabase({});
 
