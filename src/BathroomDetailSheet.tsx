@@ -20,6 +20,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [profiles, setProfiles] = useState<{ user_id: string; username: string }[]>([]);
   const [view, setView] = useState<"detail" | "review">("detail");
   const [ownReview, setOwnReview] = useState<{ accessibility: number; lighting: number; odor: number; maintenance: number; cleanliness: number; comment: string; show_username: boolean } | null>(null);
+  const [defaultShowUsername, setDefaultShowUsername] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportComment, setReportComment] = useState("");
   const [reportSent, setReportSent] = useState(false);
@@ -38,6 +39,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return;
       supabase.from("reviews").select().eq("bathroom_id", bathroomId).eq("user_id", data.user.id).maybeSingle().then(({ data: row }) => setOwnReview(row));
+      supabase.from("profiles").select("default_show_username").eq("user_id", data.user.id).single().then(({ data: row }) => setDefaultShowUsername(row?.default_show_username ?? false));
     });
   }, [bathroomId]);
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
     });
   }
   if (!bathroom) return null;
-  if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={false} onCancel={() => setView("detail")} onApproved={() => setView("detail")} onPending={() => setView("detail")} />;
+  if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={defaultShowUsername} onCancel={() => setView("detail")} onApproved={() => setView("detail")} onPending={() => setView("detail")} />;
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
       <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; dragCurrentY.current = e.clientY; }} onPointerMove={(e) => { dragCurrentY.current = e.clientY; }} onPointerUp={() => { if (shouldCloseOnDrag(dragCurrentY.current - dragStartY.current)) onClose?.(); }} />

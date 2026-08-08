@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import BathroomDetailSheet from "./BathroomDetailSheet";
 import { supabase } from "./lib/supabase";
@@ -427,4 +427,13 @@ test("opening the composer pre-fills the form when the user already reviewed thi
   fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
 
   expect(await screen.findByDisplayValue("muito limpo")).toBeInTheDocument();
+});
+
+test("composer defaultShowUsername reflects profiles.default_show_username when there is no existing review", async () => {
+  mockSupabase({}, null, null, null, null, { default_show_username: true });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+
+  expect(await screen.findByRole("radio", { name: t("review.showUsername") })).toBeChecked();
 });
