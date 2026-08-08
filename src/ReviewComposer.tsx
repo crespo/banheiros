@@ -5,17 +5,19 @@ const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"]
 
 type Props = {
   bathroomId: string;
-  existingReview: null;
+  existingReview: { accessibility: number; lighting: number; odor: number; maintenance: number; cleanliness: number; comment: string; show_username: boolean } | null;
   defaultShowUsername: boolean;
   onCancel: () => void;
   onApproved: () => void;
   onPending: () => void;
 };
 
-export default function ReviewComposer({ defaultShowUsername, onCancel }: Props) {
-  const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>({});
-  const [comment, setComment] = useState("");
-  const [showUsername, setShowUsername] = useState(defaultShowUsername);
+export default function ReviewComposer({ defaultShowUsername, existingReview, onCancel }: Props) {
+  const [ratings, setRatings] = useState<Partial<Record<typeof CATS[number], number>>>(
+    existingReview ? { accessibility: existingReview.accessibility, lighting: existingReview.lighting, odor: existingReview.odor, maintenance: existingReview.maintenance, cleanliness: existingReview.cleanliness } : {}
+  );
+  const [comment, setComment] = useState(existingReview ? existingReview.comment : "");
+  const [showUsername, setShowUsername] = useState(existingReview ? existingReview.show_username : defaultShowUsername);
 
   return (
     <>
@@ -39,7 +41,7 @@ export default function ReviewComposer({ defaultShowUsername, onCancel }: Props)
         <input type="radio" aria-label={t("review.showUsername")} checked={showUsername} onChange={() => setShowUsername(true)} />
       </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
-      <textarea id="comment" onChange={(e) => setComment(e.target.value)} />
+      <textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} />
       <button onClick={onCancel}>{t("common.back")}</button>
       <button disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}>{t("review.submit")}</button>
     </>

@@ -191,6 +191,32 @@ test("submit becomes enabled when all 5 ratings and a non-empty comment are fill
   expect(screen.getByRole("button", { name: t("review.submit") })).toBeEnabled();
 });
 
+test("opening with an existing review pre-fills ratings, comment, and visibility from it", () => {
+  const existingReview = {
+    accessibility: 3,
+    lighting: 2,
+    odor: 1,
+    maintenance: 2,
+    cleanliness: 3,
+    comment: "muito limpo",
+    show_username: true,
+  };
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={existingReview}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  expect(within(screen.getByRole("group", { name: t("ratingCat.accessibility") })).getByRole("radio", { name: `${t("ratingCat.accessibility")} 3` })).toBeChecked();
+  expect(screen.getByRole("textbox", { name: t("review.commentLabel") })).toHaveValue("muito limpo");
+  expect(within(screen.getByRole("group", { name: t("review.usernameVisibility") })).getByRole("radio", { name: t("review.showUsername") })).toBeChecked();
+});
+
 test("clicking the back button calls onCancel", () => {
   const onCancel = vi.fn();
   render(
