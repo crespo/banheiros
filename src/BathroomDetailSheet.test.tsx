@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import BathroomDetailSheet from "./BathroomDetailSheet";
 import { supabase } from "./lib/supabase";
@@ -8,19 +8,29 @@ vi.mock("./lib/supabase", () => ({
   supabase: {
     from: vi.fn(),
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1" } } }) },
+    functions: { invoke: vi.fn().mockResolvedValue({ data: {}, error: null }) },
   },
 }));
 
-function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null) {
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
+  const ownReviewMaybeSingle = vi.fn().mockResolvedValue({ data: ownReviewData, error: null });
   const order = vi.fn().mockResolvedValue({ data: reviewsData, error: null });
   const inFn = vi.fn().mockResolvedValue({ data: profilesData, error: null });
+  const profileDefaultSingle = vi.fn().mockResolvedValue({ data: profileDefaultData, error: null });
   const insert = vi.fn().mockResolvedValue({ error: null });
-  const eq = vi.fn();
-  eq.mockReturnValue({ single, maybeSingle, eq, order });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq, in: inFn }), insert } as never);
-  return { single, maybeSingle, eq, order, in: inFn, insert };
+  // dispatch by table name: each table can have its own query shapes without colliding
+  // with the same terminal method (.single/.maybeSingle) used by another table's query
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    if (table === "bathrooms") return { select: () => ({ eq: () => ({ single }) }) } as never;
+    if (table === "bathroom_scores") return { select: () => ({ eq: () => ({ maybeSingle }) }) } as never;
+    if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
+    if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
+    if (table === "reports") return { insert } as never;
+    return {} as never;
+  });
+  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
@@ -337,12 +347,23 @@ test("does not close on a tap that follows an earlier sub-threshold drag", async
   expect(onClose).not.toHaveBeenCalled();
 });
 
-test("renders a disabled write-review placeholder button", async () => {
+test("clicking write-review switches the sheet to ReviewComposer view", async () => {
   mockSupabase({});
 
   render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
 
-  expect(await screen.findByRole("button", { name: t("bathroom.writeReview") })).toBeDisabled();
+  expect(screen.getByRole("button", { name: t("review.submit") })).toBeInTheDocument();
+});
+
+test("clicking the composer's back button returns the sheet to the detail view", async () => {
+  mockSupabase({ address: "Rua das Flores, 42" });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("button", { name: t("common.back") }));
+
+  expect(await screen.findByText("Rua das Flores, 42")).toBeInTheDocument();
 });
 
 test("renders a disabled favorite placeholder button", async () => {
@@ -398,4 +419,74 @@ test("shows a success confirmation after submitting the report", async () => {
   fireEvent.click(screen.getByRole("button", { name: t("bathroom.reportSubmit") }));
 
   expect(await screen.findByText(t("bathroom.reportSuccess"))).toBeInTheDocument();
+});
+
+test("opening the composer pre-fills the form when the user already reviewed this bathroom", async () => {
+  mockSupabase({}, null, null, null, { accessibility: 3, lighting: 2, odor: 1, maintenance: 2, cleanliness: 3, comment: "muito limpo", show_username: true });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+
+  expect(await screen.findByDisplayValue("muito limpo")).toBeInTheDocument();
+});
+
+test("composer defaultShowUsername reflects profiles.default_show_username when there is no existing review", async () => {
+  mockSupabase({}, null, null, null, null, { default_show_username: true });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+
+  expect(await screen.findByRole("radio", { name: t("review.showUsername") })).toBeChecked();
+});
+
+test("after approved submission shows the success banner", async () => {
+  mockSupabase({}, {}, []);
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  expect(await screen.findByText(t("review.successMessage"))).toBeInTheDocument();
+});
+
+test("after approved submission refetches bathroom_scores and reviews", async () => {
+  const { maybeSingle, order } = mockSupabase({}, {}, []);
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  await vi.waitFor(() => expect(maybeSingle).toHaveBeenCalledTimes(2));
+  await vi.waitFor(() => expect(order).toHaveBeenCalledTimes(2));
+});
+
+test("after pending submission shows the pending message", async () => {
+  mockSupabase({}, {}, []);
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "pending", reason: null }, error: null });
+
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  fireEvent.click(await screen.findByRole("button", { name: t("bathroom.writeReview") }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "bom" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  expect(await screen.findByText(t("review.pendingMessage"))).toBeInTheDocument();
 });

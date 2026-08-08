@@ -7,7 +7,7 @@ import { supabase } from "./lib/supabase";
 import { MACEIO_CENTER } from "./lib/mapCoverage";
 
 vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
-vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn() } }));
+vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn(), auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } } }));
 
 beforeEach(() => {
   setLanguage("pt");
