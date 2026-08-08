@@ -19,6 +19,7 @@ export default function ReviewComposer({ bathroomId, defaultShowUsername, existi
   );
   const [comment, setComment] = useState(existingReview ? existingReview.comment : "");
   const [showUsername, setShowUsername] = useState(existingReview ? existingReview.show_username : defaultShowUsername);
+  const [rejected, setRejected] = useState(false);
 
   return (
     <>
@@ -43,10 +44,11 @@ export default function ReviewComposer({ bathroomId, defaultShowUsername, existi
       </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
       <textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} />
+      {rejected && <p>{t("review.moderationWarning")}</p>}
       <button onClick={onCancel}>{t("common.back")}</button>
       <button
         disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}
-        onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } }).then(({ data }) => { if (data?.verdict === "approved") onApproved(); })}
+        onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } }).then(({ data }) => { if (data?.verdict === "approved") onApproved(); else if (data?.verdict === "rejected") setRejected(true); })}
       >{t("review.submit")}</button>
     </>
   );

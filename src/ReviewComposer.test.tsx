@@ -287,3 +287,27 @@ test("calls onApproved when moderate-submit responds with approved verdict", asy
 
   await vi.waitFor(() => expect(onApproved).toHaveBeenCalledOnce());
 });
+
+test("shows moderationWarning when moderate-submit responds with rejected verdict", async () => {
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "rejected", reason: "TOXICITY" }, error: null });
+  render(
+    <ReviewComposer
+      bathroomId="b1"
+      existingReview={null}
+      defaultShowUsername={false}
+      onCancel={vi.fn()}
+      onApproved={vi.fn()}
+      onPending={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.accessibility")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.lighting")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.odor")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.maintenance")} 2` }));
+  fireEvent.click(screen.getByRole("radio", { name: `${t("ratingCat.cleanliness")} 2` }));
+  fireEvent.change(screen.getByRole("textbox", { name: t("review.commentLabel") }), { target: { value: "linguagem ofensiva" } });
+  fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
+
+  expect(await screen.findByText(t("review.moderationWarning"))).toBeInTheDocument();
+});
