@@ -11,20 +11,25 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
-function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null) {
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
   const ownReviewMaybeSingle = vi.fn().mockResolvedValue({ data: ownReviewData, error: null });
   const order = vi.fn().mockResolvedValue({ data: reviewsData, error: null });
   const inFn = vi.fn().mockResolvedValue({ data: profilesData, error: null });
+  const profileDefaultSingle = vi.fn().mockResolvedValue({ data: profileDefaultData, error: null });
   const insert = vi.fn().mockResolvedValue({ error: null });
-  // second .eq() in a chain (e.g. filtering by bathroom_id AND user_id) resolves via ownReviewMaybeSingle,
-  // distinct from the first-level maybeSingle used by the single-eq bathroom_scores query
-  const innerEq = vi.fn().mockReturnValue({ single, maybeSingle: ownReviewMaybeSingle, order });
-  const eq = vi.fn();
-  eq.mockReturnValue({ single, maybeSingle, eq: innerEq, order });
-  vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq, in: inFn }), insert } as never);
-  return { single, maybeSingle, ownReviewMaybeSingle, eq, order, in: inFn, insert };
+  // dispatch by table name: each table can have its own query shapes without colliding
+  // with the same terminal method (.single/.maybeSingle) used by another table's query
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    if (table === "bathrooms") return { select: () => ({ eq: () => ({ single }) }) } as never;
+    if (table === "bathroom_scores") return { select: () => ({ eq: () => ({ maybeSingle }) }) } as never;
+    if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
+    if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
+    if (table === "reports") return { insert } as never;
+    return {} as never;
+  });
+  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
