@@ -1,4 +1,4 @@
-import { parseOpeningHours } from "./opening-hours";
+import { parseOpeningHours } from "./opening-hours.ts";
 
 export function mapElement(element: {
   id: number;
