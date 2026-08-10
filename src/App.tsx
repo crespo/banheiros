@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AuthScreen from "./AuthScreen";
 import ChooseUsernameScreen from "./ChooseUsernameScreen";
 import FavoritesScreen from "./FavoritesScreen";
 import MapScreen from "./MapScreen";
+import PrivacidadeScreen from "./PrivacidadeScreen";
 import ProfileScreen from "./ProfileScreen";
 import ResetPasswordScreen from "./ResetPasswordScreen";
+import TermosScreen from "./TermosScreen";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
 export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/termos" element={<TermosScreen />} />
+        <Route path="/privacidade" element={<PrivacidadeScreen />} />
+        <Route path="*" element={<Gated />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function Gated() {
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [profileExists, setProfileExists] = useState<boolean | null>(null);
   const [passwordRecovery, setPasswordRecovery] = useState(false);

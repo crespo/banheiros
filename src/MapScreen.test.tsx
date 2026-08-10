@@ -1,12 +1,14 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
 import MapScreen from "./MapScreen";
 import { supabase } from "./lib/supabase";
 import { MACEIO_CENTER } from "./lib/mapCoverage";
 
-vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
+vi.mock("maplibre-gl", () => ({ Map: vi.fn() }));
+
+type MapStyle = { sources?: Record<string, { tiles?: string[]; attribution?: string }>; layers?: unknown[] };
 vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn(), auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } } }));
 
 beforeEach(() => {
@@ -178,19 +180,22 @@ test("MapScreen constructs a maplibregl.Map on mount", () => {
 test("Map is constructed with OSM raster tile source", () => {
   render(<MapScreen />);
   const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
-  expect(opts?.style?.sources?.osm?.tiles).toEqual(["https://tile.openstreetmap.org/{z}/{x}/{y}.png"]);
+  const style = opts?.style as MapStyle | undefined;
+  expect(style?.sources?.osm?.tiles).toEqual(["https://tile.openstreetmap.org/{z}/{x}/{y}.png"]);
 });
 
 test("Map style includes OSM attribution", () => {
   render(<MapScreen />);
   const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
-  expect(opts?.style?.sources?.osm?.attribution).toEqual(expect.stringContaining("OpenStreetMap"));
+  const style = opts?.style as MapStyle | undefined;
+  expect(style?.sources?.osm?.attribution).toEqual(expect.stringContaining("OpenStreetMap"));
 });
 
 test("Map style includes a raster layer referencing the osm source", () => {
   render(<MapScreen />);
   const opts = vi.mocked(maplibregl.Map).mock.calls[0][0];
-  expect(opts?.style?.layers).toEqual(expect.arrayContaining([expect.objectContaining({ type: "raster", source: "osm" })]));
+  const style = opts?.style as MapStyle | undefined;
+  expect(style?.layers).toEqual(expect.arrayContaining([expect.objectContaining({ type: "raster", source: "osm" })]));
 });
 
 test("Map is constructed centered on the default Maceió region", () => {

@@ -98,7 +98,10 @@ export default function AuthScreen() {
           <input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           <label>
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            {t("auth.termsAgree")}
+            {t("auth.termsAgreePrefix")}
+            <a href="/termos">{t("auth.termsLinkText")}</a>
+            {t("auth.termsAgreeMiddle")}
+            <a href="/privacidade">{t("auth.privacyLinkText")}</a>
           </label>
           <button
             disabled={

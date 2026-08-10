@@ -4,7 +4,7 @@ import App from "./App";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
-vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
+vi.mock("maplibre-gl", () => ({ Map: vi.fn() }));
 
 vi.mock("./lib/supabase", () => ({
   supabase: {
@@ -68,6 +68,18 @@ test("App renders ChooseUsernameScreen when a session exists but no profile row 
   } as never);
   render(<App />);
   expect(await screen.findByLabelText(t("auth.usernameLabel"))).toBeInTheDocument();
+});
+
+test("App renders TermosScreen at the /termos route", async () => {
+  window.history.pushState({}, "", "/termos");
+  render(<App />);
+  expect(await screen.findByRole("heading", { name: t("auth.termsLinkText") })).toBeInTheDocument();
+});
+
+test("App renders PrivacidadeScreen at the /privacidade route", async () => {
+  window.history.pushState({}, "", "/privacidade");
+  render(<App />);
+  expect(await screen.findByRole("heading", { name: t("auth.privacyLinkText") })).toBeInTheDocument();
 });
 
 test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", async () => {
