@@ -66,8 +66,9 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   }
   function handleFavoriteClick() {
     if (!userId) return;
-    if (!isFavorite) addFavorite(userId, bathroomId);
-    else removeFavorite(userId, bathroomId);
+    const prev = isFavorite;
+    if (!isFavorite) addFavorite(userId, bathroomId).catch(() => setIsFavorite(prev));
+    else removeFavorite(userId, bathroomId).catch(() => setIsFavorite(prev));
     setIsFavorite(!isFavorite);
   }
   if (!bathroom) return null;

@@ -524,3 +524,22 @@ test("clicking the favorite button when favorited calls removeFavorite", async (
   fireEvent.click(star);
   await vi.waitFor(() => expect(favoritesDelete).toHaveBeenCalledWith("bathroom_id", "b1"));
 });
+
+test("favorite button reverts to not-pressed when addFavorite fails", async () => {
+  const { favoritesInsert } = mockSupabase({});
+  favoritesInsert.mockRejectedValueOnce(new Error("network"));
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "false"));
+});
+
+test("favorite button reverts to pressed when removeFavorite fails", async () => {
+  const { favoritesDelete } = mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  favoritesDelete.mockRejectedValueOnce(new Error("network"));
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
+});
