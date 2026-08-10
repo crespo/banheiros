@@ -43,6 +43,7 @@ export default function ProfileScreen() {
 
   function changeLanguage(lang: Lang) {
     setLanguage(lang);
+    setProfile((prev) => (prev ? { ...prev, language: lang } : prev));
     supabase.from("profiles").update({ language: lang }).eq("user_id", userId);
   }
 

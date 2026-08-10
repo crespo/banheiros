@@ -89,6 +89,13 @@ test("selecting a language persists it to the profile", async () => {
   expect(updateMock).toHaveBeenCalledExactlyOnceWith({ language: "en" });
 });
 
+test("selecting a language checks its radio immediately", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("radio", { name: "EN" }));
+  expect(screen.getByRole("radio", { name: "EN" })).toBeChecked();
+});
+
 test("clicking logout calls supabase.auth.signOut", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
