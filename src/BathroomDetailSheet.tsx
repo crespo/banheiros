@@ -7,7 +7,7 @@ import { t } from "./i18n/i18n";
 import { isOpenNow } from "./lib/bathroomHours";
 import Icon from "./Icon";
 import ReviewComposer from "./ReviewComposer";
-import { fetchFavoriteIds, addFavorite } from "./lib/favorites";
+import { fetchFavoriteIds, addFavorite, removeFavorite } from "./lib/favorites";
 
 type Bathroom = { name: string | null; address: string; kind: string; paid: boolean; open_time: string | null; close_time: string };
 
@@ -64,6 +64,12 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
       supabase.from("reports").insert({ bathroom_id: bathroomId, user_id: data.user?.id ?? null, comment: reportComment }).then(() => setReportSent(true));
     });
   }
+  function handleFavoriteClick() {
+    if (!userId) return;
+    if (!isFavorite) addFavorite(userId, bathroomId);
+    else removeFavorite(userId, bathroomId);
+    setIsFavorite(!isFavorite);
+  }
   if (!bathroom) return null;
   if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={defaultShowUsername} onCancel={() => setView("detail")} onApproved={() => { setView("detail"); setApprovedBanner(true); setRefreshKey((k) => k + 1); }} onPending={() => { setView("detail"); setPendingBanner(true); }} />;
   return (
@@ -78,7 +84,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
       {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
       {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
       {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
-      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} onClick={() => { if (!userId) return; if (!isFavorite) addFavorite(userId, bathroomId); setIsFavorite(!isFavorite); }} />
+      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} onClick={handleFavoriteClick} />
       {approvedBanner && <p className="success-banner">{t("review.successMessage")}</p>}
       {pendingBanner && <p>{t("review.pendingMessage")}</p>}
       <button onClick={() => setView("review")}>{t("bathroom.writeReview")}</button>

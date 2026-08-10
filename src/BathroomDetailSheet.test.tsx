@@ -21,6 +21,7 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
   const profileDefaultSingle = vi.fn().mockResolvedValue({ data: profileDefaultData, error: null });
   const insert = vi.fn().mockResolvedValue({ error: null });
   const favoritesInsert = vi.fn().mockResolvedValue({});
+  const favoritesDelete = vi.fn().mockResolvedValue({});
   // dispatch by table name: each table can have its own query shapes without colliding
   // with the same terminal method (.single/.maybeSingle) used by another table's query
   vi.mocked(supabase.from).mockImplementation((table: string) => {
@@ -29,10 +30,10 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
     if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
     if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
     if (table === "reports") return { insert } as never;
-    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }), insert: favoritesInsert } as never;
+    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }), insert: favoritesInsert, delete: () => ({ eq: () => ({ eq: favoritesDelete }) }) } as never;
     return {} as never;
   });
-  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert, favoritesInsert };
+  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert, favoritesInsert, favoritesDelete };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
@@ -513,4 +514,13 @@ test("clicking the favorite button calls addFavorite with the current user and b
   const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
   fireEvent.click(star);
   await vi.waitFor(() => expect(favoritesInsert).toHaveBeenCalledWith({ user_id: "u1", bathroom_id: "b1" }));
+});
+
+test("clicking the favorite button when favorited calls removeFavorite", async () => {
+  const { favoritesDelete } = mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(favoritesDelete).toHaveBeenCalledWith("bathroom_id", "b1"));
 });
