@@ -4,7 +4,7 @@ import App from "./App";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
-vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
+vi.mock("maplibre-gl", () => ({ Map: vi.fn() }));
 
 vi.mock("./lib/supabase", () => ({
   supabase: {
