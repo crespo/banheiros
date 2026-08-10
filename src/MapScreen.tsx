@@ -83,6 +83,7 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
           <span>{t("map.legendPublic")}</span>
           <span>{t("map.legendInstore")}</span>
           <span>{t("map.legendPaid")}</span>
+          <span>{t("map.legendFavorite")}</span>
           <span>{t("map.legendYou")}</span>
         </div>
       )}

@@ -287,6 +287,7 @@ test("clicking the legend toggle shows the legend rows", () => {
   expect(screen.getByText(t("map.legendPublic"))).toBeInTheDocument();
   expect(screen.getByText(t("map.legendInstore"))).toBeInTheDocument();
   expect(screen.getByText(t("map.legendPaid"))).toBeInTheDocument();
+  expect(screen.getByText(t("map.legendFavorite"))).toBeInTheDocument();
   expect(screen.getByText(t("map.legendYou"))).toBeInTheDocument();
 });
 
