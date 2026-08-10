@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import App from "./App";
 import { t } from "./i18n/i18n";
@@ -39,6 +39,15 @@ test("App renders the Map tab by default when there is a session", async () => {
   } as never);
   render(<App />);
   expect(await screen.findByRole("button", { name: t("nav.map") })).toBeInTheDocument();
+});
+
+test("App shows ProfileScreen when the Perfil tab is selected", async () => {
+  vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
+    data: { session: { user: { id: "u1" } } },
+  } as never);
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button", { name: t("nav.profile") }));
+  expect(await screen.findByText("@raul")).toBeInTheDocument();
 });
 
 test("App renders ChooseUsernameScreen when a session exists but no profile row does", async () => {
