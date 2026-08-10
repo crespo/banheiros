@@ -37,6 +37,12 @@ test("addFavorite calls supabase.from with 'favorites'", async () => {
   expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("favorites");
 });
 
+test("addFavorite rejects when supabase returns an error", async () => {
+  const insertMock = vi.fn().mockResolvedValue({ error: { message: "fail" } });
+  vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as never);
+  await expect(addFavorite("u1", "b1")).rejects.toThrow();
+});
+
 test("removeFavorite filters by user_id", async () => {
   const deleteEq = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({}) });
   vi.mocked(supabase.from).mockReturnValue({ delete: () => ({ eq: deleteEq }) } as never);
