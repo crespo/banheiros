@@ -12,6 +12,7 @@ vi.mock("./lib/supabase", () => ({
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
       onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1", email: "raul@gmail.com" } } }),
+      updateUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
     },
     from: vi.fn().mockReturnValue({
       select: () => ({
@@ -88,4 +89,17 @@ test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", asy
   const onAuthStateChange = vi.mocked(supabase.auth.onAuthStateChange).mock.calls[0][0];
   onAuthStateChange("PASSWORD_RECOVERY", { user: { id: "u1" } } as never);
   expect(await screen.findByLabelText(t("auth.newPasswordLabel"))).toBeInTheDocument();
+});
+
+test("App leaves ResetPasswordScreen once the reset is completed", async () => {
+  render(<App />);
+  await screen.findByLabelText(t("auth.emailLabel"));
+  const onAuthStateChange = vi.mocked(supabase.auth.onAuthStateChange).mock.calls[0][0];
+  onAuthStateChange("PASSWORD_RECOVERY", { user: { id: "u1" } } as never);
+  await screen.findByLabelText(t("auth.newPasswordLabel"));
+  fireEvent.change(screen.getByLabelText(t("auth.newPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
+  fireEvent.click(await screen.findByRole("button", { name: t("auth.continueButton") }));
+  expect(screen.queryByLabelText(t("auth.newPasswordLabel"))).not.toBeInTheDocument();
 });
