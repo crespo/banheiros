@@ -6,6 +6,7 @@ import { t } from "./i18n/i18n";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
 import { bathroomDisplayName } from "./lib/bathroomName";
+import { fetchFavoriteIds } from "./lib/favorites";
 import { resolveLocationMode } from "./lib/locationMode";
 import { COVERAGE_BOUNDS, isWithinCoverage, MACEIO_CENTER } from "./lib/mapCoverage";
 import { supabase } from "./lib/supabase";
@@ -20,10 +21,16 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   useEffect(() => {
     supabase.from("bathrooms").select().eq("status", "approved").then(({ data }: { data: Bathroom[] | null }) => setBathrooms(data ?? []));
+  }, []);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) fetchFavoriteIds(user.id).then(setFavoriteIds);
+    });
   }, []);
   useEffect(() => {
     mapInstanceRef.current = new maplibregl.Map({

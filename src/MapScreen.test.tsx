@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
@@ -343,4 +343,10 @@ describe("address search geocoding", () => {
 test("MapScreen shows Nominatim attribution near the search input", () => {
   render(<MapScreen />);
   expect(screen.getByText(/Nominatim/)).toBeInTheDocument();
+});
+
+test("MapScreen queries the favorites table on mount when a user is authenticated", async () => {
+  vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({ data: { user: { id: "u1" } } } as never);
+  render(<MapScreen />);
+  await waitFor(() => expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("favorites"));
 });
