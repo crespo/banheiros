@@ -281,6 +281,13 @@ test("clicking forgot password calls supabase.auth.resetPasswordForEmail with th
   expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledExactlyOnceWith("raul@gmail.com");
 });
 
+test("clicking forgot password shows a confirmation message", () => {
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.forgotPassword") }));
+  expect(screen.getByText(t("auth.resetEmailSent"))).toBeInTheDocument();
+});
+
 test("clicking the Google button calls supabase.auth.signInWithOAuth with the google provider", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.googleButton") }));

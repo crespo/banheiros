@@ -14,6 +14,7 @@ export default function AuthScreen() {
   const [usernameTaken, setUsernameTaken] = useState(false);
   const [usernameAlternative, setUsernameAlternative] = useState<string | null>(null);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
   function handleEmailChange(email: string) {
@@ -35,6 +36,7 @@ export default function AuthScreen() {
 
   function forgotPassword() {
     supabase.auth.resetPasswordForEmail(email);
+    setResetEmailSent(true);
   }
 
   function resendConfirmation() {
@@ -122,6 +124,7 @@ export default function AuthScreen() {
         <>
           <button onClick={submitLogin}>{t("auth.loginButton")}</button>
           <button onClick={forgotPassword}>{t("auth.forgotPassword")}</button>
+          {resetEmailSent && <p>{t("auth.resetEmailSent")}</p>}
           {emailNotConfirmed && (
             <p>
               {t("auth.emailNotConfirmed")}
