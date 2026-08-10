@@ -12,7 +12,7 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
-function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null) {
+function mockSupabase(bathroomData: object | null, scoreData: object | null = null, reviewsData: object[] | null = null, profilesData: object[] | null = null, ownReviewData: object | null = null, profileDefaultData: object | null = null, favoritesData: object[] = []) {
   const single = vi.fn().mockResolvedValue({ data: bathroomData, error: null });
   const maybeSingle = vi.fn().mockResolvedValue({ data: scoreData, error: null });
   const ownReviewMaybeSingle = vi.fn().mockResolvedValue({ data: ownReviewData, error: null });
@@ -20,6 +20,8 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
   const inFn = vi.fn().mockResolvedValue({ data: profilesData, error: null });
   const profileDefaultSingle = vi.fn().mockResolvedValue({ data: profileDefaultData, error: null });
   const insert = vi.fn().mockResolvedValue({ error: null });
+  const favoritesInsert = vi.fn().mockResolvedValue({});
+  const favoritesDelete = vi.fn().mockResolvedValue({});
   // dispatch by table name: each table can have its own query shapes without colliding
   // with the same terminal method (.single/.maybeSingle) used by another table's query
   vi.mocked(supabase.from).mockImplementation((table: string) => {
@@ -28,9 +30,10 @@ function mockSupabase(bathroomData: object | null, scoreData: object | null = nu
     if (table === "reviews") return { select: () => ({ eq: () => ({ eq: () => ({ order, maybeSingle: ownReviewMaybeSingle }) }) }) } as never;
     if (table === "profiles") return { select: () => ({ in: inFn, eq: () => ({ single: profileDefaultSingle }) }) } as never;
     if (table === "reports") return { insert } as never;
+    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: favoritesData, error: null }) }), insert: favoritesInsert, delete: () => ({ eq: () => ({ eq: favoritesDelete }) }) } as never;
     return {} as never;
   });
-  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert };
+  return { single, maybeSingle, ownReviewMaybeSingle, order, in: inFn, profileDefaultSingle, insert, favoritesInsert, favoritesDelete };
 }
 
 test("renders the bathroom's address once the query resolves", async () => {
@@ -366,12 +369,18 @@ test("clicking the composer's back button returns the sheet to the detail view",
   expect(await screen.findByText("Rua das Flores, 42")).toBeInTheDocument();
 });
 
-test("renders a disabled favorite placeholder button", async () => {
+test("favorite button is not pressed when the bathroom is not in the user's favorites", async () => {
   mockSupabase({});
 
   render(<BathroomDetailSheet bathroomId="b1" />);
 
-  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toBeDisabled();
+  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toHaveAttribute("aria-pressed", "false");
+});
+
+test("favorite button is pressed when the bathroom is in the user's favorites", async () => {
+  mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  expect(await screen.findByRole("button", { name: t("bathroom.favorite") })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("renders a report-issue button", async () => {
@@ -489,4 +498,48 @@ test("after pending submission shows the pending message", async () => {
   fireEvent.click(screen.getByRole("button", { name: t("review.submit") }));
 
   expect(await screen.findByText(t("review.pendingMessage"))).toBeInTheDocument();
+});
+
+test("clicking the favorite button when not favorited flips it to pressed immediately", async () => {
+  mockSupabase({});
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  fireEvent.click(star);
+  expect(star).toHaveAttribute("aria-pressed", "true");
+});
+
+test("clicking the favorite button calls addFavorite with the current user and bathroom id", async () => {
+  const { favoritesInsert } = mockSupabase({});
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(favoritesInsert).toHaveBeenCalledWith({ user_id: "u1", bathroom_id: "b1" }));
+});
+
+test("clicking the favorite button when favorited calls removeFavorite", async () => {
+  const { favoritesDelete } = mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(favoritesDelete).toHaveBeenCalledWith("bathroom_id", "b1"));
+});
+
+test("favorite button reverts to not-pressed when addFavorite fails", async () => {
+  const { favoritesInsert } = mockSupabase({});
+  favoritesInsert.mockRejectedValueOnce(new Error("network"));
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "false"));
+});
+
+test("favorite button reverts to pressed when removeFavorite fails", async () => {
+  const { favoritesDelete } = mockSupabase({}, undefined, undefined, undefined, undefined, undefined, [{ bathroom_id: "b1" }]);
+  favoritesDelete.mockRejectedValueOnce(new Error("network"));
+  render(<BathroomDetailSheet bathroomId="b1" />);
+  const star = await screen.findByRole("button", { name: t("bathroom.favorite") });
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
+  fireEvent.click(star);
+  await vi.waitFor(() => expect(star).toHaveAttribute("aria-pressed", "true"));
 });
