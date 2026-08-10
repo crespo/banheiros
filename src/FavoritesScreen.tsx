@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { t } from "./i18n/i18n";
-import { fetchFavoriteIds } from "./lib/favorites";
+import { fetchFavoriteIds, removeFavorite } from "./lib/favorites";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { supabase } from "./lib/supabase";
 import Icon from "./Icon";
 import BathroomDetailSheet from "./BathroomDetailSheet";
 
 export default function FavoritesScreen() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null; address: string; kind: string; paid: boolean }[]>([]);
   const [scores, setScores] = useState<{ bathroom_id: string; overall: number }[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) fetchFavoriteIds(user.id).then(setFavoriteIds);
+      if (user) {
+        setUserId(user.id);
+        fetchFavoriteIds(user.id).then(setFavoriteIds);
+      }
     });
   }, []);
   useEffect(() => {
@@ -36,6 +40,16 @@ export default function FavoritesScreen() {
           <p>{b.name}</p>
           <p>{b.address}</p>
           <p>{scores.find((s) => s.bathroom_id === b.id)?.overall}</p>
+          <button
+            aria-label={t("bathroom.favorited")}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!userId) return;
+              removeFavorite(userId, b.id);
+              setFavoriteIds((ids) => ids.filter((id) => id !== b.id));
+              setBathrooms((bs) => bs.filter((x) => x.id !== b.id));
+            }}
+          />
         </div>
       ))}
       {selectedId && <BathroomDetailSheet bathroomId={selectedId} onClose={() => setSelectedId(null)} />}

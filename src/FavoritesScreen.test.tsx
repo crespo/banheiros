@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { setLanguage, t } from "./i18n/i18n";
 import FavoritesScreen from "./FavoritesScreen";
@@ -80,4 +80,21 @@ test("clicking a card opens BathroomDetailSheet for that bathroom", async () => 
   render(<FavoritesScreen />);
   fireEvent.click(await screen.findByText("Banheiro Central"));
   expect(await screen.findByRole("button", { name: t("common.close") })).toBeInTheDocument();
+});
+
+test("clicking unfavorite removes the card from the list", async () => {
+  mockFavoriteBathrooms([{ id: "b1", name: "Banheiro A" }]);
+  render(<FavoritesScreen />);
+  await screen.findByText("Banheiro A");
+  fireEvent.click(screen.getByRole("button", { name: t("bathroom.favorited") }));
+  await waitFor(() => expect(screen.queryByText("Banheiro A")).not.toBeInTheDocument());
+});
+
+test("clicking unfavorite does not open the detail sheet", async () => {
+  mockFavoriteBathrooms([{ id: "b1", name: "Banheiro A" }]);
+  render(<FavoritesScreen />);
+  await screen.findByText("Banheiro A");
+  fireEvent.click(screen.getByRole("button", { name: t("bathroom.favorited") }));
+  await screen.findByText(t("favorites.emptyTitle"));
+  expect(screen.queryByRole("button", { name: t("common.close") })).not.toBeInTheDocument();
 });
