@@ -46,16 +46,15 @@ O Banheiros existe para resolver isso: dados de localização reais (via OSM), a
 
 ## 🏗️ Stack técnica
 
-| Camada | Tecnologia | Por quê |
-|---|---|---|
-| Frontend | React 19 + Vite + TypeScript | SPA leve, build rápido ([ADR-0002](docs/adr/0002-react-vite-spa.md)) |
-| Plataforma | PWA (instalável, sem app store) | [ADR-0001](docs/adr/0001-plataforma-web-pwa.md) |
-| Mapa | MapLibre GL + tiles OSM | Open source, sem vendor lock-in de mapas |
-| Backend | Supabase (Postgres + Auth + Storage + Edge Functions) | Auth pronta, RLS no banco, funções serverless ([ADR-0003](docs/adr/0003-backend-supabase.md)) |
-| Dados de localização | Extrato sincronizado do OpenStreetMap via `osm-sync` | Evita rate limit da Overpass API em tempo real ([ADR-0004](docs/adr/0004-osm-extrato-sincronizado.md)) |
-| Moderação | Google Perspective API | Detecção automática de toxicidade, ameaça e ataques ([ADR-0005](docs/adr/0005-moderacao-perspective-api.md)) |
-| Testes | Vitest + Testing Library (frontend/functions) + pgTAP (banco) | |
-| Deploy | Vercel (frontend) + Supabase Cloud (backend) | Runbook completo em [docs/DEPLOY.md](docs/DEPLOY.md) |
+| Camada | Tecnologia |
+|---|---|
+| Frontend | React 19 + Vite + TypeScript, PWA instalável |
+| Mapa | MapLibre GL + tiles OSM |
+| Backend | Supabase (Postgres + Auth + Storage + Edge Functions) |
+| Dados de localização | Extrato sincronizado do OpenStreetMap |
+| Moderação | Google Perspective API |
+| Testes | Vitest + Testing Library + pgTAP |
+| Deploy | Vercel (frontend) + Supabase Cloud (backend) |
 
 ## 🗺️ Arquitetura
 
@@ -67,10 +66,10 @@ flowchart LR
 
     subgraph Supabase
         Auth["Auth\n(e-mail + Google + 2FA)"]
-        DB[("Postgres\nRLS por tabela")]
+        DB[("Postgres")]
         Storage["Storage\n(fotos)"]
         ModFn["Edge Function\nmoderate-submit"]
-        SyncFn["Edge Function\nosm-sync\n(pg_cron diário)"]
+        SyncFn["Edge Function\nosm-sync"]
     end
 
     Perspective["Google Perspective API"]
@@ -101,12 +100,6 @@ supabase/
 ├── migrations/         # Schema, RLS, funções SQL
 ├── functions/          # Edge Functions (moderate-submit, osm-sync, delete-account)
 └── tests/              # Testes pgTAP do banco
-
-docs/
-├── prd/                # Product Requirements Document
-├── adr/                # Architecture Decision Records
-├── specs/              # Specs por funcionalidade
-└── DEPLOY.md           # Runbook de deploy em produção
 ```
 
 ## 🚀 Rodando localmente
@@ -139,13 +132,6 @@ npm run dev
 | `npm test` | Roda a suíte Vitest (frontend + Edge Functions) |
 | `npm run lint` | ESLint |
 | `supabase test db` | Testes pgTAP do schema e das políticas de RLS |
-
-## 📖 Documentação
-
-- **[PRD](docs/prd/2026-08-02-banheiros-mvp.md)**: problema, requisitos e critérios de aceite
-- **[ADRs](docs/adr/)**: decisões de arquitetura e por quê
-- **[Specs](docs/specs/)**: especificação funcional detalhada, por feature
-- **[Runbook de deploy](docs/DEPLOY.md)**: passo a passo para produção
 
 ## 🧭 Cobertura e roadmap
 
