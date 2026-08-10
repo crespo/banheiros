@@ -6,6 +6,7 @@ import { supabase } from "./lib/supabase";
 export default function FavoritesScreen() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null; address: string }[]>([]);
+  const [scores, setScores] = useState<{ bathroom_id: string; overall: number }[]>([]);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) fetchFavoriteIds(user.id).then(setFavoriteIds);
@@ -14,6 +15,7 @@ export default function FavoritesScreen() {
   useEffect(() => {
     if (favoriteIds.length === 0) return;
     supabase.from("bathrooms").select().in("id", favoriteIds).then(({ data }) => setBathrooms(data ?? []));
+    supabase.from("bathroom_scores").select().in("bathroom_id", favoriteIds).then(({ data }) => setScores(data ?? []));
   }, [favoriteIds]);
   return (
     <div>
@@ -28,6 +30,7 @@ export default function FavoritesScreen() {
         <div key={b.id}>
           <p>{b.name}</p>
           <p>{b.address}</p>
+          <p>{scores.find((s) => s.bathroom_id === b.id)?.overall}</p>
         </div>
       ))}
     </div>
