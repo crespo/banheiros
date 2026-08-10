@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { setLanguage, t } from "./i18n/i18n";
 import FavoritesScreen from "./FavoritesScreen";
@@ -10,10 +10,33 @@ vi.mock("./lib/supabase", () => ({
 
 function mockFavoriteBathrooms(bathrooms: { id: string; name?: string; address?: string; overall?: number; kind?: string; paid?: boolean }[]) {
   vi.mocked(supabase.from).mockImplementation((table) => {
-    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: bathrooms.map((b) => ({ bathroom_id: b.id })), error: null }) }) } as never;
-    if (table === "bathrooms") return { select: () => ({ in: () => Promise.resolve({ data: bathrooms, error: null }) }) } as never;
-    if (table === "bathroom_scores") return { select: () => ({ in: () => Promise.resolve({ data: bathrooms.filter((b) => b.overall !== undefined).map((b) => ({ bathroom_id: b.id, overall: b.overall })), error: null }) }) } as never;
-    return { select: () => ({ in: () => Promise.resolve({ data: [], error: null }) }) } as never;
+    if (table === "favorites")
+      return {
+        select: () => ({ eq: () => Promise.resolve({ data: bathrooms.map((b) => ({ bathroom_id: b.id })), error: null }) }),
+        insert: vi.fn().mockResolvedValue({}),
+        delete: () => ({ eq: () => ({ eq: vi.fn().mockResolvedValue({}) }) }),
+      } as never;
+    if (table === "bathrooms")
+      return {
+        select: () => ({
+          in: () => Promise.resolve({ data: bathrooms, error: null }),
+          eq: () => ({ single: vi.fn().mockResolvedValue({ data: bathrooms[0] ?? null, error: null }) }),
+        }),
+      } as never;
+    if (table === "bathroom_scores")
+      return {
+        select: () => ({
+          in: () => Promise.resolve({ data: bathrooms.filter((b) => b.overall !== undefined).map((b) => ({ bathroom_id: b.id, overall: b.overall })), error: null }),
+          eq: () => ({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }),
+        }),
+      } as never;
+    if (table === "reviews")
+      return { select: () => ({ eq: () => ({ eq: () => ({ order: vi.fn().mockResolvedValue({ data: [], error: null }), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }) } as never;
+    if (table === "profiles")
+      return { select: () => ({ in: vi.fn().mockResolvedValue({ data: [], error: null }), eq: () => ({ single: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) } as never;
+    if (table === "reports")
+      return { insert: vi.fn().mockResolvedValue({ error: null }) } as never;
+    return {} as never;
   });
 }
 
@@ -50,4 +73,11 @@ test("shows the category icon for an instore bathroom", async () => {
   const { container } = render(<FavoritesScreen />);
   await screen.findByText("Loja X");
   expect(container.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeInTheDocument();
+});
+
+test("clicking a card opens BathroomDetailSheet for that bathroom", async () => {
+  mockFavoriteBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+  render(<FavoritesScreen />);
+  fireEvent.click(await screen.findByText("Banheiro Central"));
+  expect(await screen.findByRole("button", { name: t("common.close") })).toBeInTheDocument();
 });
