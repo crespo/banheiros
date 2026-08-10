@@ -345,8 +345,32 @@ test("MapScreen shows Nominatim attribution near the search input", () => {
   expect(screen.getByText(/Nominatim/)).toBeInTheDocument();
 });
 
+test("favorited bathroom pin shows star badge", async () => {
+  vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({ data: { user: { id: "u1" } } } as never);
+  const fav = { id: "b1", name: "P", address: "Rua A", kind: "public", paid: false };
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    if (table === "favorites") return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [{ bathroom_id: "b1" }], error: null }) }) }) } as never;
+    return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [fav], error: null }) }) }) } as never;
+  });
+  const { container } = render(<MapScreen />);
+  await screen.findByRole("button", { name: "P" });
+  expect(container.querySelector('path[d^="M11.525 2.295"]')).toBeInTheDocument();
+});
+
 test("MapScreen queries the favorites table on mount when a user is authenticated", async () => {
   vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({ data: { user: { id: "u1" } } } as never);
   render(<MapScreen />);
   await waitFor(() => expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("favorites"));
+});
+
+test("unfavorited bathroom pin shows no star badge", async () => {
+  vi.mocked(supabase.auth.getUser).mockResolvedValue({ data: { user: { id: "u1" } } } as never);
+  const notFav = { id: "b2", name: "Q", address: "Rua B", kind: "public", paid: false };
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    if (table === "favorites") return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [], error: null }) }) }) } as never;
+    return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [notFav], error: null }) }) }) } as never;
+  });
+  const { container } = render(<MapScreen />);
+  await screen.findByRole("button", { name: "Q" });
+  expect(container.querySelector('path[d^="M11.525 2.295"]')).not.toBeInTheDocument();
 });
