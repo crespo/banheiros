@@ -80,6 +80,8 @@ export default function ProfileScreen() {
           <button onClick={deleteAccount}>{t("profile.deleteAccountConfirmButton")}</button>
         </p>
       )}
+      <a href="/termos">{t("auth.termsLinkText")}</a>
+      <a href="/privacidade">{t("auth.privacyLinkText")}</a>
     </div>
   );
 }

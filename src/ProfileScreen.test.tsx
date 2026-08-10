@@ -117,3 +117,18 @@ test("confirming delete account invokes the delete-account edge function", async
   fireEvent.click(screen.getByRole("button", { name: t("profile.deleteAccountConfirmButton") }));
   expect(supabase.functions.invoke).toHaveBeenCalledExactlyOnceWith("delete-account");
 });
+
+test("ProfileScreen renders a link to the terms of use page", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("link", { name: t("auth.termsLinkText") })).toHaveAttribute("href", "/termos");
+});
+
+test("ProfileScreen renders a link to the privacy policy page", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("link", { name: t("auth.privacyLinkText") })).toHaveAttribute(
+    "href",
+    "/privacidade"
+  );
+});
