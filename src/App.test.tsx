@@ -50,6 +50,15 @@ test("App shows ProfileScreen when the Perfil tab is selected", async () => {
   expect(await screen.findByText("@raul")).toBeInTheDocument();
 });
 
+test("App shows FavoritesScreen when the Favoritos tab is selected", async () => {
+  vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
+    data: { session: { user: { id: "u1" } } },
+  } as never);
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button", { name: t("nav.favorites") }));
+  expect(await screen.findByText(t("favorites.emptyTitle"))).toBeInTheDocument();
+});
+
 test("App renders ChooseUsernameScreen when a session exists but no profile row does", async () => {
   vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
     data: { session: { user: { id: "u1" } } },
