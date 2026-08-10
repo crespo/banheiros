@@ -101,9 +101,9 @@ export default function AuthScreen() {
           <label>
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
             {t("auth.termsAgreePrefix")}
-            <a href="/termos">{t("auth.termsLinkText")}</a>
+            <a href="/termos" target="_blank" rel="noopener noreferrer">{t("auth.termsLinkText")}</a>
             {t("auth.termsAgreeMiddle")}
-            <a href="/privacidade">{t("auth.privacyLinkText")}</a>
+            <a href="/privacidade" target="_blank" rel="noopener noreferrer">{t("auth.privacyLinkText")}</a>
           </label>
           <button
             disabled={
