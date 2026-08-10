@@ -17,6 +17,8 @@ vi.mock("./lib/supabase", () => ({
   },
 }));
 
+const termsLabel = `${t("auth.termsAgreePrefix")}${t("auth.termsLinkText")}${t("auth.termsAgreeMiddle")}${t("auth.privacyLinkText")}`;
+
 test("AuthScreen renders a login submit button by default", () => {
   render(<AuthScreen />);
   expect(screen.getByRole("button", { name: t("auth.loginButton") })).toBeInTheDocument();
@@ -47,7 +49,19 @@ test("signup mode renders a confirm-password input", () => {
 test("signup mode renders a terms-agreement checkbox", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
-  expect(screen.getByRole("checkbox", { name: t("auth.termsAgree") })).toBeInTheDocument();
+  expect(screen.getByRole("checkbox", { name: termsLabel })).toBeInTheDocument();
+});
+
+test("signup mode renders a link to the terms of use page", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("link", { name: t("auth.termsLinkText") })).toHaveAttribute("href", "/termos");
+});
+
+test("signup mode renders a link to the privacy policy page", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("link", { name: t("auth.privacyLinkText") })).toHaveAttribute("href", "/privacidade");
 });
 
 test("signup mode renders a create-account submit button", () => {
@@ -61,7 +75,7 @@ test("signup submit is disabled when the password is shorter than 6 characters",
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "12345" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "12345" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
 });
 
@@ -78,7 +92,7 @@ test("signup submit is disabled when the confirm password does not match", () =>
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "654321" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
 });
 
@@ -87,7 +101,7 @@ test("signup submit is enabled when password, confirm, and terms are all valid",
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeEnabled();
 });
 
@@ -185,7 +199,7 @@ test("signup submit is disabled when the typed username fails format rules", () 
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "ab" } });
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
 });
@@ -196,7 +210,7 @@ test("signup submit is disabled when the typed username is taken", async () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "taken" } });
   await screen.findByText(t("auth.usernameTaken"));
   expect(screen.getByRole("button", { name: t("auth.signupButton") })).toBeDisabled();
@@ -209,7 +223,7 @@ test("clicking signup submit calls supabase.auth.signUp with email, password, an
   fireEvent.change(screen.getByLabelText(t("auth.usernameLabel")), { target: { value: "raul" } });
   fireEvent.change(screen.getByLabelText(t("auth.passwordLabel")), { target: { value: "123456" } });
   fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
-  fireEvent.click(screen.getByRole("checkbox", { name: t("auth.termsAgree") }));
+  fireEvent.click(screen.getByRole("checkbox", { name: termsLabel }));
   fireEvent.click(screen.getByRole("button", { name: t("auth.signupButton") }));
   expect(supabase.auth.signUp).toHaveBeenCalledExactlyOnceWith({
     email: "raul@gmail.com",
