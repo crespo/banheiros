@@ -14,5 +14,6 @@ export async function addFavorite(userId: string, bathroomId: string) {
 }
 
 export async function removeFavorite(userId: string, bathroomId: string) {
-  await supabase.from("favorites").delete().eq("user_id", userId).eq("bathroom_id", bathroomId);
+  const { error } = await supabase.from("favorites").delete().eq("user_id", userId).eq("bathroom_id", bathroomId);
+  if (error) throw new Error(error.message);
 }

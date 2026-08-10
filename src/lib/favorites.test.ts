@@ -57,3 +57,9 @@ test("removeFavorite filters by bathroom_id", async () => {
   await removeFavorite("u1", "b1");
   expect(innerEq).toHaveBeenCalledWith("bathroom_id", "b1");
 });
+
+test("removeFavorite rejects when supabase returns an error", async () => {
+  const innerEq = vi.fn().mockResolvedValue({ error: { message: "fail" } });
+  vi.mocked(supabase.from).mockReturnValue({ delete: () => ({ eq: () => ({ eq: innerEq }) }) } as never);
+  await expect(removeFavorite("u1", "b1")).rejects.toThrow();
+});
