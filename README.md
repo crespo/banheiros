@@ -15,7 +15,7 @@ Um PWA mobile-first que mapeia banheiros acessíveis ao público (parques, praç
 
 ## O problema
 
-Quem está na rua e precisa de um banheiro não tem como saber onde existe um acessível ao público, se está aberto, se é pago e em que condições está. A informação existe de forma fragmentada: o OpenStreetMap tem localizações, mas sem qualidade nem condições reais. Hoje a solução é perguntar, torcer ou consumir algo num comércio só para poder usar o banheiro.
+Quem está na rua e precisa de um banheiro não tem como saber onde existe um acessível ao público, se está aberto, se é pago e em que condições está. A informação existe de forma fragmentada. Hoje a solução é perguntar, torcer ou consumir algo num comércio só para poder usar o banheiro.
 
 O Banheiros existe para resolver isso: dados de localização reais (via OSM), avaliações da comunidade em critérios que importam de verdade, e moderação automática para manter o conteúdo confiável.
 
