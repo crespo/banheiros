@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { t } from "./i18n/i18n";
 import { fetchFavoriteIds } from "./lib/favorites";
+import { categorizeBathroom } from "./lib/bathroomCategory";
 import { supabase } from "./lib/supabase";
+import Icon from "./Icon";
 
 export default function FavoritesScreen() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null; address: string }[]>([]);
+  const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null; address: string; kind: string; paid: boolean }[]>([]);
   const [scores, setScores] = useState<{ bathroom_id: string; overall: number }[]>([]);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -28,6 +30,7 @@ export default function FavoritesScreen() {
       )}
       {bathrooms.map((b) => (
         <div key={b.id}>
+          <Icon name={categorizeBathroom(b.kind, b.paid).icon} />
           <p>{b.name}</p>
           <p>{b.address}</p>
           <p>{scores.find((s) => s.bathroom_id === b.id)?.overall}</p>

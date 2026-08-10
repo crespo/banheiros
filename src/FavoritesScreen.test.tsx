@@ -8,7 +8,7 @@ vi.mock("./lib/supabase", () => ({
   supabase: { from: vi.fn(), auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1" } } }) } },
 }));
 
-function mockFavoriteBathrooms(bathrooms: { id: string; name?: string; address?: string; overall?: number }[]) {
+function mockFavoriteBathrooms(bathrooms: { id: string; name?: string; address?: string; overall?: number; kind?: string; paid?: boolean }[]) {
   vi.mocked(supabase.from).mockImplementation((table) => {
     if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: bathrooms.map((b) => ({ bathroom_id: b.id })), error: null }) }) } as never;
     if (table === "bathrooms") return { select: () => ({ in: () => Promise.resolve({ data: bathrooms, error: null }) }) } as never;
@@ -43,4 +43,11 @@ test("shows the favorited bathroom's overall score", async () => {
   mockFavoriteBathrooms([{ id: "b1", overall: 4.2 }]);
   render(<FavoritesScreen />);
   expect(await screen.findByText("4.2")).toBeInTheDocument();
+});
+
+test("shows the category icon for an instore bathroom", async () => {
+  mockFavoriteBathrooms([{ id: "b1", name: "Loja X", kind: "instore", paid: false }]);
+  const { container } = render(<FavoritesScreen />);
+  await screen.findByText("Loja X");
+  expect(container.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeInTheDocument();
 });
