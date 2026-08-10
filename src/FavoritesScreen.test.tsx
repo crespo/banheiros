@@ -8,12 +8,17 @@ vi.mock("./lib/supabase", () => ({
   supabase: { from: vi.fn(), auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u1" } } }) } },
 }));
 
-beforeEach(() => {
-  setLanguage("pt");
+function mockFavoriteBathrooms(bathrooms: { id: string; name?: string; address?: string }[]) {
   vi.mocked(supabase.from).mockImplementation((table) => {
-    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }) } as never;
+    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: bathrooms.map((b) => ({ bathroom_id: b.id })), error: null }) }) } as never;
+    if (table === "bathrooms") return { select: () => ({ in: () => Promise.resolve({ data: bathrooms, error: null }) }) } as never;
     return { select: () => ({ in: () => Promise.resolve({ data: [], error: null }) }) } as never;
   });
+}
+
+beforeEach(() => {
+  setLanguage("pt");
+  mockFavoriteBathrooms([]);
 });
 
 test("FavoritesScreen shows empty-state title when user has no favorites", async () => {
@@ -22,11 +27,13 @@ test("FavoritesScreen shows empty-state title when user has no favorites", async
 });
 
 test("shows the favorited bathroom's name", async () => {
-  vi.mocked(supabase.from).mockImplementation((table) => {
-    if (table === "favorites") return { select: () => ({ eq: () => Promise.resolve({ data: [{ bathroom_id: "b1" }], error: null }) }) } as never;
-    if (table === "bathrooms") return { select: () => ({ in: () => Promise.resolve({ data: [{ id: "b1", name: "Banheiro Central" }], error: null }) }) } as never;
-    return { select: () => ({ in: () => Promise.resolve({ data: [], error: null }) }) } as never;
-  });
+  mockFavoriteBathrooms([{ id: "b1", name: "Banheiro Central" }]);
   render(<FavoritesScreen />);
   expect(await screen.findByText("Banheiro Central")).toBeInTheDocument();
+});
+
+test("shows the favorited bathroom's address", async () => {
+  mockFavoriteBathrooms([{ id: "b1", address: "Rua das Flores, 42" }]);
+  render(<FavoritesScreen />);
+  expect(await screen.findByText("Rua das Flores, 42")).toBeInTheDocument();
 });

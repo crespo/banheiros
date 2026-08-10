@@ -5,7 +5,7 @@ import { supabase } from "./lib/supabase";
 
 export default function FavoritesScreen() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null }[]>([]);
+  const [bathrooms, setBathrooms] = useState<{ id: string; name: string | null; address: string }[]>([]);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) fetchFavoriteIds(user.id).then(setFavoriteIds);
@@ -25,7 +25,10 @@ export default function FavoritesScreen() {
         </div>
       )}
       {bathrooms.map((b) => (
-        <p key={b.id}>{b.name}</p>
+        <div key={b.id}>
+          <p>{b.name}</p>
+          <p>{b.address}</p>
+        </div>
       ))}
     </div>
   );
