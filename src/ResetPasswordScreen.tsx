@@ -6,10 +6,12 @@ export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
 
   function submit() {
     supabase.auth.updateUser({ password }).then(({ error }) => {
-      if (!error) setSuccess(true);
+      if (error) setError(true);
+      else setSuccess(true);
     });
   }
 
@@ -23,6 +25,7 @@ export default function ResetPasswordScreen() {
         {t("auth.resetPasswordButton")}
       </button>
       {success && <p>{t("auth.resetPasswordSuccess")}</p>}
+      {error && <p>{t("auth.resetPasswordError")}</p>}
     </div>
   );
 }
