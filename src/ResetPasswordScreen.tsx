@@ -5,9 +5,12 @@ import { supabase } from "./lib/supabase";
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [success, setSuccess] = useState(false);
 
   function submit() {
-    supabase.auth.updateUser({ password });
+    supabase.auth.updateUser({ password }).then(({ error }) => {
+      if (!error) setSuccess(true);
+    });
   }
 
   return (
@@ -19,6 +22,7 @@ export default function ResetPasswordScreen() {
       <button disabled={password.length < 6 || password !== confirm} onClick={submit}>
         {t("auth.resetPasswordButton")}
       </button>
+      {success && <p>{t("auth.resetPasswordSuccess")}</p>}
     </div>
   );
 }
