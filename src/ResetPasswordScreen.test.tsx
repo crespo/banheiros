@@ -64,6 +64,16 @@ test("a successful password update shows a success message", async () => {
   expect(await screen.findByText(t("auth.resetPasswordSuccess"))).toBeInTheDocument();
 });
 
+test("clicking continue after a successful update calls onComplete", async () => {
+  const onComplete = vi.fn();
+  render(<ResetPasswordScreen onComplete={onComplete} />);
+  fireEvent.change(screen.getByLabelText(t("auth.newPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
+  fireEvent.click(await screen.findByRole("button", { name: t("auth.continueButton") }));
+  expect(onComplete).toHaveBeenCalledOnce();
+});
+
 test("a rejected password update shows an error message", async () => {
   vi.mocked(supabase.auth.updateUser).mockResolvedValueOnce({ data: {}, error: { message: "Password too weak" } } as never);
   render(<ResetPasswordScreen />);

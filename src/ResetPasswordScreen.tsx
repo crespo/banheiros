@@ -2,7 +2,7 @@ import { useState } from "react";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
-export default function ResetPasswordScreen() {
+export default function ResetPasswordScreen({ onComplete }: { onComplete?: () => void }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [success, setSuccess] = useState(false);
@@ -24,7 +24,12 @@ export default function ResetPasswordScreen() {
       <button disabled={password.length < 6 || password !== confirm} onClick={submit}>
         {t("auth.resetPasswordButton")}
       </button>
-      {success && <p>{t("auth.resetPasswordSuccess")}</p>}
+      {success && (
+        <>
+          <p>{t("auth.resetPasswordSuccess")}</p>
+          <button onClick={onComplete}>{t("auth.continueButton")}</button>
+        </>
+      )}
       {error && <p>{t("auth.resetPasswordError")}</p>}
     </div>
   );
