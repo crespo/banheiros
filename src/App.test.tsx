@@ -4,6 +4,8 @@ import App from "./App";
 import { t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
 
+vi.mock("maplibre-gl", () => ({ default: { Map: vi.fn() } }));
+
 vi.mock("./lib/supabase", () => ({
   supabase: {
     auth: {
@@ -18,6 +20,7 @@ vi.mock("./lib/supabase", () => ({
             .fn()
             .mockResolvedValue({ data: { username: "raul", language: "pt", default_show_username: false }, error: null }),
           maybeSingle: vi.fn().mockResolvedValue({ data: { username: "raul" }, error: null }),
+          then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }),
         }),
       }),
     }),
@@ -30,12 +33,12 @@ test("App renders AuthScreen when there is no session", async () => {
   expect(await screen.findByLabelText(t("auth.emailLabel"))).toBeInTheDocument();
 });
 
-test("App renders ProfileScreen when there is a session", async () => {
+test("App renders the Map tab by default when there is a session", async () => {
   vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
     data: { session: { user: { id: "u1" } } },
   } as never);
   render(<App />);
-  expect(await screen.findByText("@raul")).toBeInTheDocument();
+  expect(await screen.findByRole("button", { name: t("nav.map") })).toBeInTheDocument();
 });
 
 test("App renders ChooseUsernameScreen when a session exists but no profile row does", async () => {
