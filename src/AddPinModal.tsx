@@ -26,10 +26,12 @@ export default function AddPinModal({ onClose }: Props) {
   const [closeTime, setCloseTime] = useState("18:00");
   const [geocodeError, setGeocodeError] = useState(false);
   const [sent, setSent] = useState(false);
+  const [rejected, setRejected] = useState(false);
   const valid = name.trim().length > 2 && address.trim().length > 3;
 
   async function handleSubmit() {
     setGeocodeError(false);
+    setRejected(false);
     const point = await geocode(address);
     if (!point) {
       setGeocodeError(true);
@@ -42,6 +44,8 @@ export default function AddPinModal({ onClose }: Props) {
     if (data?.verdict === "approved" || data?.verdict === "pending") {
       setSent(true);
       setTimeout(onClose, 1800);
+    } else if (data?.verdict === "rejected") {
+      setRejected(true);
     }
   }
 
@@ -71,6 +75,7 @@ export default function AddPinModal({ onClose }: Props) {
               <input type="time" name="addpin-close" className="input" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
             </fieldset>
             {geocodeError && <p>{t("addPin.geocodeError")}</p>}
+            {rejected && <p>{t("review.moderationWarning")}</p>}
             <button disabled={!valid} onClick={handleSubmit}>{t("addPin.submit")}</button>
           </>
         )}
