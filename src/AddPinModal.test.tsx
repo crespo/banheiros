@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import AddPinModal from "./AddPinModal";
 import { t } from "./i18n/i18n";
@@ -34,4 +34,11 @@ test("hours fields default to 08:00 open and 18:00 close", () => {
 test("submit button is disabled when the form opens empty", () => {
   render(<AddPinModal onClose={vi.fn()} />);
   expect(screen.getByRole("button", { name: t("addPin.submit") })).toBeDisabled();
+});
+
+test("submit button becomes enabled once name and address pass the length thresholds", () => {
+  render(<AddPinModal onClose={vi.fn()} />);
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.nameLabel") }), { target: { value: "Padaria" } });
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.addressLabel") }), { target: { value: "Rua das Flores, 123" } });
+  expect(screen.getByRole("button", { name: t("addPin.submit") })).toBeEnabled();
 });
