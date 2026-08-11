@@ -580,3 +580,96 @@ h4.section-title {
   font-size: 13px;
   margin-bottom: var(--space-3);
 }
+
+/* ---- auth ---- */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.auth-form .btn-block {
+  margin-top: 0;
+}
+.auth-form .divider-row {
+  margin: 0;
+}
+.field-note {
+  font-size: 11.5px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  margin-top: 4px;
+}
+.field-note.warn {
+  color: var(--color-accent-3-800);
+}
+.input.taken {
+  border-color: var(--color-accent-3-600);
+}
+.suggest-chip {
+  display: inline-flex;
+  background: var(--color-accent-3-100);
+  color: var(--color-accent-3-800);
+  border: 1px solid var(--color-accent-3-300);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.pw-field {
+  position: relative;
+}
+.pw-field .input {
+  padding-right: 40px;
+}
+.pw-toggle {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 32px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.form-links {
+  display: flex;
+  justify-content: flex-end;
+}
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: var(--space-2) 0;
+  color: color-mix(in srgb, var(--color-text) 45%, transparent);
+  font-size: 12px;
+}
+.divider-row .line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-divider);
+}
+.switch-mode {
+  text-align: center;
+  font-size: 13px;
+  margin-top: var(--space-4);
+}
+.switch-mode button {
+  background: none;
+  border: 0;
+  color: var(--color-accent-700);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+}
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.checkbox-row input {
+  margin-top: 2px;
+}

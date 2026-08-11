@@ -46,6 +46,30 @@ test("signup mode renders a confirm-password input", () => {
   expect(screen.getByLabelText(t("auth.confirmPasswordLabel"))).toBeInTheDocument();
 });
 
+test("clicking the eye icon on the login password field reveals it", () => {
+  render(<AuthScreen />);
+  const passwordInput = screen.getByLabelText(t("auth.passwordLabel"));
+  expect(passwordInput).toHaveAttribute("type", "password");
+  fireEvent.click(passwordInput.closest(".pw-field")!.querySelector("button")!);
+  expect(passwordInput).toHaveAttribute("type", "text");
+});
+
+test("clicking the eye icon on the signup password field reveals it", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  const passwordInput = screen.getByLabelText(t("auth.passwordLabel"));
+  fireEvent.click(passwordInput.closest(".pw-field")!.querySelector("button")!);
+  expect(passwordInput).toHaveAttribute("type", "text");
+});
+
+test("clicking the eye icon on the signup confirm-password field reveals it", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  const confirmInput = screen.getByLabelText(t("auth.confirmPasswordLabel"));
+  fireEvent.click(confirmInput.closest(".pw-field")!.querySelector("button")!);
+  expect(confirmInput).toHaveAttribute("type", "text");
+});
+
 test("signup mode renders a terms-agreement checkbox", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
