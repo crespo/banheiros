@@ -90,3 +90,11 @@ test("clicking the eye icon on the new-password field reveals it", () => {
   fireEvent.click(passwordInput.closest(".pw-field")!.querySelector("button")!);
   expect(passwordInput).toHaveAttribute("type", "text");
 });
+
+test("clicking the eye icon on the confirm-password field reveals it", () => {
+  render(<ResetPasswordScreen />);
+  const confirmInput = screen.getByLabelText(t("auth.confirmPasswordLabel"));
+  expect(confirmInput).toHaveAttribute("type", "password");
+  fireEvent.click(confirmInput.closest(".pw-field")!.querySelector("button")!);
+  expect(confirmInput).toHaveAttribute("type", "text");
+});

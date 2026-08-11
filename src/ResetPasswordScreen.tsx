@@ -9,6 +9,7 @@ export default function ResetPasswordScreen({ onComplete }: { onComplete?: () =>
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   function submit() {
     supabase.auth.updateUser({ password }).then(({ error }) => {
@@ -31,7 +32,16 @@ export default function ResetPasswordScreen({ onComplete }: { onComplete?: () =>
         </button>
       </div>
       <label htmlFor="confirm-password">{t("auth.confirmPasswordLabel")}</label>
-      <input id="confirm-password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+      <div className="pw-field">
+        <input id="confirm-password" type={showConfirmPassword ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <button
+          type="button"
+          aria-label={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          <Icon name={showConfirmPassword ? "eyeOff" : "eye"} />
+        </button>
+      </div>
       <button disabled={password.length < 6 || password !== confirm} onClick={submit}>
         {t("auth.resetPasswordButton")}
       </button>
