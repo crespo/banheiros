@@ -82,6 +82,15 @@ test("App renders PrivacidadeScreen at the /privacidade route", async () => {
   expect(await screen.findByRole("heading", { name: t("auth.privacyLinkText") })).toBeInTheDocument();
 });
 
+test("clicking the map FAB opens AddPinModal", async () => {
+  vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
+    data: { session: { user: { id: "u1" } } },
+  } as never);
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button", { name: t("map.addBathroom") }));
+  expect(await screen.findByRole("textbox", { name: t("addPin.nameLabel") })).toBeInTheDocument();
+});
+
 test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", async () => {
   render(<App />);
   await screen.findByLabelText(t("auth.emailLabel"));
