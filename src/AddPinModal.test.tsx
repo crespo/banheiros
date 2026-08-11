@@ -109,3 +109,14 @@ test("closes the modal 1800ms after an approved verdict shows the success banner
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
+
+test("shows the success banner when moderate-submit responds with a pending verdict", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "pending", reason: null }, error: null });
+  render(<AddPinModal onClose={vi.fn()} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  expect(await screen.findByText(t("addPin.successNote"))).toBeInTheDocument();
+  vi.unstubAllGlobals();
+});
