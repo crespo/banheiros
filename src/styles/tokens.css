@@ -1,14 +1,12 @@
-/* Design tokens — sourced from the "Organic" design system (handoff v1).
-   Colors are v1 placeholders: design v2 re-themes to green primary/secondary
-   + orange accent (docs/design/2026-08-02-design-v2-prompt.md). Swap values
-   here only; nothing outside this file hardcodes color. */
+/* Design tokens — sourced from the "Organic" design system, re-themed for
+   v2 (docs/design/2026-08-02-design-v2-prompt.md): green primary/secondary
+   + orange accent. Swap values here only; nothing outside this file
+   hardcodes color. */
 
 :root {
   --color-bg: #f5ead8;
   --color-surface: #ebddc5;
   --color-text: #201e1d;
-  --color-accent: #c67139;
-  --color-accent-2: #7a8a5e;
   --color-divider: color-mix(in srgb, #201e1d 16%, transparent);
 
   --color-neutral-100: #f9f4ed;
@@ -21,29 +19,50 @@
   --color-neutral-800: #474238;
   --color-neutral-900: #2e2b25;
 
-  --color-accent-100: #fff2eb;
-  --color-accent-200: #ffe1d0;
-  --color-accent-300: #ffc6a5;
-  --color-accent-400: #f6a06b;
-  --color-accent-500: #d67f48;
-  --color-accent-600: #b2622d;
-  --color-accent-700: #8c491a;
-  --color-accent-800: #643312;
-  --color-accent-900: #402310;
-
-  --color-accent-2-100: #f0fae1;
-  --color-accent-2-200: #e1eecc;
-  --color-accent-2-300: #ccdbb2;
-  --color-accent-2-400: #aebf92;
-  --color-accent-2-500: #8fa073;
-  --color-accent-2-600: #728157;
-  --color-accent-2-700: #56633f;
-  --color-accent-2-800: #3d472b;
-  --color-accent-2-900: #272e1b;
-
   /* App-specific, derived in OKLCH (base palette has no blue): map water. */
-  --map-water: oklch(78% 0.05 222);
-  --map-water-deep: oklch(58% 0.06 224);
+  --map-water: oklch(76% 0.045 224);
+  --map-water-deep: oklch(56% 0.05 226);
+  --map-block: var(--color-neutral-100);
+  --map-block-line: var(--color-neutral-300);
+  --nav-h: 66px;
+
+  /* v2 re-theme: two greens (primary + secondary) and an orange accent
+     reserved for highlights/notable actions, replacing Organic's
+     terracotta/sage. Ramps re-derived in oklch on lightness steps matching
+     the originals so contrast behavior (e.g. the 700 step for body-size
+     text) carries over. */
+  --color-accent: oklch(58% 0.11 152);
+  --color-accent-100: oklch(96% 0.02 152);
+  --color-accent-200: oklch(91% 0.045 152);
+  --color-accent-300: oklch(83% 0.075 152);
+  --color-accent-400: oklch(72% 0.10 152);
+  --color-accent-500: oklch(58% 0.11 152);
+  --color-accent-600: oklch(48% 0.10 152);
+  --color-accent-700: oklch(38% 0.09 152);
+  --color-accent-800: oklch(29% 0.075 152);
+  --color-accent-900: oklch(20% 0.055 152);
+
+  --color-accent-2: oklch(60% 0.065 112);
+  --color-accent-2-100: oklch(96% 0.015 112);
+  --color-accent-2-200: oklch(90% 0.03 112);
+  --color-accent-2-300: oklch(82% 0.045 112);
+  --color-accent-2-400: oklch(71% 0.06 112);
+  --color-accent-2-500: oklch(60% 0.065 112);
+  --color-accent-2-600: oklch(50% 0.06 112);
+  --color-accent-2-700: oklch(40% 0.055 112);
+  --color-accent-2-800: oklch(30% 0.045 112);
+  --color-accent-2-900: oklch(21% 0.035 112);
+
+  --color-accent-3: oklch(68% 0.16 50);
+  --color-accent-3-100: oklch(96% 0.03 50);
+  --color-accent-3-200: oklch(90% 0.06 50);
+  --color-accent-3-300: oklch(83% 0.10 50);
+  --color-accent-3-400: oklch(75% 0.14 50);
+  --color-accent-3-500: oklch(68% 0.16 50);
+  --color-accent-3-600: oklch(58% 0.15 50);
+  --color-accent-3-700: oklch(47% 0.13 50);
+  --color-accent-3-800: oklch(35% 0.10 50);
+  --color-accent-3-900: oklch(24% 0.07 50);
 
   --font-heading: "Caprasimo", system-ui, sans-serif;
   --font-heading-weight: 400;
@@ -92,17 +111,6 @@ h6 {
   line-height: 1.12;
   letter-spacing: -0.015em;
   margin: 0 0 var(--space-2);
-}
-
-:focus {
-  outline: none;
-}
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-::selection {
-  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
 .pin--accent {
