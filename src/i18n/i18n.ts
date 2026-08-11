@@ -144,6 +144,8 @@ const pt: Record<string, string> = {
   "addPin.hoursLabel": "Horário de funcionamento",
   "addPin.submit": "Enviar para moderação",
   "addPin.successNote": "Recebemos seu cadastro! Ele passa por moderação automática antes de aparecer no mapa para todos.",
+  "addPin.geocodeError": "Não conseguimos localizar esse endereço. Confira e tente novamente.",
+  "addPin.submitError": "Não foi possível enviar seu cadastro. Tente novamente.",
 };
 
 const en: Record<string, string> = {
@@ -289,6 +291,8 @@ const en: Record<string, string> = {
   "addPin.hoursLabel": "Opening hours",
   "addPin.submit": "Submit for moderation",
   "addPin.successNote": "Got it! This goes through automatic moderation before it appears on the map for everyone.",
+  "addPin.geocodeError": "We couldn't locate that address. Please check it and try again.",
+  "addPin.submitError": "Couldn't submit your bathroom. Please try again.",
 };
 
 export const dicts: Record<Lang, Record<string, string>> = { pt, en };

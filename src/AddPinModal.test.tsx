@@ -71,3 +71,14 @@ test("clicking submit geocodes the address then calls moderate-submit with the r
   );
   vi.unstubAllGlobals();
 });
+
+test("shows a geocode error and does not call moderate-submit when the address has no geocoding result", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([]) }));
+  render(<AddPinModal onClose={vi.fn()} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  expect(await screen.findByText(t("addPin.geocodeError"))).toBeInTheDocument();
+  expect(supabase.functions.invoke).not.toHaveBeenCalled();
+  vi.unstubAllGlobals();
+});

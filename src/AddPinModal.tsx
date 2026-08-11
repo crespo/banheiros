@@ -24,11 +24,16 @@ export default function AddPinModal({ onClose }: Props) {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("public");
   const [openTime, setOpenTime] = useState("08:00");
   const [closeTime, setCloseTime] = useState("18:00");
+  const [geocodeError, setGeocodeError] = useState(false);
   const valid = name.trim().length > 2 && address.trim().length > 3;
 
   async function handleSubmit() {
+    setGeocodeError(false);
     const point = await geocode(address);
-    if (!point) return;
+    if (!point) {
+      setGeocodeError(true);
+      return;
+    }
     const { kind, paid } = decomposeCategory(category);
     await supabase.functions.invoke("moderate-submit", {
       body: { type: "pin", name, address, kind, paid, open_time: openTime, close_time: closeTime, lat: point.lat, lon: point.lon },
@@ -56,6 +61,7 @@ export default function AddPinModal({ onClose }: Props) {
           <input type="time" name="addpin-open" className="input" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />
           <input type="time" name="addpin-close" className="input" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
         </fieldset>
+        {geocodeError && <p>{t("addPin.geocodeError")}</p>}
         <button disabled={!valid} onClick={handleSubmit}>{t("addPin.submit")}</button>
       </div>
     </div>
