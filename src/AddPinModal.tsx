@@ -13,6 +13,7 @@ export default function AddPinModal({ onClose }: Props) {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("public");
   const [openTime, setOpenTime] = useState("08:00");
   const [closeTime, setCloseTime] = useState("18:00");
+  const valid = name.trim().length > 2 && address.trim().length > 3;
 
   return (
     <div className="dialog-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -35,6 +36,7 @@ export default function AddPinModal({ onClose }: Props) {
           <input type="time" name="addpin-open" className="input" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />
           <input type="time" name="addpin-close" className="input" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
         </fieldset>
+        <button disabled={!valid}>{t("addPin.submit")}</button>
       </div>
     </div>
   );

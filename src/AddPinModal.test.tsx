@@ -30,3 +30,8 @@ test("hours fields default to 08:00 open and 18:00 close", () => {
   expect(container.querySelector('input[name="addpin-open"]')).toHaveValue("08:00");
   expect(container.querySelector('input[name="addpin-close"]')).toHaveValue("18:00");
 });
+
+test("submit button is disabled when the form opens empty", () => {
+  render(<AddPinModal onClose={vi.fn()} />);
+  expect(screen.getByRole("button", { name: t("addPin.submit") })).toBeDisabled();
+});
