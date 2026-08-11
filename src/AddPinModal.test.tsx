@@ -93,3 +93,19 @@ test("shows the success banner when moderate-submit responds with an approved ve
   expect(await screen.findByText(t("addPin.successNote"))).toBeInTheDocument();
   vi.unstubAllGlobals();
 });
+
+test("closes the modal 1800ms after an approved verdict shows the success banner", async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+  const onClose = vi.fn();
+  render(<AddPinModal onClose={onClose} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  await vi.advanceTimersByTimeAsync(1800);
+  expect(onClose).toHaveBeenCalledOnce();
+
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});

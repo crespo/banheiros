@@ -39,7 +39,10 @@ export default function AddPinModal({ onClose }: Props) {
     const { data } = await supabase.functions.invoke("moderate-submit", {
       body: { type: "pin", name, address, kind, paid, open_time: openTime, close_time: closeTime, lat: point.lat, lon: point.lon },
     });
-    if (data?.verdict === "approved" || data?.verdict === "pending") setSent(true);
+    if (data?.verdict === "approved" || data?.verdict === "pending") {
+      setSent(true);
+      setTimeout(onClose, 1800);
+    }
   }
 
   return (
