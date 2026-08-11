@@ -42,3 +42,15 @@ test("clicking continue inserts the profile row and calls onCreated", async () =
   expect(insertMock).toHaveBeenCalledExactlyOnceWith({ user_id: "u1", username: "raul" });
   await vi.waitFor(() => expect(onCreated).toHaveBeenCalledOnce());
 });
+
+test("shows an error message and does not call onCreated when the profile insert fails", async () => {
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: "raul", error: null } as never);
+  const insertMock = vi.fn().mockResolvedValue({ error: { code: "23514", message: "check constraint violated" } });
+  vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as never);
+  const onCreated = vi.fn();
+  render(<ChooseUsernameScreen onCreated={onCreated} />);
+  await screen.findByDisplayValue("raul");
+  fireEvent.click(screen.getByRole("button", { name: t("auth.continueButton") }));
+  expect(await screen.findByText(t("auth.chooseUsernameError"))).toBeInTheDocument();
+  expect(onCreated).not.toHaveBeenCalled();
+});

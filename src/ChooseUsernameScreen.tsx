@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 export default function ChooseUsernameScreen({ onCreated }: { onCreated: () => void }) {
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -22,6 +23,7 @@ export default function ChooseUsernameScreen({ onCreated }: { onCreated: () => v
       .from("profiles")
       .insert({ user_id: userId, username })
       .then(({ error }) => {
+        setError(error !== null);
         if (!error) onCreated();
       });
   }
@@ -31,6 +33,7 @@ export default function ChooseUsernameScreen({ onCreated }: { onCreated: () => v
       <label htmlFor="username">{t("auth.usernameLabel")}</label>
       <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
       <button onClick={submit}>{t("auth.continueButton")}</button>
+      {error && <p className="field-note warn">{t("auth.chooseUsernameError")}</p>}
     </div>
   );
 }

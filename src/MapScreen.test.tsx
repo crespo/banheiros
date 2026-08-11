@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import * as maplibregl from "maplibre-gl";
 import { setLanguage, t } from "./i18n/i18n";
@@ -6,7 +6,15 @@ import MapScreen from "./MapScreen";
 import { supabase } from "./lib/supabase";
 import { MACEIO_CENTER } from "./lib/mapCoverage";
 
-vi.mock("maplibre-gl", () => ({ Map: vi.fn() }));
+vi.mock("maplibre-gl", () => ({
+  Map: vi.fn(),
+  Marker: vi.fn().mockImplementation(function (options: { element: HTMLElement }) {
+    const marker = { setLngLat: vi.fn(), addTo: vi.fn(), remove: vi.fn(), getElement: () => options.element };
+    marker.setLngLat.mockReturnValue(marker);
+    marker.addTo.mockReturnValue(marker);
+    return marker;
+  }),
+}));
 
 type MapStyle = { sources?: Record<string, { tiles?: string[]; attribution?: string }>; layers?: unknown[] };
 vi.mock("./lib/supabase", () => ({ supabase: { from: vi.fn(), auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } } }));
@@ -34,6 +42,19 @@ function mockBathrooms(rows: unknown[], detail: unknown = rows[0] ?? null) {
     select: () => ({ eq, in: inFn }),
   } as never);
   return eq;
+}
+
+function markerFor(bathroomName: string) {
+  const results = vi.mocked(maplibregl.Marker).mock.results;
+  for (let i = results.length - 1; i >= 0; i--) {
+    const marker = results[i].value as { getElement: () => HTMLElement; remove: () => void; setLngLat: (v: [number, number]) => unknown };
+    if (marker.getElement().getAttribute("aria-label") === bathroomName) return marker;
+  }
+  return undefined;
+}
+
+function markerElementFor(bathroomName: string) {
+  return markerFor(bathroomName)?.getElement();
 }
 
 function mockPreciseGeolocation() {
@@ -65,34 +86,34 @@ test('clicking the "Público" chip selects it and deselects "Todos"', () => {
   expect(screen.getByRole("button", { name: t("map.filterAll") })).toHaveAttribute("aria-pressed", "false");
 });
 
-test('clicking "Público" chip hides instore bathroom pins', async () => {
+test('clicking "Público" chip removes the instore bathroom marker', async () => {
   mockBathrooms([
-    { id: "pub1", name: "Public One", address: "Rua A", kind: "public",  paid: false },
-    { id: "inst1", name: "Instore One", address: "Rua B", kind: "instore", paid: false },
+    { id: "pub1", name: "Public One", address: "Rua A", kind: "public",  paid: false, lat: -9.58, lon: -35.73 },
+    { id: "inst1", name: "Instore One", address: "Rua B", kind: "instore", paid: false, lat: -9.59, lon: -35.74 },
   ]);
   render(<MapScreen />);
-  await screen.findByRole("button", { name: "Instore One" });
+  await waitFor(() => expect(markerFor("Instore One")).toBeTruthy());
+  const instoreMarker = markerFor("Instore One")!;
   fireEvent.click(screen.getByRole("button", { name: t("map.filterPublic") }));
-  expect(screen.queryByRole("button", { name: "Instore One" })).not.toBeInTheDocument();
+  await waitFor(() => expect(instoreMarker.remove).toHaveBeenCalled());
 });
 
-test("MapScreen renders a pin button using a generic label when bathroom name is null", async () => {
-  mockBathrooms([{ id: "b2", name: null, address: "Rua B", kind: "public", paid: false }]);
+test("marker uses a generic label when bathroom name is null", async () => {
+  mockBathrooms([{ id: "b2", name: null, address: "Rua B", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
   render(<MapScreen />);
-  expect(await screen.findByRole("button", { name: t("bathroom.unnamed") })).toBeInTheDocument();
+  await waitFor(() => expect(markerElementFor(t("bathroom.unnamed"))).toBeTruthy());
 });
 
-test("paid bathroom pin shows dollar-sign badge; free bathroom pin does not", async () => {
-  const paid = { id: "b3", name: "P", address: "Rua C", kind: "public", paid: true };
-  const free = { id: "b4", name: "F", address: "Rua D", kind: "public", paid: false };
-  mockBathrooms([paid]);
-  const { container: paidContainer } = render(<MapScreen />);
-  await within(paidContainer).findByRole("button", { name: "P" });
-  mockBathrooms([free]);
-  const { container: freeContainer } = render(<MapScreen />);
-  await within(freeContainer).findByRole("button", { name: "F" });
-  expect(paidContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).toBeInTheDocument();
-  expect(freeContainer.querySelector('line[x1="12"][x2="12"][y1="2"][y2="22"]')).not.toBeInTheDocument();
+test("paid bathroom marker shows dollar-sign badge; free bathroom marker does not", async () => {
+  mockBathrooms([{ id: "b3", name: "P", address: "Rua C", kind: "public", paid: true, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("P")).toBeTruthy());
+  expect(markerElementFor("P")!.querySelector(".pin-sub")).toBeTruthy();
+
+  mockBathrooms([{ id: "b4", name: "F", address: "Rua D", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("F")).toBeTruthy());
+  expect(markerElementFor("F")!.querySelector(".pin-sub")).toBeNull();
 });
 
 describe("user location marker", () => {
@@ -215,69 +236,86 @@ test("MapScreen filters bathrooms query by status=approved", () => {
   expect(eq).toHaveBeenCalledWith("status", "approved");
 });
 
-test("MapScreen renders a pin button for a bathroom returned by the fetch", async () => {
-  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+test("MapScreen creates a marker positioned at the bathroom's [lon, lat]", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
   render(<MapScreen />);
-  expect(await screen.findByRole("button", { name: "Banheiro Central" })).toBeInTheDocument();
+  await waitFor(() => expect(maplibregl.Marker).toHaveBeenCalledOnce());
+  const marker = vi.mocked(maplibregl.Marker).mock.results[0].value;
+  expect(marker.setLngLat).toHaveBeenCalledWith([-35.73, -9.58]);
 });
 
-test("pin renders building2 icon for public bathroom and store icon for instore bathroom", async () => {
-  const pub  = { id: "b5", name: "P", address: "Rua E", kind: "public",  paid: false };
-  const inst = { id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false };
-  mockBathrooms([pub]);
-  const { container: publicContainer } = render(<MapScreen />);
-  await within(publicContainer).findByRole("button", { name: "P" });
-  mockBathrooms([inst]);
-  const { container: instoreContainer } = render(<MapScreen />);
-  await within(instoreContainer).findByRole("button", { name: "I" });
-  expect(publicContainer.querySelector('path[d^="M6 22V4"]')).toBeInTheDocument();
-  expect(publicContainer.querySelector('path[d="M3 9 4 4h16l1 5"]')).not.toBeInTheDocument();
-  expect(instoreContainer.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeInTheDocument();
-  expect(instoreContainer.querySelector('path[d^="M6 22V4"]')).not.toBeInTheDocument();
+test("unmounting MapScreen removes all markers", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
+  const { unmount } = render(<MapScreen />);
+  await waitFor(() => expect(markerFor("Banheiro Central")).toBeTruthy());
+  const marker = markerFor("Banheiro Central")!;
+  unmount();
+  expect(marker.remove).toHaveBeenCalled();
 });
 
-test("pin button carries a tone class matching the bathroom category", async () => {
-  const pub  = { id: "b7", name: "P2", address: "Rua G", kind: "public",  paid: false };
-  const inst = { id: "b8", name: "I2", address: "Rua H", kind: "instore", paid: false };
-  mockBathrooms([pub]);
-  const { container: publicContainer } = render(<MapScreen />);
-  const publicPin = await within(publicContainer).findByRole("button", { name: "P2" });
-  mockBathrooms([inst]);
-  const { container: instoreContainer } = render(<MapScreen />);
-  const instorePin = await within(instoreContainer).findByRole("button", { name: "I2" });
-  expect(publicPin).toHaveClass("pin--accent");
-  expect(instorePin).toHaveClass("pin--accent2");
-});
-
-test("clicking a pin marks it selected", async () => {
-  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+test("bathroom with null lat/lon is skipped without creating a marker", async () => {
+  mockBathrooms([
+    { id: "b9", name: "No Coords", address: "Rua Z", kind: "public", paid: false, lat: null, lon: null },
+    { id: "b10", name: "Has Coords", address: "Rua Y", kind: "public", paid: false, lat: -9.58, lon: -35.73 },
+  ]);
   render(<MapScreen />);
-  const pin = await screen.findByRole("button", { name: "Banheiro Central" });
-  expect(pin).toHaveAttribute("aria-pressed", "false");
-  fireEvent.click(pin);
-  expect(pin).toHaveAttribute("aria-pressed", "true");
+  await waitFor(() => expect(markerElementFor("Has Coords")).toBeTruthy());
+  expect(markerElementFor("No Coords")).toBeUndefined();
 });
 
-test("clicking a pin opens the detail sheet for the selected bathroom", async () => {
-  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false }]);
+test("marker renders building2 icon for public bathroom and store icon for instore bathroom", async () => {
+  mockBathrooms([{ id: "b5", name: "P", address: "Rua E", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
   render(<MapScreen />);
-  const pin = await screen.findByRole("button", { name: "Banheiro Central" });
-  fireEvent.click(pin);
+  await waitFor(() => expect(markerElementFor("P")).toBeTruthy());
+  expect(markerElementFor("P")!.querySelector('path[d^="M6 22V4"]')).toBeTruthy();
+
+  mockBathrooms([{ id: "b6", name: "I", address: "Rua F", kind: "instore", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("I")).toBeTruthy());
+  expect(markerElementFor("I")!.querySelector('path[d="M3 9 4 4h16l1 5"]')).toBeTruthy();
+});
+
+test("marker's pin-badge tone class matches the bathroom category", async () => {
+  mockBathrooms([{ id: "b7", name: "P2", address: "Rua G", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("P2")).toBeTruthy());
+  expect(markerElementFor("P2")!.querySelector(".pin-badge")).toHaveClass("tone-accent");
+
+  mockBathrooms([{ id: "b8", name: "I2", address: "Rua H", kind: "instore", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("I2")).toBeTruthy());
+  expect(markerElementFor("I2")!.querySelector(".pin-badge")).toHaveClass("tone-accent2");
+});
+
+test("clicking a marker's button marks it selected", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("Banheiro Central")).toBeTruthy());
+  expect(markerElementFor("Banheiro Central")).toHaveAttribute("aria-pressed", "false");
+  fireEvent.click(markerElementFor("Banheiro Central")!);
+  await waitFor(() => expect(markerElementFor("Banheiro Central")).toHaveAttribute("aria-pressed", "true"));
+});
+
+test("clicking a marker's button opens the detail sheet for the selected bathroom", async () => {
+  mockBathrooms([{ id: "b1", name: "Banheiro Central", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 }]);
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("Banheiro Central")).toBeTruthy());
+  fireEvent.click(markerElementFor("Banheiro Central")!);
   expect(await screen.findByText("Rua A")).toBeInTheDocument();
 });
 
-test("selecting a pin deselects the previously selected pin", async () => {
+test("selecting a marker deselects the previously selected one", async () => {
   mockBathrooms([
-    { id: "b1", name: "A", address: "Rua A", kind: "public", paid: false },
-    { id: "b2", name: "B", address: "Rua B", kind: "public", paid: false },
+    { id: "b1", name: "A", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 },
+    { id: "b2", name: "B", address: "Rua B", kind: "public", paid: false, lat: -9.59, lon: -35.74 },
   ]);
   render(<MapScreen />);
-  const pinA = await screen.findByRole("button", { name: "A" });
-  const pinB = screen.getByRole("button", { name: "B" });
-  fireEvent.click(pinA);
-  fireEvent.click(pinB);
-  expect(pinA).toHaveAttribute("aria-pressed", "false");
-  expect(pinB).toHaveAttribute("aria-pressed", "true");
+  await waitFor(() => expect(markerElementFor("B")).toBeTruthy());
+  fireEvent.click(markerElementFor("A")!);
+  await waitFor(() => expect(markerElementFor("A")).toHaveAttribute("aria-pressed", "true"));
+  fireEvent.click(markerElementFor("B")!);
+  await waitFor(() => expect(markerElementFor("B")).toHaveAttribute("aria-pressed", "true"));
+  expect(markerElementFor("A")).toHaveAttribute("aria-pressed", "false");
 });
 
 test("MapScreen renders a legend toggle button", () => {
@@ -351,16 +389,15 @@ test("MapScreen shows Nominatim attribution near the search input", () => {
   expect(screen.getByText(/Nominatim/)).toBeInTheDocument();
 });
 
-test("favorited bathroom pin shows star badge", async () => {
+test("favorited bathroom marker shows star badge", async () => {
   vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({ data: { user: { id: "u1" } } } as never);
-  const fav = { id: "b1", name: "P", address: "Rua A", kind: "public", paid: false };
+  const fav = { id: "b1", name: "P", address: "Rua A", kind: "public", paid: false, lat: -9.58, lon: -35.73 };
   vi.mocked(supabase.from).mockImplementation((table: string) => {
     if (table === "favorites") return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [{ bathroom_id: "b1" }], error: null }) }) }) } as never;
     return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [fav], error: null }) }) }) } as never;
   });
-  const { container } = render(<MapScreen />);
-  await screen.findByRole("button", { name: "P" });
-  expect(container.querySelector('path[d^="M11.525 2.295"]')).toBeInTheDocument();
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("P")?.querySelector(".pin-fav")).toBeTruthy());
 });
 
 test("MapScreen queries the favorites table on mount when a user is authenticated", async () => {
@@ -369,14 +406,14 @@ test("MapScreen queries the favorites table on mount when a user is authenticate
   await waitFor(() => expect(vi.mocked(supabase.from)).toHaveBeenCalledWith("favorites"));
 });
 
-test("unfavorited bathroom pin shows no star badge", async () => {
+test("unfavorited bathroom marker shows no star badge", async () => {
   vi.mocked(supabase.auth.getUser).mockResolvedValue({ data: { user: { id: "u1" } } } as never);
-  const notFav = { id: "b2", name: "Q", address: "Rua B", kind: "public", paid: false };
+  const notFav = { id: "b2", name: "Q", address: "Rua B", kind: "public", paid: false, lat: -9.58, lon: -35.73 };
   vi.mocked(supabase.from).mockImplementation((table: string) => {
     if (table === "favorites") return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [], error: null }) }) }) } as never;
     return { select: () => ({ eq: () => ({ then: (resolve: (v: unknown) => void) => resolve({ data: [notFav], error: null }) }) }) } as never;
   });
-  const { container } = render(<MapScreen />);
-  await screen.findByRole("button", { name: "Q" });
-  expect(container.querySelector('path[d^="M11.525 2.295"]')).not.toBeInTheDocument();
+  render(<MapScreen />);
+  await waitFor(() => expect(markerElementFor("Q")).toBeTruthy());
+  expect(markerElementFor("Q")!.querySelector(".pin-fav")).toBeNull();
 });

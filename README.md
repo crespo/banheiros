@@ -56,35 +56,6 @@ O Banheiros existe para resolver isso: dados de localização reais (via OSM), a
 | Testes | Vitest + Testing Library + pgTAP |
 | Deploy | Vercel (frontend) + Supabase Cloud (backend) |
 
-## 🗺️ Arquitetura
-
-```mermaid
-flowchart LR
-    subgraph Cliente
-        PWA["React PWA\n(MapLibre GL)"]
-    end
-
-    subgraph Supabase
-        Auth["Auth\n(e-mail + Google + 2FA)"]
-        DB[("Postgres")]
-        Storage["Storage\n(fotos)"]
-        ModFn["Edge Function\nmoderate-submit"]
-        SyncFn["Edge Function\nosm-sync"]
-    end
-
-    Perspective["Google Perspective API"]
-    Overpass["OpenStreetMap\n(Overpass API)"]
-
-    PWA -->|login/signup| Auth
-    PWA -->|CRUD via RLS| DB
-    PWA -->|upload de fotos| Storage
-    PWA -->|nova avaliação/pin| ModFn
-    ModFn -->|score de toxicidade| Perspective
-    ModFn -->|publica se aprovado| DB
-    SyncFn -->|extrato de banheiros| Overpass
-    SyncFn -->|upsert| DB
-```
-
 ## 📂 Estrutura do projeto
 
 ```

@@ -330,6 +330,16 @@ test("clicking the Google button calls supabase.auth.signInWithOAuth with the go
   expect(supabase.auth.signInWithOAuth).toHaveBeenCalledExactlyOnceWith({ provider: "google" });
 });
 
+test("shows an error message when Google sign-in fails", async () => {
+  vi.mocked(supabase.auth.signInWithOAuth).mockResolvedValueOnce({
+    data: {},
+    error: { code: "provider_disabled", message: "Unsupported provider" },
+  } as never);
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.googleButton") }));
+  expect(await screen.findByText(t("auth.googleError"))).toBeInTheDocument();
+});
+
 test("signup mode has a link back to login mode", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
