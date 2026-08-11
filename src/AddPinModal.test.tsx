@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import AddPinModal from "./AddPinModal";
 import { t } from "./i18n/i18n";
@@ -17,4 +17,10 @@ test("renders a name text field", () => {
 test("renders an address text field", () => {
   render(<AddPinModal onClose={vi.fn()} />);
   expect(screen.getByRole("textbox", { name: t("addPin.addressLabel") })).toBeInTheDocument();
+});
+
+test("category radio group defaults to public selected", () => {
+  render(<AddPinModal onClose={vi.fn()} />);
+  const group = screen.getByRole("group", { name: t("addPin.categoryLabel") });
+  expect(within(group).getByRole("radio", { name: t("category.public") })).toBeChecked();
 });
