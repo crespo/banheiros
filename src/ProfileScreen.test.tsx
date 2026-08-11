@@ -49,13 +49,13 @@ test("ProfileScreen renders the user's email", async () => {
 test("ProfileScreen renders the default-visibility toggle reflecting the loaded state", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: true });
   render(<ProfileScreen />);
-  expect(await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") })).toBeChecked();
+  expect(await screen.findByRole("switch", { name: t("profile.defaultVisibilityLabel") })).toBeChecked();
 });
 
 test("toggling the default-visibility switch persists the new value", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
-  const toggle = await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") });
+  const toggle = await screen.findByRole("switch", { name: t("profile.defaultVisibilityLabel") });
   fireEvent.click(toggle);
   expect(updateMock).toHaveBeenCalledExactlyOnceWith({ default_show_username: true });
 });
@@ -63,7 +63,7 @@ test("toggling the default-visibility switch persists the new value", async () =
 test("toggling the default-visibility switch updates its checked state", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
-  const toggle = await screen.findByRole("checkbox", { name: t("profile.defaultVisibilityLabel") });
+  const toggle = await screen.findByRole("switch", { name: t("profile.defaultVisibilityLabel") });
   fireEvent.click(toggle);
   expect(toggle).toBeChecked();
 });

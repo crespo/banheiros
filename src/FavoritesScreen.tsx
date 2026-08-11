@@ -29,29 +29,41 @@ export default function FavoritesScreen() {
     <div className="screen screen-pad">
       <h2>{t("favorites.title")}</h2>
       {favoriteIds.length === 0 && (
-        <div>
+        <div className="empty-state">
+          <div className="circle">
+            <Icon name="star" />
+          </div>
           <p>{t("favorites.emptyTitle")}</p>
           <p>{t("favorites.emptySubtitle")}</p>
         </div>
       )}
-      {bathrooms.map((b) => (
-        <div key={b.id} role="button" tabIndex={0} onClick={() => setSelectedId(b.id)} onKeyDown={(e) => { if (e.key === "Enter") setSelectedId(b.id); }}>
-          <Icon name={categorizeBathroom(b.kind, b.paid).icon} />
-          <p>{b.name}</p>
-          <p>{b.address}</p>
-          <p>{scores.find((s) => s.bathroom_id === b.id)?.overall}</p>
-          <button
-            aria-label={t("bathroom.favorited")}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!userId) return;
-              removeFavorite(userId, b.id);
-              setFavoriteIds((ids) => ids.filter((id) => id !== b.id));
-              setBathrooms((bs) => bs.filter((x) => x.id !== b.id));
-            }}
-          />
-        </div>
-      ))}
+      <div className="fav-list">
+        {bathrooms.map((b) => (
+          <div key={b.id} className="fav-card" role="button" tabIndex={0} onClick={() => setSelectedId(b.id)} onKeyDown={(e) => { if (e.key === "Enter") setSelectedId(b.id); }}>
+            <div className="fav-icon">
+              <Icon name={categorizeBathroom(b.kind, b.paid).icon} />
+            </div>
+            <div className="fav-body">
+              <p className="fav-name">{b.name}</p>
+              <p className="fav-addr">{b.address}</p>
+              <p>{scores.find((s) => s.bathroom_id === b.id)?.overall}</p>
+            </div>
+            <button
+              className="fav-unstar"
+              aria-label={t("bathroom.favorited")}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!userId) return;
+                removeFavorite(userId, b.id);
+                setFavoriteIds((ids) => ids.filter((id) => id !== b.id));
+                setBathrooms((bs) => bs.filter((x) => x.id !== b.id));
+              }}
+            >
+              <Icon name="star" />
+            </button>
+          </div>
+        ))}
+      </div>
       {selectedId && <BathroomDetailSheet bathroomId={selectedId} onClose={() => setSelectedId(null)} />}
     </div>
   );
