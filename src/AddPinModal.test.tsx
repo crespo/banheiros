@@ -131,3 +131,14 @@ test("shows the moderation warning when moderate-submit responds with a rejected
   expect(await screen.findByText(t("review.moderationWarning"))).toBeInTheDocument();
   vi.unstubAllGlobals();
 });
+
+test("shows a submit error when moderate-submit resolves with an error", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: null, error: new Error("network down") });
+  render(<AddPinModal onClose={vi.fn()} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  expect(await screen.findByText(t("addPin.submitError"))).toBeInTheDocument();
+  vi.unstubAllGlobals();
+});

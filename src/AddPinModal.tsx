@@ -27,21 +27,25 @@ export default function AddPinModal({ onClose }: Props) {
   const [geocodeError, setGeocodeError] = useState(false);
   const [sent, setSent] = useState(false);
   const [rejected, setRejected] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const valid = name.trim().length > 2 && address.trim().length > 3;
 
   async function handleSubmit() {
     setGeocodeError(false);
     setRejected(false);
+    setSubmitError(false);
     const point = await geocode(address);
     if (!point) {
       setGeocodeError(true);
       return;
     }
     const { kind, paid } = decomposeCategory(category);
-    const { data } = await supabase.functions.invoke("moderate-submit", {
+    const { data, error } = await supabase.functions.invoke("moderate-submit", {
       body: { type: "pin", name, address, kind, paid, open_time: openTime, close_time: closeTime, lat: point.lat, lon: point.lon },
     });
-    if (data?.verdict === "approved" || data?.verdict === "pending") {
+    if (error) {
+      setSubmitError(true);
+    } else if (data?.verdict === "approved" || data?.verdict === "pending") {
       setSent(true);
       setTimeout(onClose, 1800);
     } else if (data?.verdict === "rejected") {
@@ -76,6 +80,7 @@ export default function AddPinModal({ onClose }: Props) {
             </fieldset>
             {geocodeError && <p>{t("addPin.geocodeError")}</p>}
             {rejected && <p>{t("review.moderationWarning")}</p>}
+            {submitError && <p>{t("addPin.submitError")}</p>}
             <button disabled={!valid} onClick={handleSubmit}>{t("addPin.submit")}</button>
           </>
         )}
