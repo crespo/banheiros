@@ -30,6 +30,19 @@ export default function AddPinModal({ onClose }: Props) {
   const [submitError, setSubmitError] = useState(false);
   const valid = name.trim().length > 2 && address.trim().length > 3;
 
+  async function handlePrefill() {
+    const point = await geocode(address);
+    if (!point) return;
+    const { data } = await supabase.rpc("nearby_osm_bathroom", { in_lat: point.lat, in_lon: point.lon });
+    const match = data?.[0];
+    if (!match) return;
+    if (name === "" && match.name) setName(match.name);
+    if (openTime === "08:00" && closeTime === "18:00" && match.open_time && match.close_time) {
+      setOpenTime(match.open_time.slice(0, 5));
+      setCloseTime(match.close_time.slice(0, 5));
+    }
+  }
+
   async function handleSubmit() {
     setGeocodeError(false);
     setRejected(false);
@@ -73,7 +86,7 @@ export default function AddPinModal({ onClose }: Props) {
               ))}
             </fieldset>
             <label htmlFor="addpin-address">{t("addPin.addressLabel")}</label>
-            <input id="addpin-address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input id="addpin-address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} onBlur={handlePrefill} />
             <fieldset>
               <legend>{t("addPin.hoursLabel")}</legend>
               <input type="time" name="addpin-open" className="input" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />

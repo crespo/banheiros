@@ -7,6 +7,7 @@ import { supabase } from "./lib/supabase";
 vi.mock("./lib/supabase", () => ({
   supabase: {
     functions: { invoke: vi.fn().mockResolvedValue({ data: {}, error: null }) },
+    rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
   },
 }));
 
@@ -140,6 +141,19 @@ test("shows a submit error when moderate-submit resolves with an error", async (
   fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
 
   expect(await screen.findByText(t("addPin.submitError"))).toBeInTheDocument();
+  vi.unstubAllGlobals();
+});
+
+test("blurring the address field pre-fills name and hours from a nearby OSM bathroom", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: [{ name: "Banheiro Praça", open_time: "06:00:00", close_time: "22:00:00" }], error: null } as never);
+  const { container } = render(<AddPinModal onClose={vi.fn()} />);
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.addressLabel") }), { target: { value: "Rua das Flores, 123" } });
+  fireEvent.blur(screen.getByRole("textbox", { name: t("addPin.addressLabel") }));
+
+  expect(await screen.findByRole("textbox", { name: t("addPin.nameLabel") })).toHaveValue("Banheiro Praça");
+  expect(container.querySelector('input[name="addpin-open"]')).toHaveValue("06:00");
+  expect(container.querySelector('input[name="addpin-close"]')).toHaveValue("22:00");
   vi.unstubAllGlobals();
 });
 
