@@ -82,3 +82,14 @@ test("shows a geocode error and does not call moderate-submit when the address h
   expect(supabase.functions.invoke).not.toHaveBeenCalled();
   vi.unstubAllGlobals();
 });
+
+test("shows the success banner when moderate-submit responds with an approved verdict", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({ data: { verdict: "approved", reason: null }, error: null });
+  render(<AddPinModal onClose={vi.fn()} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  expect(await screen.findByText(t("addPin.successNote"))).toBeInTheDocument();
+  vi.unstubAllGlobals();
+});
