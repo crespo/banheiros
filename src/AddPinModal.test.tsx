@@ -157,6 +157,19 @@ test("blurring the address field pre-fills name and hours from a nearby OSM bath
   vi.unstubAllGlobals();
 });
 
+test("prefill does not overwrite a name the user already typed", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: [{ name: "Banheiro Praça", open_time: "06:00:00", close_time: "22:00:00" }], error: null } as never);
+  render(<AddPinModal onClose={vi.fn()} />);
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.nameLabel") }), { target: { value: "Meu banheiro" } });
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.addressLabel") }), { target: { value: "Rua das Flores, 123" } });
+  fireEvent.blur(screen.getByRole("textbox", { name: t("addPin.addressLabel") }));
+  await vi.waitFor(() => expect(supabase.rpc).toHaveBeenCalled());
+
+  expect(screen.getByRole("textbox", { name: t("addPin.nameLabel") })).toHaveValue("Meu banheiro");
+  vi.unstubAllGlobals();
+});
+
 test("clicking the close button calls onClose", () => {
   const onClose = vi.fn();
   render(<AddPinModal onClose={onClose} />);
