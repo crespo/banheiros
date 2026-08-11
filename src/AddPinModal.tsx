@@ -56,6 +56,7 @@ export default function AddPinModal({ onClose }: Props) {
   return (
     <div className="dialog-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="dialog">
+        <button aria-label={t("common.close")} onClick={onClose}>×</button>
         {sent ? (
           <p className="success-banner">{t("addPin.successNote")}</p>
         ) : (

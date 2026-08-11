@@ -142,3 +142,10 @@ test("shows a submit error when moderate-submit resolves with an error", async (
   expect(await screen.findByText(t("addPin.submitError"))).toBeInTheDocument();
   vi.unstubAllGlobals();
 });
+
+test("clicking the close button calls onClose", () => {
+  const onClose = vi.fn();
+  render(<AddPinModal onClose={onClose} />);
+  fireEvent.click(screen.getByRole("button", { name: t("common.close") }));
+  expect(onClose).toHaveBeenCalledOnce();
+});
