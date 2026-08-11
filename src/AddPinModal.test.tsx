@@ -2,12 +2,18 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import AddPinModal from "./AddPinModal";
 import { t } from "./i18n/i18n";
+import { supabase } from "./lib/supabase";
 
 vi.mock("./lib/supabase", () => ({
   supabase: {
     functions: { invoke: vi.fn().mockResolvedValue({ data: {}, error: null }) },
   },
 }));
+
+function fillValidForm() {
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.nameLabel") }), { target: { value: "Padaria Bom Pão" } });
+  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.addressLabel") }), { target: { value: "Rua das Flores, 123" } });
+}
 
 test("renders a name text field", () => {
   render(<AddPinModal onClose={vi.fn()} />);
@@ -38,7 +44,30 @@ test("submit button is disabled when the form opens empty", () => {
 
 test("submit button becomes enabled once name and address pass the length thresholds", () => {
   render(<AddPinModal onClose={vi.fn()} />);
-  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.nameLabel") }), { target: { value: "Padaria" } });
-  fireEvent.change(screen.getByRole("textbox", { name: t("addPin.addressLabel") }), { target: { value: "Rua das Flores, 123" } });
+  fillValidForm();
   expect(screen.getByRole("button", { name: t("addPin.submit") })).toBeEnabled();
+});
+
+test("clicking submit geocodes the address then calls moderate-submit with the resulting coordinates", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: () => Promise.resolve([{ lat: "-9.6", lon: "-35.7" }]) }));
+  render(<AddPinModal onClose={vi.fn()} />);
+  fillValidForm();
+  fireEvent.click(screen.getByRole("button", { name: t("addPin.submit") }));
+
+  await vi.waitFor(() =>
+    expect(vi.mocked(supabase.functions.invoke)).toHaveBeenCalledExactlyOnceWith("moderate-submit", {
+      body: {
+        type: "pin",
+        name: "Padaria Bom Pão",
+        address: "Rua das Flores, 123",
+        kind: "public",
+        paid: false,
+        open_time: "08:00",
+        close_time: "18:00",
+        lat: -9.6,
+        lon: -35.7,
+      },
+    }),
+  );
+  vi.unstubAllGlobals();
 });
