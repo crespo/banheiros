@@ -39,6 +39,12 @@ button {
 .screen-pad {
   padding: var(--space-4);
 }
+.screen-standalone {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ---- bottom nav ---- */
 .bottom-nav {
