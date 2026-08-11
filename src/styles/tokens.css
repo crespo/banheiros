@@ -124,13 +124,6 @@ h6 {
   margin: 0 0 var(--space-2);
 }
 
-.pin--accent {
-  color: var(--color-accent);
-}
-.pin--accent2 {
-  color: var(--color-accent-2);
-}
-
 .location-dot {
   fill: var(--color-accent-2);
 }

@@ -1,7 +1,7 @@
 import * as maplibregl from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import BathroomDetailSheet from "./BathroomDetailSheet";
-import Icon from "./Icon";
+import Icon, { iconMarkup } from "./Icon";
 import { t } from "./i18n/i18n";
 import { categorizeBathroom } from "./lib/bathroomCategory";
 import { filterBathrooms } from "./lib/bathroomFilters";
@@ -11,7 +11,7 @@ import { resolveLocationMode } from "./lib/locationMode";
 import { COVERAGE_BOUNDS, isWithinCoverage, MACEIO_CENTER } from "./lib/mapCoverage";
 import { supabase } from "./lib/supabase";
 
-type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean };
+type Bathroom = { id: string; name: string | null; address: string; kind: string; paid: boolean; lat: number | null; lon: number | null };
 
 export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => void } = {}) {
   const [filter, setFilter] = useState("all");
@@ -57,6 +57,37 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
     }, 400);
     return () => clearTimeout(timeout);
   }, [query]);
+  useEffect(() => {
+    const markers = filterBathrooms(bathrooms, filter)
+      .filter(b => b.lat != null && b.lon != null)
+      .map(b => {
+        const category = categorizeBathroom(b.kind, b.paid);
+        const selected = b.id === selectedId;
+        const element = document.createElement("button");
+        element.className = "pin" + (selected ? " selected" : "");
+        element.setAttribute("aria-label", bathroomDisplayName(b.name, t("bathroom.unnamed")));
+        element.setAttribute("aria-pressed", selected ? "true" : "false");
+        element.addEventListener("click", () => setSelectedId(b.id));
+        const badge = document.createElement("div");
+        badge.className = `pin-badge tone-${category.tone}`;
+        badge.innerHTML = iconMarkup(category.icon, 17);
+        if (b.paid) {
+          const sub = document.createElement("div");
+          sub.className = "pin-sub";
+          sub.innerHTML = iconMarkup("dollarSign", 9);
+          badge.appendChild(sub);
+        }
+        if (favoriteIds.includes(b.id)) {
+          const fav = document.createElement("div");
+          fav.className = "pin-fav";
+          fav.innerHTML = iconMarkup("star", 9);
+          badge.appendChild(fav);
+        }
+        element.appendChild(badge);
+        return new maplibregl.Marker({ element }).setLngLat([b.lon!, b.lat!]).addTo(mapInstanceRef.current!);
+      });
+    return () => markers.forEach(m => m.remove());
+  }, [bathrooms, filter, selectedId, favoriteIds]);
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -110,7 +141,6 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
         </span>
       )}
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
-      {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id} className={`pin--${category.tone}`} aria-pressed={b.id === selectedId ? "true" : "false"} onClick={() => setSelectedId(b.id)}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}{favoriteIds.includes(b.id) && <Icon name="star" />}</button>; })}
       <button className="fab" aria-label={t("map.addBathroom")} onClick={onAddBathroom}><Icon name="plus" /></button>
       {selectedId && <BathroomDetailSheet bathroomId={selectedId} onClose={() => setSelectedId(null)} />}
     </div>
