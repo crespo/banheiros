@@ -33,6 +33,12 @@ test("App renders AuthScreen when there is no session", async () => {
   expect(await screen.findByLabelText(t("auth.emailLabel"))).toBeInTheDocument();
 });
 
+test("logged-out user has no path to the add-bathroom FAB", async () => {
+  render(<App />);
+  await screen.findByLabelText(t("auth.emailLabel"));
+  expect(screen.queryByRole("button", { name: t("map.addBathroom") })).not.toBeInTheDocument();
+});
+
 test("App renders the Map tab by default when there is a session", async () => {
   vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
     data: { session: { user: { id: "u1" } } },
