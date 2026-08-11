@@ -8,6 +8,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles/tokens.css";
 import "./styles/components.css";
 import "./styles/app.css";
+import "./styles/tailwind.css";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(
