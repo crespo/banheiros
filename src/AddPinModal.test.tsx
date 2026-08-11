@@ -149,3 +149,10 @@ test("clicking the close button calls onClose", () => {
   fireEvent.click(screen.getByRole("button", { name: t("common.close") }));
   expect(onClose).toHaveBeenCalledOnce();
 });
+
+test("clicking the backdrop calls onClose", () => {
+  const onClose = vi.fn();
+  const { container } = render(<AddPinModal onClose={onClose} />);
+  fireEvent.click(container.querySelector(".dialog-backdrop")!);
+  expect(onClose).toHaveBeenCalledOnce();
+});
