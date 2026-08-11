@@ -34,6 +34,12 @@ test("App renders AuthScreen when there is no session", async () => {
   expect(await screen.findByLabelText(t("auth.emailLabel"))).toBeInTheDocument();
 });
 
+test("logged-out user has no path to the add-bathroom FAB", async () => {
+  render(<App />);
+  await screen.findByLabelText(t("auth.emailLabel"));
+  expect(screen.queryByRole("button", { name: t("map.addBathroom") })).not.toBeInTheDocument();
+});
+
 test("App renders the Map tab by default when there is a session", async () => {
   vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
     data: { session: { user: { id: "u1" } } },
@@ -81,6 +87,15 @@ test("App renders PrivacidadeScreen at the /privacidade route", async () => {
   window.history.pushState({}, "", "/privacidade");
   render(<App />);
   expect(await screen.findByRole("heading", { name: t("auth.privacyLinkText") })).toBeInTheDocument();
+});
+
+test("clicking the map FAB opens AddPinModal", async () => {
+  vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
+    data: { session: { user: { id: "u1" } } },
+  } as never);
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button", { name: t("map.addBathroom") }));
+  expect(await screen.findByRole("textbox", { name: t("addPin.nameLabel") })).toBeInTheDocument();
 });
 
 test("App renders ResetPasswordScreen when a PASSWORD_RECOVERY event fires", async () => {

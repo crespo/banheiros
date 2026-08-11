@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AddPinModal from "./AddPinModal";
 import AuthScreen from "./AuthScreen";
 import ChooseUsernameScreen from "./ChooseUsernameScreen";
 import FavoritesScreen from "./FavoritesScreen";
@@ -28,6 +29,7 @@ function Gated() {
   const [profileExists, setProfileExists] = useState<boolean | null>(null);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [tab, setTab] = useState<"map" | "favorites" | "profile">("map");
+  const [showAddPinModal, setShowAddPinModal] = useState(false);
 
   function checkSession(session: { user: { id: string } } | null) {
     setHasSession(session !== null);
@@ -62,9 +64,10 @@ function Gated() {
   if (!profileExists) return <ChooseUsernameScreen onCreated={() => setProfileExists(true)} />;
   return (
     <>
-      {tab === "map" && <MapScreen />}
+      {tab === "map" && <MapScreen onAddBathroom={() => setShowAddPinModal(true)} />}
       {tab === "favorites" && <FavoritesScreen />}
       {tab === "profile" && <ProfileScreen />}
+      {showAddPinModal && <AddPinModal onClose={() => setShowAddPinModal(false)} />}
       <nav>
         <button onClick={() => setTab("map")}>{t("nav.map")}</button>
         <button onClick={() => setTab("favorites")}>{t("nav.favorites")}</button>
