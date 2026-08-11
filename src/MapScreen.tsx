@@ -70,29 +70,49 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
     );
   }, []);
   return (
-    <>
-      <button aria-pressed={filter === "all" ? "true" : "false"} onClick={() => setFilter("all")}>{t("map.filterAll")}</button>
-      <button aria-pressed={filter === "public" ? "true" : "false"} onClick={() => setFilter("public")}>{t("map.filterPublic")}</button>
-      <button aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
-      <button aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
-      <input placeholder={t("map.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
+    <div className="map-screen">
+      <div className="map-topbar">
+        <div className="search-row">
+          <div className="search-box">
+            <Icon name="search" />
+            <input placeholder={t("map.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
+          </div>
+          <button className="icon-btn-float" aria-label={t("map.legendTitle")} onClick={() => setLegendOpen(!legendOpen)}><Icon name="filter" /></button>
+        </div>
+        <div className="chip-row">
+          <button className={"chip" + (filter === "all" ? " active" : "")} aria-pressed={filter === "all" ? "true" : "false"} onClick={() => setFilter("all")}>{t("map.filterAll")}</button>
+          <button className={"chip" + (filter === "public" ? " active" : "")} aria-pressed={filter === "public" ? "true" : "false"} onClick={() => setFilter("public")}>{t("map.filterPublic")}</button>
+          <button className={"chip" + (filter === "instore" ? " active" : "")} aria-pressed={filter === "instore" ? "true" : "false"} onClick={() => setFilter("instore")}>{t("map.filterInstore")}</button>
+          <button className={"chip" + (filter === "paid" ? " active" : "")} aria-pressed={filter === "paid" ? "true" : "false"} onClick={() => setFilter("paid")}>{t("map.filterPaid")}</button>
+        </div>
+      </div>
       <small>Search by Nominatim, © OpenStreetMap contributors</small>
-      <button aria-label={t("map.legendTitle")} onClick={() => setLegendOpen(!legendOpen)}><Icon name="filter" /></button>
       {legendOpen && (
-        <div>
-          <span>{t("map.legendPublic")}</span>
-          <span>{t("map.legendInstore")}</span>
-          <span>{t("map.legendPaid")}</span>
-          <span>{t("map.legendFavorite")}</span>
-          <span>{t("map.legendYou")}</span>
+        <div className="legend-pop">
+          <div className="legend-row"><span className="legend-dot tone-accent" />{t("map.legendPublic")}</div>
+          <div className="legend-row"><span className="legend-dot tone-accent2" />{t("map.legendInstore")}</div>
+          <div className="legend-row"><span className="legend-dot paid" />{t("map.legendPaid")}</div>
+          <div className="legend-row"><span className="legend-dot fav" />{t("map.legendFavorite")}</div>
+          <div className="legend-row"><span className="legend-dot you" />{t("map.legendYou")}</div>
         </div>
       )}
-      <div ref={mapRef} />
-      {locationMode !== null && <span role="img" aria-label={t("map.legendYou")}>{locationMode === "precise" && <svg aria-hidden="true"><circle className="location-halo" /><circle className="location-dot" /></svg>}</span>}
+      <div className="map-canvas-wrap">
+        <div className="map-canvas" ref={mapRef} />
+      </div>
+      {locationMode !== null && (
+        <span role="img" aria-label={t("map.legendYou")} className={"user-location" + (locationMode === "approximate" ? " approximate" : "")}>
+          {locationMode === "precise" && (
+            <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
+              <circle className="location-halo user-location-halo" cx="8" cy="8" r="8" />
+              <circle className="location-dot user-location-dot" cx="8" cy="8" r="5" />
+            </svg>
+          )}
+        </span>
+      )}
       {outOfCoverage && <div role="alert">{t("map.outOfCoverage")}</div>}
       {filterBathrooms(bathrooms, filter).map(b => { const category = categorizeBathroom(b.kind, b.paid); return <button key={b.id} className={`pin--${category.tone}`} aria-pressed={b.id === selectedId ? "true" : "false"} onClick={() => setSelectedId(b.id)}><Icon name={category.icon} />{bathroomDisplayName(b.name, t("bathroom.unnamed"))}{b.paid && <Icon name="dollarSign" />}{favoriteIds.includes(b.id) && <Icon name="star" />}</button>; })}
-      <button aria-label={t("map.addBathroom")} onClick={onAddBathroom}><Icon name="plus" /></button>
+      <button className="fab" aria-label={t("map.addBathroom")} onClick={onAddBathroom}><Icon name="plus" /></button>
       {selectedId && <BathroomDetailSheet bathroomId={selectedId} onClose={() => setSelectedId(null)} />}
-    </>
+    </div>
   );
 }

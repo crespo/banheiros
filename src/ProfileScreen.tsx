@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { dicts, Lang, setLanguage, t } from "./i18n/i18n";
 import { supabase } from "./lib/supabase";
+import Icon from "./Icon";
 
 type Profile = { username: string; language: string; default_show_username: boolean };
 
@@ -50,34 +51,48 @@ export default function ProfileScreen() {
   if (!profile) return null;
 
   return (
-    <div>
-      <p>@{profile.username}</p>
-      <p>{email}</p>
-      <label>
-        <input
-          type="checkbox"
-          checked={profile.default_show_username}
-          onChange={(e) => toggleDefaultVisibility(e.target.checked)}
-        />
-        {t("profile.defaultVisibilityLabel")}
-      </label>
-      {Object.keys(dicts).map((lang) => (
-        <label key={lang}>
-          <input
-            type="radio"
-            name="lang"
-            checked={profile.language === lang}
-            onChange={() => changeLanguage(lang as Lang)}
-          />
-          {lang.toUpperCase()}
-        </label>
-      ))}
-      <button onClick={logout}>{t("profile.logout")}</button>
-      <button onClick={() => setConfirmingDelete(true)}>{t("profile.deleteAccount")}</button>
+    <div className="screen screen-pad">
+      <div className="profile-header">
+        <div className="avatar">{profile.username.charAt(0).toUpperCase()}</div>
+        <div>
+          <p>@{profile.username}</p>
+          <p>{email}</p>
+        </div>
+      </div>
+      <div className="settings-row">
+        <span className="label">{t("profile.defaultVisibilityLabel")}</span>
+        <button
+          role="switch"
+          aria-checked={profile.default_show_username}
+          aria-label={t("profile.defaultVisibilityLabel")}
+          className={"switch" + (profile.default_show_username ? " on" : "")}
+          onClick={() => toggleDefaultVisibility(!profile.default_show_username)}
+        >
+          <span className="thumb" />
+        </button>
+      </div>
+      <div className="settings-row">
+        <span className="label">{t("profile.languageSection")}</span>
+        <div className="seg">
+          {Object.keys(dicts).map((lang) => (
+            <label key={lang} className="seg-opt">
+              <input
+                type="radio"
+                name="lang"
+                checked={profile.language === lang}
+                onChange={() => changeLanguage(lang as Lang)}
+              />
+              {lang.toUpperCase()}
+            </label>
+          ))}
+        </div>
+      </div>
+      <button className="btn btn-secondary" onClick={logout}><Icon name="logOut" />{t("profile.logout")}</button>
+      <button className="btn btn-ghost" onClick={() => setConfirmingDelete(true)}>{t("profile.deleteAccount")}</button>
       {confirmingDelete && (
         <p>
           {t("profile.deleteAccountConfirm")}
-          <button onClick={deleteAccount}>{t("profile.deleteAccountConfirmButton")}</button>
+          <button className="btn btn-primary" onClick={deleteAccount}>{t("profile.deleteAccountConfirmButton")}</button>
         </p>
       )}
       <a href="/termos">{t("auth.termsLinkText")}</a>

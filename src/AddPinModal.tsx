@@ -3,6 +3,7 @@ import { t } from "./i18n/i18n";
 import { decomposeCategory } from "./lib/bathroomCategory";
 import { COVERAGE_BOUNDS } from "./lib/mapCoverage";
 import { supabase } from "./lib/supabase";
+import Icon from "./Icon";
 
 type Props = {
   onClose: () => void;
@@ -69,33 +70,41 @@ export default function AddPinModal({ onClose }: Props) {
   return (
     <div className="dialog-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="dialog">
-        <button aria-label={t("common.close")} onClick={onClose}>×</button>
+        <button className="sheet-close" aria-label={t("common.close")} onClick={onClose}><Icon name="x" /></button>
         {sent ? (
-          <p className="success-banner">{t("addPin.successNote")}</p>
+          <p className="success-banner"><Icon name="check" />{t("addPin.successNote")}</p>
         ) : (
           <>
-            <label htmlFor="addpin-name">{t("addPin.nameLabel")}</label>
-            <input id="addpin-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+            <div className="field">
+              <label htmlFor="addpin-name">{t("addPin.nameLabel")}</label>
+              <input id="addpin-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
             <fieldset>
               <legend>{t("addPin.categoryLabel")}</legend>
-              {CATEGORIES.map((c) => (
-                <label key={c}>
-                  <input type="radio" name="addpin-category" checked={category === c} onChange={() => setCategory(c)} aria-label={t(`category.${c}`)} />
-                  {t(`category.${c}`)}
-                </label>
-              ))}
+              <div className="seg">
+                {CATEGORIES.map((c) => (
+                  <label key={c} className="seg-opt">
+                    <input type="radio" name="addpin-category" checked={category === c} onChange={() => setCategory(c)} aria-label={t(`category.${c}`)} />
+                    {t(`category.${c}`)}
+                  </label>
+                ))}
+              </div>
             </fieldset>
-            <label htmlFor="addpin-address">{t("addPin.addressLabel")}</label>
-            <input id="addpin-address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} onBlur={handlePrefill} />
+            <div className="field">
+              <label htmlFor="addpin-address">{t("addPin.addressLabel")}</label>
+              <input id="addpin-address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} onBlur={handlePrefill} />
+            </div>
             <fieldset>
               <legend>{t("addPin.hoursLabel")}</legend>
               <input type="time" name="addpin-open" className="input" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />
               <input type="time" name="addpin-close" className="input" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
             </fieldset>
-            {geocodeError && <p>{t("addPin.geocodeError")}</p>}
-            {rejected && <p>{t("review.moderationWarning")}</p>}
-            {submitError && <p>{t("addPin.submitError")}</p>}
-            <button disabled={!valid} onClick={handleSubmit}>{t("addPin.submit")}</button>
+            {geocodeError && <p className="field-note warn">{t("addPin.geocodeError")}</p>}
+            {rejected && <p className="mod-warning"><Icon name="alertTriangle" />{t("review.moderationWarning")}</p>}
+            {submitError && <p className="field-note warn">{t("addPin.submitError")}</p>}
+            <div className="dialog-actions">
+              <button className="btn btn-primary btn-block" disabled={!valid} onClick={handleSubmit}>{t("addPin.submit")}</button>
+            </div>
           </>
         )}
       </div>

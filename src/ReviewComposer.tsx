@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { supabase } from "./lib/supabase";
 import { t } from "./i18n/i18n";
+import Icon from "./Icon";
 
 const CATS = ["accessibility", "lighting", "odor", "maintenance", "cleanliness"] as const;
+const CAT_ICON = { accessibility: "accessibility", lighting: "lightbulb", odor: "wind", maintenance: "wrench", cleanliness: "sparkles" } as const;
 
 type Props = {
   bathroomId: string;
@@ -24,31 +26,49 @@ export default function ReviewComposer({ bathroomId, defaultShowUsername, existi
 
   return (
     <>
+      <div className="composer-head">
+        <button onClick={onCancel}><Icon name="arrowLeft" />{t("common.back")}</button>
+        <h2>{t("review.title")}</h2>
+      </div>
       {CATS.map((cat) => (
-        <fieldset key={cat}>
-          <legend>{t(`ratingCat.${cat}`)}</legend>
-          {[1, 2, 3].map((n) => (
-            <input
-              key={n}
-              type="radio"
-              aria-label={`${t(`ratingCat.${cat}`)} ${n}`}
-              checked={ratings[cat] === n}
-              onChange={() => setRatings((prev) => ({ ...prev, [cat]: n }))}
-            />
-          ))}
-        </fieldset>
+        <div className="composer-cat" key={cat}>
+          <fieldset>
+            <legend className="composer-cat-label"><Icon name={CAT_ICON[cat]} />{t(`ratingCat.${cat}`)}</legend>
+            <div className="rating-dots pick">
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={ratings[cat] === n}
+                  aria-label={`${t(`ratingCat.${cat}`)} ${n}`}
+                  className={"dot" + (ratings[cat] === n ? " filled" : "")}
+                  onClick={() => setRatings((prev) => ({ ...prev, [cat]: n }))}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
       ))}
-      <fieldset>
+      <fieldset className="visibility-card">
         <legend>{t("review.usernameVisibility")}</legend>
-        <input type="radio" aria-label={t("review.hideUsername")} checked={!showUsername} onChange={() => setShowUsername(false)} />
-        <input type="radio" aria-label={t("review.showUsername")} checked={showUsername} onChange={() => setShowUsername(true)} />
+        <label className="visibility-opt">
+          <input type="radio" aria-label={t("review.hideUsername")} checked={!showUsername} onChange={() => setShowUsername(false)} />
+          {t("review.hideUsername")}
+        </label>
+        <label className="visibility-opt">
+          <input type="radio" aria-label={t("review.showUsername")} checked={showUsername} onChange={() => setShowUsername(true)} />
+          {t("review.showUsername")}
+        </label>
       </fieldset>
       <label htmlFor="comment">{t("review.commentLabel")}</label>
-      <textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} />
-      {rejected && <p>{t("review.moderationWarning")}</p>}
+      <textarea id="comment" className="input" value={comment} onChange={(e) => setComment(e.target.value)} />
+      {rejected && <p className="mod-warning"><Icon name="alertTriangle" />{t("review.moderationWarning")}</p>}
       {submitError && <p>{t("review.submitError")}</p>}
-      <button onClick={onCancel}>{t("common.back")}</button>
       <button
+        className="btn btn-primary btn-block"
         disabled={!CATS.every((cat) => ratings[cat] !== undefined) || comment.trim() === ""}
         onClick={() => supabase.functions.invoke("moderate-submit", { body: { type: "review", bathroom_id: bathroomId, accessibility: ratings.accessibility, lighting: ratings.lighting, odor: ratings.odor, maintenance: ratings.maintenance, cleanliness: ratings.cleanliness, comment, show_username: showUsername } }).then(({ data, error }) => { if (error) setSubmitError(true); else if (data?.verdict === "approved") onApproved(); else if (data?.verdict === "rejected") setRejected(true); else if (data?.verdict === "pending") onPending(); })}
       >{t("review.submit")}</button>
