@@ -55,7 +55,7 @@ function Gated() {
     return () => subscription.subscription.unsubscribe();
   }, []);
 
-  if (passwordRecovery) return <ResetPasswordScreen />;
+  if (passwordRecovery) return <ResetPasswordScreen onComplete={() => setPasswordRecovery(false)} />;
   if (hasSession === null) return null;
   if (!hasSession) return <AuthScreen />;
   if (profileExists === null) return null;

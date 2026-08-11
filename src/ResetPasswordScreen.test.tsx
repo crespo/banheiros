@@ -55,3 +55,30 @@ test("clicking submit calls supabase.auth.updateUser with the new password", () 
   fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
   expect(supabase.auth.updateUser).toHaveBeenCalledExactlyOnceWith({ password: "123456" });
 });
+
+test("a successful password update shows a success message", async () => {
+  render(<ResetPasswordScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.newPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
+  expect(await screen.findByText(t("auth.resetPasswordSuccess"))).toBeInTheDocument();
+});
+
+test("clicking continue after a successful update calls onComplete", async () => {
+  const onComplete = vi.fn();
+  render(<ResetPasswordScreen onComplete={onComplete} />);
+  fireEvent.change(screen.getByLabelText(t("auth.newPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
+  fireEvent.click(await screen.findByRole("button", { name: t("auth.continueButton") }));
+  expect(onComplete).toHaveBeenCalledOnce();
+});
+
+test("a rejected password update shows an error message", async () => {
+  vi.mocked(supabase.auth.updateUser).mockResolvedValueOnce({ data: {}, error: { message: "Password too weak" } } as never);
+  render(<ResetPasswordScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.newPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.change(screen.getByLabelText(t("auth.confirmPasswordLabel")), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
+  expect(await screen.findByText(t("auth.resetPasswordError"))).toBeInTheDocument();
+});

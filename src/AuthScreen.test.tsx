@@ -64,6 +64,18 @@ test("signup mode renders a link to the privacy policy page", () => {
   expect(screen.getByRole("link", { name: t("auth.privacyLinkText") })).toHaveAttribute("href", "/privacidade");
 });
 
+test("the terms of use link opens in a new tab so the signup form is not lost", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("link", { name: t("auth.termsLinkText") })).toHaveAttribute("target", "_blank");
+});
+
+test("the privacy policy link opens in a new tab so the signup form is not lost", () => {
+  render(<AuthScreen />);
+  fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
+  expect(screen.getByRole("link", { name: t("auth.privacyLinkText") })).toHaveAttribute("target", "_blank");
+});
+
 test("signup mode renders a create-account submit button", () => {
   render(<AuthScreen />);
   fireEvent.click(screen.getByRole("button", { name: t("auth.createAccountLink") }));
@@ -279,6 +291,13 @@ test("clicking forgot password calls supabase.auth.resetPasswordForEmail with th
   fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
   fireEvent.click(screen.getByRole("button", { name: t("auth.forgotPassword") }));
   expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledExactlyOnceWith("raul@gmail.com");
+});
+
+test("clicking forgot password shows a confirmation message", () => {
+  render(<AuthScreen />);
+  fireEvent.change(screen.getByLabelText(t("auth.emailLabel")), { target: { value: "raul@gmail.com" } });
+  fireEvent.click(screen.getByRole("button", { name: t("auth.forgotPassword") }));
+  expect(screen.getByText(t("auth.resetEmailSent"))).toBeInTheDocument();
 });
 
 test("clicking the Google button calls supabase.auth.signInWithOAuth with the google provider", () => {

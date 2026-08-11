@@ -89,6 +89,13 @@ test("selecting a language persists it to the profile", async () => {
   expect(updateMock).toHaveBeenCalledExactlyOnceWith({ language: "en" });
 });
 
+test("selecting a language checks its radio immediately", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  fireEvent.click(await screen.findByRole("radio", { name: "EN" }));
+  expect(screen.getByRole("radio", { name: "EN" })).toBeChecked();
+});
+
 test("clicking logout calls supabase.auth.signOut", async () => {
   mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
   render(<ProfileScreen />);
@@ -109,4 +116,19 @@ test("confirming delete account invokes the delete-account edge function", async
   fireEvent.click(await screen.findByRole("button", { name: t("profile.deleteAccount") }));
   fireEvent.click(screen.getByRole("button", { name: t("profile.deleteAccountConfirmButton") }));
   expect(supabase.functions.invoke).toHaveBeenCalledExactlyOnceWith("delete-account");
+});
+
+test("ProfileScreen renders a link to the terms of use page", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("link", { name: t("auth.termsLinkText") })).toHaveAttribute("href", "/termos");
+});
+
+test("ProfileScreen renders a link to the privacy policy page", async () => {
+  mockProfileLoad({ username: "raul", language: "pt", default_show_username: false });
+  render(<ProfileScreen />);
+  expect(await screen.findByRole("link", { name: t("auth.privacyLinkText") })).toHaveAttribute(
+    "href",
+    "/privacidade"
+  );
 });
