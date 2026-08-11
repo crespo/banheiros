@@ -50,7 +50,7 @@ export default function ProfileScreen() {
   if (!profile) return null;
 
   return (
-    <div>
+    <div className="screen screen-pad">
       <p>@{profile.username}</p>
       <p>{email}</p>
       <label>

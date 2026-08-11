@@ -63,16 +63,16 @@ function Gated() {
   if (profileExists === null) return null;
   if (!profileExists) return <ChooseUsernameScreen onCreated={() => setProfileExists(true)} />;
   return (
-    <>
+    <div className="app-shell">
       {tab === "map" && <MapScreen onAddBathroom={() => setShowAddPinModal(true)} />}
       {tab === "favorites" && <FavoritesScreen />}
       {tab === "profile" && <ProfileScreen />}
       {showAddPinModal && <AddPinModal onClose={() => setShowAddPinModal(false)} />}
-      <nav>
-        <button onClick={() => setTab("map")}>{t("nav.map")}</button>
-        <button onClick={() => setTab("favorites")}>{t("nav.favorites")}</button>
-        <button onClick={() => setTab("profile")}>{t("nav.profile")}</button>
+      <nav className="bottom-nav">
+        <button className={"nav-item" + (tab === "map" ? " active" : "")} onClick={() => setTab("map")}>{t("nav.map")}</button>
+        <button className={"nav-item" + (tab === "favorites" ? " active" : "")} onClick={() => setTab("favorites")}>{t("nav.favorites")}</button>
+        <button className={"nav-item" + (tab === "profile" ? " active" : "")} onClick={() => setTab("profile")}>{t("nav.profile")}</button>
       </nav>
-    </>
+    </div>
   );
 }

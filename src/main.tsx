@@ -6,6 +6,7 @@ import "@fontsource/figtree/600.css";
 import "@fontsource/figtree/700.css";
 import "./styles/tokens.css";
 import "./styles/components.css";
+import "./styles/app.css";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(

@@ -26,7 +26,7 @@ export default function FavoritesScreen() {
     supabase.from("bathroom_scores").select().in("bathroom_id", favoriteIds).then(({ data }) => setScores(data ?? []));
   }, [favoriteIds]);
   return (
-    <div>
+    <div className="screen screen-pad">
       <h2>{t("favorites.title")}</h2>
       {favoriteIds.length === 0 && (
         <div>
