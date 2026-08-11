@@ -11,6 +11,8 @@ export default function AddPinModal({ onClose }: Props) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("public");
+  const [openTime, setOpenTime] = useState("08:00");
+  const [closeTime, setCloseTime] = useState("18:00");
 
   return (
     <div className="dialog-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -28,6 +30,11 @@ export default function AddPinModal({ onClose }: Props) {
         </fieldset>
         <label htmlFor="addpin-address">{t("addPin.addressLabel")}</label>
         <input id="addpin-address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} />
+        <fieldset>
+          <legend>{t("addPin.hoursLabel")}</legend>
+          <input type="time" name="addpin-open" className="input" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />
+          <input type="time" name="addpin-close" className="input" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
+        </fieldset>
       </div>
     </div>
   );

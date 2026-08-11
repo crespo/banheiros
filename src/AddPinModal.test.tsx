@@ -24,3 +24,9 @@ test("category radio group defaults to public selected", () => {
   const group = screen.getByRole("group", { name: t("addPin.categoryLabel") });
   expect(within(group).getByRole("radio", { name: t("category.public") })).toBeChecked();
 });
+
+test("hours fields default to 08:00 open and 18:00 close", () => {
+  const { container } = render(<AddPinModal onClose={vi.fn()} />);
+  expect(container.querySelector('input[name="addpin-open"]')).toHaveValue("08:00");
+  expect(container.querySelector('input[name="addpin-close"]')).toHaveValue("18:00");
+});
