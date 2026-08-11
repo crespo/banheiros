@@ -4,6 +4,7 @@ import "@fontsource/caprasimo/400.css";
 import "@fontsource/figtree/400.css";
 import "@fontsource/figtree/600.css";
 import "@fontsource/figtree/700.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles/tokens.css";
 import "./styles/components.css";
 import "./styles/app.css";
