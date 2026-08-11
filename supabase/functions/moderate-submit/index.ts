@@ -22,6 +22,8 @@ type PinSubmission = {
   address: string;
   kind: "public" | "instore";
   paid: boolean;
+  open_time: string;
+  close_time: string;
   lat: number;
   lon: number;
 };
@@ -131,6 +133,8 @@ Deno.serve(async (req) => {
       paid: submission.paid,
       name: submission.name,
       address: submission.address,
+      open_time: submission.open_time,
+      close_time: submission.close_time,
       location: `SRID=4326;POINT(${submission.lon} ${submission.lat})`,
       created_by: user.id,
       status: verdict,
