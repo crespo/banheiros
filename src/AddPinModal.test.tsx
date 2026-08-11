@@ -13,3 +13,8 @@ test("renders a name text field", () => {
   render(<AddPinModal onClose={vi.fn()} />);
   expect(screen.getByRole("textbox", { name: t("addPin.nameLabel") })).toBeInTheDocument();
 });
+
+test("renders an address text field", () => {
+  render(<AddPinModal onClose={vi.fn()} />);
+  expect(screen.getByRole("textbox", { name: t("addPin.addressLabel") })).toBeInTheDocument();
+});
