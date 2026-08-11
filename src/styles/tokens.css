@@ -91,6 +91,17 @@
   box-sizing: border-box;
 }
 
+/* fieldset/legend are used purely for accessible grouping (role=group)
+   here, never for the browser's default grouped-box chrome. */
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+legend {
+  padding: 0;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);
