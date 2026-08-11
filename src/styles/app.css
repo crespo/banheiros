@@ -573,11 +573,13 @@ h4.section-title {
   gap: 8px;
   margin-bottom: var(--space-3);
 }
-.composer-head button {
+.composer-head button,
+.composer-head a {
   background: none;
   border: 0;
   cursor: pointer;
   color: var(--color-text);
+  text-decoration: none;
   display: flex;
 }
 .composer-cat {
