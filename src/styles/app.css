@@ -1,6 +1,5 @@
 /* Banheiros — app-specific layout on top of the Organic tokens/components.
-   Ported from docs/design/app.css. Pin/marker CSS lives here too but is
-   added by spec 0016 (markers), not this file's initial cut. */
+   Ported from docs/design/app.css. */
 
 html,
 body {
@@ -224,6 +223,78 @@ button {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+/* ---- pins (spec 0016: maplibregl.Marker elements) ---- */
+.pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pin-badge {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--color-bg);
+}
+.pin-badge.tone-accent {
+  background: var(--color-accent);
+}
+.pin-badge.tone-accent2 {
+  background: var(--color-accent-2-700);
+}
+.pin-badge svg {
+  transform: rotate(-45deg);
+  color: var(--color-bg);
+}
+.pin.selected .pin-badge {
+  outline: 3px solid var(--color-accent-2-700);
+  outline-offset: 2px;
+}
+.pin-sub {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg);
+  background: var(--color-accent-2-600);
+  color: var(--color-bg);
+}
+.pin-fav {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg);
+  background: var(--color-accent-700);
+  color: var(--color-bg);
+}
+.pin-sub svg,
+.pin-fav svg {
+  width: 9px;
+  height: 9px;
 }
 
 /* ---- user location marker ----
