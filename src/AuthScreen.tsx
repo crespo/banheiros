@@ -18,6 +18,7 @@ export default function AuthScreen() {
   const [usernameAlternative, setUsernameAlternative] = useState<string | null>(null);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
   const usernameFormatError = usernameTouched ? validateUsernameFormat(username) : null;
 
   function handleEmailChange(email: string) {
@@ -34,7 +35,9 @@ export default function AuthScreen() {
   }
 
   function loginWithGoogle() {
-    supabase.auth.signInWithOAuth({ provider: "google" });
+    supabase.auth.signInWithOAuth({ provider: "google" }).then(({ error }) => {
+      setGoogleError(error !== null);
+    });
   }
 
   function forgotPassword() {
@@ -178,6 +181,7 @@ export default function AuthScreen() {
         <GoogleLogo />
         {t("auth.googleButton")}
       </button>
+      {googleError && <p className="field-note warn">{t("auth.googleError")}</p>}
       <p className="switch-mode">
         {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
         <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
