@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import { shouldCloseOnDrag } from "./lib/shouldCloseOnDrag";
 import { bathroomDisplayName } from "./lib/bathroomName";
@@ -30,6 +30,7 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   const [reportSent, setReportSent] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const dragStartY = useRef(0);
   const dragCurrentY = useRef(0);
   useEffect(() => {
@@ -73,24 +74,86 @@ export default function BathroomDetailSheet({ bathroomId, onClose }: { bathroomI
   }
   if (!bathroom) return null;
   if (view === "review") return <ReviewComposer bathroomId={bathroomId} existingReview={ownReview} defaultShowUsername={defaultShowUsername} onCancel={() => setView("detail")} onApproved={() => { setView("detail"); setApprovedBanner(true); setRefreshKey((k) => k + 1); }} onPending={() => { setView("detail"); setPendingBanner(true); }} />;
+  const category = categorizeBathroom(bathroom.kind, bathroom.paid);
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
-      <div className="sheet-handle" onPointerDown={(e) => { dragStartY.current = e.clientY; dragCurrentY.current = e.clientY; }} onPointerMove={(e) => { dragCurrentY.current = e.clientY; }} onPointerUp={() => { if (shouldCloseOnDrag(dragCurrentY.current - dragStartY.current)) onClose?.(); }} />
-      <button aria-label={t("common.close")} onClick={() => onClose?.()} />
-      <span>{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</span>
-      <span>{bathroom.address}</span>
-      <span>{t(`category.${categorizeBathroom(bathroom.kind, bathroom.paid).id}`)}</span>
-      <span>{bathroom.paid ? t("common.paid") : t("common.free")}</span>
-      {!bathroom.open_time && <span>{t("bathroom.hoursUnknown")}</span>}
-      {bathroom.open_time && <><span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>{isOpenNow(bathroom.open_time, bathroom.close_time, new Date()) ? <span>{t("bathroom.openNow")}</span> : <span>{t("bathroom.closedNow")}</span>}</>}
-      {score ? <span>{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
-      {CATS.map((cat) => <span key={cat}>{t(`ratingCat.${cat}`)}<Icon name={CAT_ICON[cat]} />{[1,2,3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}</span>)}
-      <button aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} onClick={handleFavoriteClick} />
-      {approvedBanner && <p className="success-banner">{t("review.successMessage")}</p>}
-      {pendingBanner && <p>{t("review.pendingMessage")}</p>}
-      <button onClick={() => setView("review")}>{t("bathroom.writeReview")}</button>
-      {reviews.length === 0 ? <p>{t("bathroom.noReviews")}</p> : reviews.map((r, i) => <Fragment key={i}><p>{r.show_username && r.user_id ? `@${profiles.find(p => p.user_id === r.user_id)?.username}` : t("common.anonymous")}</p><p>{r.comment}</p></Fragment>)}
-      {reportSent ? <p className="success-banner">{t("bathroom.reportSuccess")}</p> : reportOpen ? <><textarea value={reportComment} onChange={(e) => setReportComment(e.target.value)} /><button onClick={submitReport}>{t("bathroom.reportSubmit")}</button></> : <button onClick={() => setReportOpen(true)}>{t("bathroom.reportIssue")}</button>}
+      <div className={"sheet" + (dragging ? " dragging" : "")}>
+        <div className="sheet-handle-area">
+          <div
+            className="sheet-handle"
+            onPointerDown={(e) => { setDragging(true); dragStartY.current = e.clientY; dragCurrentY.current = e.clientY; }}
+            onPointerMove={(e) => { dragCurrentY.current = e.clientY; }}
+            onPointerUp={() => { setDragging(false); if (shouldCloseOnDrag(dragCurrentY.current - dragStartY.current)) onClose?.(); }}
+          />
+        </div>
+        <div className="sheet-header">
+          <button className="sheet-close" aria-label={t("common.close")} onClick={() => onClose?.()}><Icon name="x" /></button>
+        </div>
+        <div className="sheet-body">
+          <div className="bh-title-row">
+            <div className="bh-tags">
+              <span className={`tag tag-${category.tone}`}>{t(`category.${category.id}`)}</span>
+              <span className="tag tag-neutral">{bathroom.paid ? t("common.paid") : t("common.free")}</span>
+            </div>
+            <h2 className="bh-name">{bathroomDisplayName(bathroom.name, t("bathroom.unnamed"))}</h2>
+          </div>
+          <div className="info-row">
+            <Icon name="mapPin" />
+            <span>{bathroom.address}</span>
+          </div>
+          {!bathroom.open_time && (
+            <div className="info-row">
+              <Icon name="clock" />
+              <span>{t("bathroom.hoursUnknown")}</span>
+            </div>
+          )}
+          {bathroom.open_time && (
+            <div className="info-row">
+              <Icon name="clock" />
+              <span>{`${bathroom.open_time} – ${bathroom.close_time}`}</span>
+              {isOpenNow(bathroom.open_time, bathroom.close_time, new Date())
+                ? <span className="status-pill open">{t("bathroom.openNow")}</span>
+                : <span className="status-pill closed">{t("bathroom.closedNow")}</span>}
+            </div>
+          )}
+          <div className="overall-card">
+            {score ? <span className="overall-num">{score.overall}</span> : <span>{t("bathroom.noReviews")}</span>}
+          </div>
+          <div className="cat-rows">
+            {CATS.map((cat) => (
+              <div className="cat-row" key={cat}>
+                <Icon name={CAT_ICON[cat]} />
+                <span className="cat-label">{t(`ratingCat.${cat}`)}</span>
+                <span className="rating-dots">
+                  {[1, 2, 3].map((n) => <span key={n} className={`dot${n <= Math.round(score?.[cat] ?? NaN) ? " filled" : ""}`} />)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="actions-row">
+            <button className={"star-btn" + (isFavorite ? " active" : "")} aria-pressed={isFavorite ? "true" : "false"} aria-label={t("bathroom.favorite")} onClick={handleFavoriteClick} />
+            <button className="btn btn-primary" onClick={() => setView("review")}>{t("bathroom.writeReview")}</button>
+          </div>
+          {approvedBanner && <p className="success-banner"><Icon name="check" />{t("review.successMessage")}</p>}
+          {pendingBanner && <p>{t("review.pendingMessage")}</p>}
+          <h4 className="section-title">{t("bathroom.reviewsTitle")}</h4>
+          {reviews.length === 0
+            ? <p className="empty-note">{t("bathroom.noReviews")}</p>
+            : reviews.map((r, i) => (
+                <div className="review-card" key={i}>
+                  <div className="review-top">
+                    <span className="review-author">{r.show_username && r.user_id ? `@${profiles.find(p => p.user_id === r.user_id)?.username}` : t("common.anonymous")}</span>
+                  </div>
+                  <p className="review-comment">{r.comment}</p>
+                </div>
+              ))}
+          {reportSent
+            ? <p className="success-banner"><Icon name="check" />{t("bathroom.reportSuccess")}</p>
+            : reportOpen
+              ? <><textarea className="input" value={reportComment} onChange={(e) => setReportComment(e.target.value)} /><button className="btn btn-primary" onClick={submitReport}>{t("bathroom.reportSubmit")}</button></>
+              : <button className="report-link" onClick={() => setReportOpen(true)}><Icon name="flag" />{t("bathroom.reportIssue")}</button>}
+        </div>
+      </div>
     </div>
   );
 }

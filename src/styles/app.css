@@ -261,3 +261,230 @@ button {
 .fab:hover {
   background: var(--color-accent-3-600);
 }
+
+/* ---- bottom sheet ---- */
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-neutral-900) 45%, transparent);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+}
+.sheet {
+  width: 100%;
+  max-height: 88%;
+  background: var(--color-bg);
+  border-radius: calc(var(--radius-lg) * 1.15) calc(var(--radius-lg) * 1.15) 0 0;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  touch-action: none;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sheet.dragging {
+  transition: none;
+}
+.sheet-handle-area {
+  flex: none;
+  padding: 10px 0 6px;
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+}
+.sheet-handle {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-divider);
+}
+.sheet-header {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 var(--space-4) var(--space-2);
+}
+.sheet-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.sheet-close:hover {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+.sheet-body {
+  overflow-y: auto;
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+/* ---- bathroom detail ---- */
+.bh-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+}
+.bh-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.bh-name {
+  font-size: 21px;
+  margin: 0;
+}
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  padding: 8px 0;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+}
+.info-row svg {
+  flex: none;
+  color: var(--color-accent-700);
+}
+.status-pill {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.status-pill.open {
+  background: var(--color-accent-2-100);
+  color: var(--color-accent-2-800);
+}
+.status-pill.closed {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+.overall-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.overall-num {
+  font-family: var(--font-heading);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--color-accent-700);
+}
+.cat-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: var(--space-3) 0;
+}
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cat-row svg {
+  flex: none;
+  color: var(--color-accent-700);
+}
+.cat-row .cat-label {
+  flex: 1;
+  font-size: 13.5px;
+}
+.rating-dots {
+  display: flex;
+  gap: 5px;
+}
+.rating-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-neutral-300);
+}
+.rating-dots .dot.filled {
+  background: var(--color-accent-600);
+}
+.actions-row {
+  display: flex;
+  gap: 10px;
+  margin: var(--space-3) 0;
+}
+.actions-row .btn {
+  flex: 1;
+}
+.star-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+  width: 48px;
+}
+.star-btn.active {
+  background: var(--color-accent-100);
+  border-color: var(--color-accent);
+  color: var(--color-accent-700);
+}
+h4.section-title {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  margin: var(--space-4) 0 var(--space-2);
+}
+.review-card {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-divider);
+}
+.review-card:first-child {
+  border-top: 0;
+}
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.review-author {
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.review-date {
+  font-size: 11.5px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.review-comment {
+  font-size: 13.5px;
+  margin: 4px 0 0;
+  opacity: 0.9;
+}
+.report-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  margin-top: var(--space-4);
+  font-size: 12.5px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.report-link:hover {
+  color: var(--color-accent-700);
+}
+.empty-note {
+  font-size: 13px;
+  opacity: 0.65;
+  padding: var(--space-2) 0;
+}
