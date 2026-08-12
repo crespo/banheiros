@@ -255,6 +255,7 @@ textarea.input {
 .dialog-backdrop {
   position: absolute;
   inset: 0;
+  z-index: 20;
   display: grid;
   place-items: center;
   padding: var(--space-4);
