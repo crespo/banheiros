@@ -82,3 +82,19 @@ test("a rejected password update shows an error message", async () => {
   fireEvent.click(screen.getByRole("button", { name: t("auth.resetPasswordButton") }));
   expect(await screen.findByText(t("auth.resetPasswordError"))).toBeInTheDocument();
 });
+
+test("clicking the eye icon on the new-password field reveals it", () => {
+  render(<ResetPasswordScreen />);
+  const passwordInput = screen.getByLabelText(t("auth.newPasswordLabel"));
+  expect(passwordInput).toHaveAttribute("type", "password");
+  fireEvent.click(passwordInput.closest(".pw-field")!.querySelector("button")!);
+  expect(passwordInput).toHaveAttribute("type", "text");
+});
+
+test("clicking the eye icon on the confirm-password field reveals it", () => {
+  render(<ResetPasswordScreen />);
+  const confirmInput = screen.getByLabelText(t("auth.confirmPasswordLabel"));
+  expect(confirmInput).toHaveAttribute("type", "password");
+  fireEvent.click(confirmInput.closest(".pw-field")!.querySelector("button")!);
+  expect(confirmInput).toHaveAttribute("type", "text");
+});

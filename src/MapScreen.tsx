@@ -119,7 +119,7 @@ export default function MapScreen({ onAddBathroom }: { onAddBathroom?: () => voi
       </div>
       <small>Search by Nominatim, © OpenStreetMap contributors</small>
       {legendOpen && (
-        <div className="legend-pop">
+        <div className="legend-pop max-h-[calc(100dvh_-_(var(--nav-h)*2)_-_174px)] overflow-y-auto">
           <div className="legend-row"><span className="legend-dot tone-accent" />{t("map.legendPublic")}</div>
           <div className="legend-row"><span className="legend-dot tone-accent2" />{t("map.legendInstore")}</div>
           <div className="legend-row"><span className="legend-dot paid" />{t("map.legendPaid")}</div>

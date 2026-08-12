@@ -56,138 +56,142 @@ export default function AuthScreen() {
   }
 
   return (
-    <div className="auth-form">
-      <div className="field">
-        <label htmlFor="email">{t("auth.emailLabel")}</label>
-        <input id="email" className="input" type="email" value={email} onChange={(e) => handleEmailChange(e.target.value)} />
-      </div>
-      {mode === "signup" && (
-        <>
+    <div className="app-shell">
+      <div className="screen-standalone screen-pad">
+        <div className="auth-form">
           <div className="field">
-            <label htmlFor="username">{t("auth.usernameLabel")}</label>
-            <input
-              id="username"
-              className={"input" + (usernameTaken ? " taken" : "")}
-              type="text"
-              value={username}
-              onChange={(e) => {
-                setUsernameTouched(true);
-                setUsername(e.target.value);
-                supabase.rpc("is_username_available", { check_username: e.target.value }).then(({ data }) => {
-                  setUsernameTaken(data === false);
-                  if (data === false) {
-                    supabase.rpc("suggest_username", { email: e.target.value }).then(({ data: alt }) => {
-                      setUsernameAlternative(alt ?? null);
-                    });
-                  }
-                });
-              }}
-            />
+            <label htmlFor="email">{t("auth.emailLabel")}</label>
+            <input id="email" className="input" type="email" value={email} onChange={(e) => handleEmailChange(e.target.value)} />
           </div>
-          {usernameFormatError && <p className="field-note warn">{t(usernameFormatError)}</p>}
-          {usernameTaken && (
-            <p className="field-note warn">
-              {t("auth.usernameTaken")}
-              {usernameAlternative && (
-                <button
-                  className="suggest-chip"
-                  onClick={() => {
-                    setUsername(usernameAlternative);
-                    setUsernameTaken(false);
+          {mode === "signup" && (
+            <>
+              <div className="field">
+                <label htmlFor="username">{t("auth.usernameLabel")}</label>
+                <input
+                  id="username"
+                  className={"input" + (usernameTaken ? " taken" : "")}
+                  type="text"
+                  value={username}
+                  onChange={(e) => {
+                    setUsernameTouched(true);
+                    setUsername(e.target.value);
+                    supabase.rpc("is_username_available", { check_username: e.target.value }).then(({ data }) => {
+                      setUsernameTaken(data === false);
+                      if (data === false) {
+                        supabase.rpc("suggest_username", { email: e.target.value }).then(({ data: alt }) => {
+                          setUsernameAlternative(alt ?? null);
+                        });
+                      }
+                    });
                   }}
-                >
-                  {t("auth.usernameUseSuggestion", { name: usernameAlternative })}
-                </button>
+                />
+              </div>
+              {usernameFormatError && <p className="field-note warn">{t(usernameFormatError)}</p>}
+              {usernameTaken && (
+                <p className="field-note warn">
+                  {t("auth.usernameTaken")}
+                  {usernameAlternative && (
+                    <button
+                      className="suggest-chip"
+                      onClick={() => {
+                        setUsername(usernameAlternative);
+                        setUsernameTaken(false);
+                      }}
+                    >
+                      {t("auth.usernameUseSuggestion", { name: usernameAlternative })}
+                    </button>
+                  )}
+                </p>
               )}
-            </p>
+            </>
           )}
-        </>
-      )}
-      <div className="field">
-        <label htmlFor="password">{t("auth.passwordLabel")}</label>
-        <div className="pw-field">
-          <input id="password" className="input" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button
-            type="button"
-            className="pw-toggle"
-            aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            <Icon name={showPassword ? "eyeOff" : "eye"} />
-          </button>
-        </div>
-      </div>
-      {mode === "signup" && (
-        <>
           <div className="field">
-            <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>
+            <label htmlFor="password">{t("auth.passwordLabel")}</label>
             <div className="pw-field">
-              <input id="confirm" className="input" type={showConfirmPassword ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+              <input id="password" className="input" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
               <button
                 type="button"
                 className="pw-toggle"
-                aria-label={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+                onClick={() => setShowPassword(!showPassword)}
               >
-                <Icon name={showConfirmPassword ? "eyeOff" : "eye"} />
+                <Icon name={showPassword ? "eyeOff" : "eye"} />
               </button>
             </div>
           </div>
-          <label className="checkbox-row">
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            <span>
-              {t("auth.termsAgreePrefix")}
-              <a href="/termos" target="_blank" rel="noopener noreferrer">{t("auth.termsLinkText")}</a>
-              {t("auth.termsAgreeMiddle")}
-              <a href="/privacidade" target="_blank" rel="noopener noreferrer">{t("auth.privacyLinkText")}</a>
-            </span>
-          </label>
-          <button
-            className="btn btn-primary btn-block"
-            disabled={
-              password.length < 6 ||
-              password !== confirm ||
-              !agree ||
-              usernameTaken ||
-              Boolean(usernameFormatError)
-            }
-            onClick={submitSignup}
-          >
-            {t("auth.signupButton")}
-          </button>
-        </>
-      )}
-      {mode === "login" && (
-        <>
-          <button className="btn btn-primary btn-block" onClick={submitLogin}>{t("auth.loginButton")}</button>
-          <div className="form-links">
-            <button className="btn btn-ghost" onClick={forgotPassword}>{t("auth.forgotPassword")}</button>
-          </div>
-          {resetEmailSent && <p className="field-note">{t("auth.resetEmailSent")}</p>}
-          {emailNotConfirmed && (
-            <p className="field-note warn">
-              {t("auth.emailNotConfirmed")}
-              <button onClick={resendConfirmation}>{t("auth.resendConfirmation")}</button>
-            </p>
+          {mode === "signup" && (
+            <>
+              <div className="field">
+                <label htmlFor="confirm">{t("auth.confirmPasswordLabel")}</label>
+                <div className="pw-field">
+                  <input id="confirm" className="input" type={showConfirmPassword ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+                  <button
+                    type="button"
+                    className="pw-toggle"
+                    aria-label={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <Icon name={showConfirmPassword ? "eyeOff" : "eye"} />
+                  </button>
+                </div>
+              </div>
+              <label className="checkbox-row">
+                <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+                <span>
+                  {t("auth.termsAgreePrefix")}
+                  <a href="/termos" target="_blank" rel="noopener noreferrer">{t("auth.termsLinkText")}</a>
+                  {t("auth.termsAgreeMiddle")}
+                  <a href="/privacidade" target="_blank" rel="noopener noreferrer">{t("auth.privacyLinkText")}</a>
+                </span>
+              </label>
+              <button
+                className="btn btn-primary btn-block"
+                disabled={
+                  password.length < 6 ||
+                  password !== confirm ||
+                  !agree ||
+                  usernameTaken ||
+                  Boolean(usernameFormatError)
+                }
+                onClick={submitSignup}
+              >
+                {t("auth.signupButton")}
+              </button>
+            </>
           )}
-        </>
-      )}
-      <div className="divider-row">
-        <span className="line" />
-        {t("auth.orDivider")}
-        <span className="line" />
+          {mode === "login" && (
+            <>
+              <button className="btn btn-primary btn-block" onClick={submitLogin}>{t("auth.loginButton")}</button>
+              <div className="form-links">
+                <button className="btn btn-ghost" onClick={forgotPassword}>{t("auth.forgotPassword")}</button>
+              </div>
+              {resetEmailSent && <p className="field-note">{t("auth.resetEmailSent")}</p>}
+              {emailNotConfirmed && (
+                <p className="field-note warn">
+                  {t("auth.emailNotConfirmed")}
+                  <button onClick={resendConfirmation}>{t("auth.resendConfirmation")}</button>
+                </p>
+              )}
+            </>
+          )}
+          <div className="divider-row">
+            <span className="line" />
+            {t("auth.orDivider")}
+            <span className="line" />
+          </div>
+          <button className="btn btn-secondary btn-block" onClick={loginWithGoogle}>
+            <GoogleLogo />
+            {t("auth.googleButton")}
+          </button>
+          {googleError && <p className="field-note warn">{t("auth.googleError")}</p>}
+          <p className="switch-mode">
+            {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
+            <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
+              {mode === "login" ? t("auth.createAccountLink") : t("auth.loginLink")}
+            </button>
+          </p>
+        </div>
       </div>
-      <button className="btn btn-secondary btn-block" onClick={loginWithGoogle}>
-        <GoogleLogo />
-        {t("auth.googleButton")}
-      </button>
-      {googleError && <p className="field-note warn">{t("auth.googleError")}</p>}
-      <p className="switch-mode">
-        {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
-        <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
-          {mode === "login" ? t("auth.createAccountLink") : t("auth.loginLink")}
-        </button>
-      </p>
     </div>
   );
 }

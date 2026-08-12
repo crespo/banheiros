@@ -253,8 +253,9 @@ textarea.input {
 
 /* — dialog — */
 .dialog-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  z-index: 20;
   display: grid;
   place-items: center;
   padding: var(--space-4);
@@ -262,6 +263,8 @@ textarea.input {
 }
 .dialog {
   width: min(440px, 100%);
+  max-height: 88%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);

@@ -29,11 +29,17 @@ export default function ChooseUsernameScreen({ onCreated }: { onCreated: () => v
   }
 
   return (
-    <div>
-      <label htmlFor="username">{t("auth.usernameLabel")}</label>
-      <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-      <button onClick={submit}>{t("auth.continueButton")}</button>
-      {error && <p className="field-note warn">{t("auth.chooseUsernameError")}</p>}
+    <div className="app-shell">
+      <div className="screen-standalone screen-pad">
+        <div className="auth-form">
+          <div className="field">
+            <label htmlFor="username">{t("auth.usernameLabel")}</label>
+            <input id="username" className="input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          </div>
+          <button className="btn btn-primary btn-block" onClick={submit}>{t("auth.continueButton")}</button>
+          {error && <p className="field-note warn">{t("auth.chooseUsernameError")}</p>}
+        </div>
+      </div>
     </div>
   );
 }

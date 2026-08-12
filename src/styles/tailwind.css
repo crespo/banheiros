@@ -1,0 +1,71 @@
+/* Preflight (Tailwind's base reset) is skipped on purpose: it resets
+   h1-h6/button/input at element-selector specificity, which would win over
+   tokens.css's own element-selector reset by source order alone (Tailwind
+   loads last) and silently override it for any heading added later. This
+   project already ships a complete hand-rolled reset. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Maps Tailwind's theme namespace onto the existing design tokens
+   (tokens.css) instead of duplicating values. `inline` embeds each
+   var() reference directly into generated utility CSS rather than
+   re-declaring the custom property, so there's no collision with the
+   same-named property already set in tokens.css. */
+@theme inline {
+  /* --space-1..8 are all exact multiples of --space-1 (4.4px), matching
+     Tailwind's own single-multiplier spacing scale, so exposing the base
+     unit covers the whole existing scale (p-1, gap-4, ...) by construction. */
+  --spacing: var(--space-1);
+
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-text: var(--color-text);
+
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-900: var(--color-neutral-900);
+
+  --color-accent: var(--color-accent);
+  --color-accent-100: var(--color-accent-100);
+  --color-accent-200: var(--color-accent-200);
+  --color-accent-300: var(--color-accent-300);
+  --color-accent-400: var(--color-accent-400);
+  --color-accent-500: var(--color-accent-500);
+  --color-accent-600: var(--color-accent-600);
+  --color-accent-700: var(--color-accent-700);
+  --color-accent-800: var(--color-accent-800);
+  --color-accent-900: var(--color-accent-900);
+
+  --color-accent-2: var(--color-accent-2);
+  --color-accent-2-100: var(--color-accent-2-100);
+  --color-accent-2-200: var(--color-accent-2-200);
+  --color-accent-2-300: var(--color-accent-2-300);
+  --color-accent-2-400: var(--color-accent-2-400);
+  --color-accent-2-500: var(--color-accent-2-500);
+  --color-accent-2-600: var(--color-accent-2-600);
+  --color-accent-2-700: var(--color-accent-2-700);
+  --color-accent-2-800: var(--color-accent-2-800);
+  --color-accent-2-900: var(--color-accent-2-900);
+
+  --color-accent-3: var(--color-accent-3);
+  --color-accent-3-100: var(--color-accent-3-100);
+  --color-accent-3-200: var(--color-accent-3-200);
+  --color-accent-3-300: var(--color-accent-3-300);
+  --color-accent-3-400: var(--color-accent-3-400);
+  --color-accent-3-500: var(--color-accent-3-500);
+  --color-accent-3-600: var(--color-accent-3-600);
+  --color-accent-3-700: var(--color-accent-3-700);
+  --color-accent-3-800: var(--color-accent-3-800);
+  --color-accent-3-900: var(--color-accent-3-900);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+}
